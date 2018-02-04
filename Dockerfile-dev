@@ -1,0 +1,6 @@
+# docker build -t roadchat:dev -f Dockerfile-dev . && docker run -it -p 8080:8080 -v "$PWD":/app --privileged --rm roadchat:dev
+
+FROM swift:4.0.3
+# RUN apt-get -qq update && apt-get -q -y install \
+  # your-dependencies-here # e.g. libmysqlclient-dev libpq-dev etc
+WORKDIR /app

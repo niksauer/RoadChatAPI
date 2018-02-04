@@ -1,0 +1,25 @@
+# docker build -t roadchat:1.0.0 -f Dockerfile-prod . && docker run -p 80:80 roadchat:1.0.0
+
+# Build image
+FROM swift:4.0.3 as builder
+# RUN apt-get -qq update && apt-get -q -y install \
+  # your-dependencies-here # e.g. libmysqlclient-dev
+WORKDIR /app
+COPY . .
+RUN mkdir -p /build/lib && cp -R /usr/lib/swift/linux/*.so /build/lib
+RUN swift build -c release && mv `swift build -c release --show-bin-path` /build/bin
+
+# Production image
+FROM ubuntu:16.04
+RUN apt-get -qq update && apt-get install -y \
+  libicu55 libxml2 libbsd0 libcurl3 libatomic1 \
+  # your-release-dependencies-here \ # e.g. libmysqlclient20
+  && rm -r /var/lib/apt/lists/*
+WORKDIR /app
+# COPY Config/ ./Config/
+# COPY Resources/ ./Resources/ # if you have Resources
+# COPY Public/ ./Public/ # if you have Public
+COPY --from=builder /build/bin/Run .
+COPY --from=builder /build/lib/* /usr/lib/
+EXPOSE 80
+CMD ["./Run", "--env", "production", "--hostname", "0.0.0.0"]
