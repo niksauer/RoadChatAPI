@@ -11,7 +11,7 @@
 </a>
 
 ### Developing with Docker 
-**Warning:** Vapor 3 now depends on Swift 4.1. Until a docker image is available, please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally.
+**Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally.
 
 The theory here is that you will build and run a Swift container, mounting your project directory, then keep it open during development using command-line Swift to build, test and run your project ([see tutorial](https://bygri.github.io/2018/01/25/vapor-3-with-docker.html)).
 
