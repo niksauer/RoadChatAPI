@@ -28,7 +28,7 @@ final class UserController {
     }
     
     /// Deletes a parameterized `User`.
-    // TODO: - check if token owns user
+    // TODO: check if token owns user to be deleted
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         _ = try LoginController.validateToken(on:req).await(on: req)
         let user = try req.parameter(User.self).await(on: req)

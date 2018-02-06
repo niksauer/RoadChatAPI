@@ -16,11 +16,13 @@ final class Token: SQLiteModel, Migration, Content {
     var token: UUID?
     var userID: Int
     var expiry: Date
+    var lastLogin: Date
     
     init(token: UUID?, userID: Int, expiry: Date) {
         self.token = token
         self.userID = userID
         self.expiry = expiry
+        self.lastLogin = Date()
     }
     
 }

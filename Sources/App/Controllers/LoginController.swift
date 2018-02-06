@@ -13,6 +13,8 @@ import Crypto
 /// Controls token-based authentication.
 final class LoginController {
     
+    // TODO: allow login via email/username
+    // TODO: do not store token in database
     func login(_ req: Request) throws -> Future<Token> {
         // delete any expired tokens
         _ = Token.query(on: req).filter(\Token.expiry < Date()).delete()
@@ -61,6 +63,3 @@ final class LoginController {
     }
     
 }
-
-
-
