@@ -9,24 +9,25 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-final class CommunityMessage: SQLiteModel, Migration, Content, Parameter {
-    
-    static let idKey = \CommunityMessage.id
-    
-    var id: UUID?
+final class CommunityMessage:  Content, Parameter {
+    var id: Int?
     var senderID: Int
     var time: Date
     var location: String
     var message: String
     var upvotes: Int
     
-    init(id: UUID?, senderID: Int, time: Date, location: String, message: String) {
-        self.id = id
+    init(senderID: Int, time: Date, location: String, message: String) {
         self.senderID = senderID
         self.time = time
         self.location = location
         self.message = message
         self.upvotes = 1
     }
-    
+}
+
+extension CommunityMessage: SQLiteModel, Migration {
+    static var idKey: ReferenceWritableKeyPath<CommunityMessage, Int?> {
+        return \CommunityMessage.id
+    }
 }

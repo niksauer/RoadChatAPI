@@ -11,9 +11,10 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent.git", .branch("beta")),
         
         .package(url: "https://github.com/vapor/crypto.git", .branch("beta")),
+        .package(url: "https://github.com/vapor/auth.git", .branch("beta")),
     ],
     targets: [
-        .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Crypto"]),
+        .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Crypto", "Authentication"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"]),
     ]

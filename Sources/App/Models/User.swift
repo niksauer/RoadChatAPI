@@ -8,31 +8,39 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import Authentication
 
-final class User: SQLiteModel, Migration, Content, Parameter {
-    
-    static let idKey = \User.id
-
+final class User: Content, Parameter {
     var id: Int?
     var email: String
     var username: String
     var password: String
-//    var registry: Date
-
-    init(id: Int?, email: String, username: String, password: String) {
-        self.id = id
+    var registry: Date
+    
+    init(email: String, username: String, password: String) {
         self.email = email
         self.username = username
         self.password = password
-//        self.registry = Date()
+        self.registry = Date()
     }
     
-//    static func make(for parameter: String, using container: Container) throws -> Future<User> {
-//        guard let id = Int(parameter) else {
-//            throw Abort(.badRequest)
-//        }
-//
-//        return User.find(id, on: <#T##DatabaseConnectable#>)
-//    }
-    
+    convenience init(registerRequest: RegisterRequest) {
+        self.init(email: registerRequest.email, username: registerRequest.username, password: registerRequest.password)
+    }
+}
+
+extension User: SQLiteModel, Migration {
+    static var idKey: ReferenceWritableKeyPath<User, Int?> {
+        return \User.id
+    }
+}
+
+extension User: TokenAuthenticatable {
+    typealias TokenType = Token
+}
+
+extension Request {
+    func user() throws -> User {
+        return try requireAuthenticated(User.self)
+    }
 }

@@ -8,21 +8,34 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import Authentication
 
-final class Token: SQLiteModel, Migration, Content {
+final class Token: Content {
+    var id: Int?
+    var token: String
+    var userID: User.ID
     
-    static let idKey = \Token.token
-    
-    var token: UUID?
-    var userID: Int
-    var expiry: Date
-    var lastLogin: Date
-    
-    init(token: UUID?, userID: Int, expiry: Date) {
+    init(token: String, userID: User.ID) {
         self.token = token
         self.userID = userID
-        self.expiry = expiry
-        self.lastLogin = Date()
+    }
+}
+
+extension Token: SQLiteModel, Migration {
+    static var idKey: ReferenceWritableKeyPath<Token, Int?> {
+        return \Token.id
+    }
+}
+
+extension Token: BearerAuthenticatable, Authentication.Token {
+    typealias UserType = User
+    
+    static var userIDKey: ReferenceWritableKeyPath<Token, Int> {
+        return \Token.userID
     }
     
+    static var tokenKey: ReferenceWritableKeyPath<Token, String> {
+        return \Token.token
+    }
 }
+

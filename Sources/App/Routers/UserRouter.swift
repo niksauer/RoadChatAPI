@@ -7,6 +7,7 @@
 
 import Foundation
 import Vapor
+import Authentication
 
 class UserRouter: RouteCollection {
     func boot(router: Router) throws {
@@ -18,32 +19,31 @@ class UserRouter: RouteCollection {
         
         // /user/login
         router.get("login", use: loginController.login)
-            
+        
         // /user/logout
         router.get("logout", use: loginController.logout)
         
         // /user/User.parameter
         let user = router.grouped(User.parameter)
+        let authenticatedUser = user.grouped(try User.tokenAuthMiddleware())
         
         user.get(use: userController.get)
-//        user.put(use: )
-        user.delete(use: userController.delete)
-        
+//        authenticatedUser.put(use: )
+        authenticatedUser.delete(use: userController.delete)
+
         // /user/User.parameter/settings
-        user.group("settings", use: { group in
+        authenticatedUser.group("settings", use: { group in
 //            group.get(use: )
 //            group.put(use: )
         })
         
         // /user/User.parameter/cars
-        user.group("cars", use: { group in
-//            group.get(use: )
-//            group.post(use: )
-        })
+//        user.get("cars", use: )
+//        authenticatedUser.post("cars", use: )
         
         // /user/User.parameter/profile
-        user.group("profile", use: { group in
-//            group.get(use: )
+//        user.get("profile", use: )
+        authenticatedUser.group("profile", use: { group in
 //            group.post(use: )
 //            group.put(use: )
         })
