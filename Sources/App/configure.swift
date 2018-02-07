@@ -26,4 +26,8 @@ public func configure(
     migrations.add(model: Token.self, database: .sqlite)
     migrations.add(model: CommunityMessage.self, database: .sqlite)
     services.register(migrations)
+    
+    // Configure middleware
+//    let middleware = MiddlewareConfig.default()
+//    services.register(middleware)
 }

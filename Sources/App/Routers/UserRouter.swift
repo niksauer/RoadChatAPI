@@ -7,7 +7,6 @@
 
 import Foundation
 import Vapor
-import Authentication
 
 class UserRouter: RouteCollection {
     func boot(router: Router) throws {

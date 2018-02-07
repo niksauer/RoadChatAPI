@@ -27,6 +27,16 @@ extension Token: SQLiteModel, Migration {
     }
 }
 
+extension Token {
+    func publicToken() -> PublicToken {
+        return PublicToken(token: self.token)
+    }
+    
+    struct PublicToken: Content {
+        let token: String
+    }
+}
+
 extension Token: BearerAuthenticatable, Authentication.Token {
     typealias UserType = User
     

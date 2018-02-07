@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 
 struct RegisterRequest: Codable {
-    var email: String
-    var username: String
-    var password: String
+    let email: String
+    let username: String
+    let password: String
 }

@@ -35,6 +35,26 @@ extension User: SQLiteModel, Migration {
     }
 }
 
+extension User {
+    func publicUser() throws -> PublicUser {
+        return try PublicUser(user: self)
+    }
+    
+    struct PublicUser: Content {
+        let id: Int
+        let email: String
+        let username: String
+        let registry: Date
+        
+        init(user: User) throws {
+            self.id = try user.requireID()
+            self.email = user.email
+            self.username = user.username
+            self.registry = user.registry
+        }
+    }
+}
+
 extension User: TokenAuthenticatable {
     typealias TokenType = Token
 }
