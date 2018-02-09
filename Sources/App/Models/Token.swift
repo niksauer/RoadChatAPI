@@ -14,16 +14,10 @@ final class Token: Content {
     var id: Int?
     var token: String
     var userID: User.ID
-    
+
     init(token: String, userID: User.ID) {
         self.token = token
         self.userID = userID
-    }
-}
-
-extension Token: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<Token, Int?> {
-        return \Token.id
     }
 }
 
@@ -34,6 +28,12 @@ extension Token {
     
     struct PublicToken: Content {
         let token: String
+    }
+}
+
+extension Token: SQLiteModel, Migration {
+    static var idKey: ReferenceWritableKeyPath<Token, Int?> {
+        return \Token.id
     }
 }
 

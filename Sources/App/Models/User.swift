@@ -10,7 +10,7 @@ import Vapor
 import FluentSQLite
 import Authentication
 
-final class User: Content, Parameter {
+final class User: Content {
     var id: Int?
     var email: String
     var username: String
@@ -23,15 +23,9 @@ final class User: Content, Parameter {
         self.password = password
         self.registry = Date()
     }
-    
+
     convenience init(registerRequest: RegisterRequest) {
         self.init(email: registerRequest.email, username: registerRequest.username, password: registerRequest.password)
-    }
-}
-
-extension User: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<User, Int?> {
-        return \User.id
     }
 }
 
@@ -51,6 +45,32 @@ extension User {
             self.email = user.email
             self.username = user.username
             self.registry = user.registry
+        }
+    }
+}
+
+extension User: SQLiteModel, Migration {
+    static var idKey: ReferenceWritableKeyPath<User, Int?> {
+        return \User.id
+    }
+}
+
+extension User: Parameter {
+    static func make(for parameter: String, using container: Container) throws -> Future<User> {
+        guard let id = Int(parameter) else {
+            // id must be integer
+            throw Abort(.badRequest)
+        }
+        
+        return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
+            return User.find(id, on: database).map(to: User.self) { existingUser in
+                guard let user = existingUser else {
+                    // user not found
+                    throw Abort(.notFound)
+                }
+                
+                return user
+            }
         }
     }
 }

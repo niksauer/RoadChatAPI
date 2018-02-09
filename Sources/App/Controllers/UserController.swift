@@ -15,8 +15,15 @@ final class UserController {
     
     /// Saves a decoded new `User` to the database.
     func create(_ req: Request) throws -> Future<User.PublicUser> {
-        let registerRequest = try req.content.decode(RegisterRequest.self).await(on: req)
+        let registerRequest: RegisterRequest
         
+        do {
+            registerRequest = try req.content.decode(RegisterRequest.self).await(on: req)
+        } catch {
+            // missing parameter
+            throw APIFailType.invalidRegisterRequest
+        }
+
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: User.PublicUser.self) { existingUser in
             guard existingUser == nil else {
                 // duplicate email
@@ -44,7 +51,10 @@ final class UserController {
             throw Abort(.forbidden)
         }
         
-        return requestedUser.delete(on: req).transform(to: .ok)
+        // delete requested user and revoke all of his tokens
+        return requestedUser.delete(on: req).flatMap(to: HTTPStatus.self) { _ in
+            return try authenticatedUser.authTokens.query(on: req).delete().transform(to: .ok)
+        }
     }
     
     /// Returns a parameterized `User`.
