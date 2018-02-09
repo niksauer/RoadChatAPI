@@ -21,7 +21,7 @@ final class LoginController {
             loginRequest = try req.content.decode(LoginRequest.self).await(on: req)
         } catch {
             // missing parameter
-            throw APIFailType.invalidLoginRequest
+            throw APIFail.invalidLoginRequest
         }
     
         return User.query(on: req).filter(\User.email == loginRequest.email).first().flatMap(to: Token.PublicToken.self) { existingUser in

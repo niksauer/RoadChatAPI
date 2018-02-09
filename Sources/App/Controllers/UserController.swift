@@ -21,7 +21,7 @@ final class UserController {
             registerRequest = try req.content.decode(RegisterRequest.self).await(on: req)
         } catch {
             // missing parameter
-            throw APIFailType.invalidRegisterRequest
+            throw APIFail.invalidRegisterRequest
         }
 
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: User.PublicUser.self) { existingUser in
