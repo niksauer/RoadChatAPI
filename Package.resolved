@@ -11,12 +11,12 @@
         }
       },
       {
-        "package": "CEpoll",
-        "repositoryURL": "https://github.com/vapor/cepoll.git",
+        "package": "Auth",
+        "repositoryURL": "https://github.com/vapor/auth.git",
         "state": {
-          "branch": null,
-          "revision": "0b4aa90aae3a97fd6f5316501636f2bdf6292489",
-          "version": "0.2.0"
+          "branch": "beta",
+          "revision": "68780119a7744c67b4f743076b950db6c998ef23",
+          "version": null
         }
       },
       {
@@ -26,15 +26,6 @@
           "branch": "beta",
           "revision": "e3a7592e1d279c105d303055fb5b0d1bfba47903",
           "version": null
-        }
-      },
-      {
-        "package": "COpenSSL",
-        "repositoryURL": "https://github.com/vapor/copenssl.git",
-        "state": {
-          "branch": null,
-          "revision": "edede8271dacf511561ddcc80a0cfb13c8915486",
-          "version": "1.0.0-alpha.1"
         }
       },
       {

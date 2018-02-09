@@ -9,9 +9,12 @@ let package = Package(
 
         // 🖋 Swift ORM framework (queries, models, and relations) for building NoSQL and SQL database integrations.
         .package(url: "https://github.com/vapor/fluent.git", .branch("beta")),
+        
+        .package(url: "https://github.com/vapor/crypto.git", .branch("beta")),
+        .package(url: "https://github.com/vapor/auth.git", .branch("beta")),
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentSQLite", "Vapor"]),
+        .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Crypto", "Authentication"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"]),
     ]
