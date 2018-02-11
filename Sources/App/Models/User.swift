@@ -17,6 +17,10 @@ final class User: Content {
     var password: String
     var registry: Date
     
+    var settings: Children<User, Settings> {
+        return children(\Settings.userID)
+    }
+    
     init(email: String, username: String, password: String) {
         self.email = email
         self.username = username
@@ -84,3 +88,17 @@ extension Request {
         return try requireAuthenticated(User.self)
     }
 }
+
+extension User {
+    func getSettings(on req: Request) throws -> Future<Settings> {
+        return try settings.query(on: req).first().map(to: Settings.self) { settings in
+            guard let settings = settings else {
+                // no settings associated to user
+                throw Abort(.internalServerError)
+            }
+            
+            return settings
+        }
+    }
+}
+

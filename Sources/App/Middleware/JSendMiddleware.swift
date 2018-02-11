@@ -12,8 +12,10 @@ enum APIFail: Error {
     case invalidRegisterRequest
     case invalidLoginRequest
     case invalidUpdateRequest
+    case invalidSettingsRequest
     case emailTaken
     case usernameTaken
+    case invalidPrivacyLevel
 }
 
 final class JSendMiddleware: Middleware {

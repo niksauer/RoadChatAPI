@@ -32,8 +32,8 @@ class UserRouter: RouteCollection {
 
         // /user/User.parameter/settings
         authenticatedUser.group("settings", use: { group in
-//            group.get(use: )
-//            group.put(use: )
+            group.get(use: userController.getSettings)
+            group.put(use: userController.updateSettings)
         })
         
         // /user/User.parameter/cars

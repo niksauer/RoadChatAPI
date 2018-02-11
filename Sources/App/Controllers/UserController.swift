@@ -40,8 +40,11 @@ final class UserController {
                 let hashedPassword = try hasher.make(registerRequest.password)
                 
                 let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
-                
+            
                 return newUser.create(on: req).map(to: User.PublicUser.self) { user in
+                    // further user setup
+                    _ = Settings(userID: try user.requireID()).create(on: req)
+                    
                     return try user.publicUser()
                 }
             }
@@ -87,6 +90,37 @@ final class UserController {
         }
     }
     
+    func getSettings(_ req: Request) throws -> Future<Settings.PublicSettings> {
+        let user = try checkOwnership(req)
+        return try user.getSettings(on: req).map(to: Settings.PublicSettings.self) { settings in
+            return settings.publicSettings()
+        }
+    }
+    
+    func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try checkOwnership(req)
+        let updatedSettings: SettingsRequest
+
+        do {
+            updatedSettings = try req.content.decode(SettingsRequest.self).await(on: req)
+        } catch {
+            // missing parameter
+            throw APIFail.invalidSettingsRequest
+        }
+
+        guard let privacyLevel = PrivacyLevel(rawValue: updatedSettings.privacy) else {
+            // invalid privacy level
+            throw APIFail.invalidPrivacyLevel
+        }
+
+        return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
+            settings.privacy = privacyLevel.rawValue
+            settings.communityRadius = updatedSettings.communityRadius
+            settings.trafficRadius = updatedSettings.trafficRadius
+            return settings.update(on: req).transform(to: .ok)
+        }
+    }
+    
     /// Checks resource ownership for a parameterized `User` according to the supplied token.
     func checkOwnership(_ req: Request) throws -> User {
         let requestedUser = try req.parameter(User.self).await(on: req)
@@ -99,5 +133,5 @@ final class UserController {
         
         return authenticatedUser
     }
-    
+
 }
