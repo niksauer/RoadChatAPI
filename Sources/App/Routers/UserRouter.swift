@@ -27,7 +27,7 @@ class UserRouter: RouteCollection {
         let authenticatedUser = user.grouped(try User.tokenAuthMiddleware())
         
         user.get(use: userController.get)
-//        authenticatedUser.put(use: )
+        authenticatedUser.put(use: userController.update)
         authenticatedUser.delete(use: userController.delete)
 
         // /user/User.parameter/settings

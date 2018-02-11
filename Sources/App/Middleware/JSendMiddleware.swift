@@ -11,6 +11,7 @@ import Vapor
 enum APIFail: Error {
     case invalidRegisterRequest
     case invalidLoginRequest
+    case invalidUpdateRequest
     case emailTaken
     case usernameTaken
 }
@@ -23,14 +24,18 @@ final class JSendMiddleware: Middleware {
                 // use data or null as payload
                 return response
             }
-        } catch is APIFail {
-            // fail 
-            // use details mapped to error as payload
-            throw Abort(.badRequest)
         } catch {
-            // error
-            // use received details as payload
-            throw Abort(.internalServerError)
+            switch error {
+            case let error as APIFail:
+                // fail
+                // use details mapped to error as payload
+                print(error)
+                throw Abort(.badRequest)
+            default:
+                // error
+                // use received details as payload
+                throw error
+            }
         }
     }
 }

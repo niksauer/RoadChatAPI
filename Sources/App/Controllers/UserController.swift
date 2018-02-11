@@ -48,27 +48,56 @@ final class UserController {
         }
     }
     
-    /// Deletes a parameterized `User`.
-    func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let requestedUser = try req.parameter(User.self).await(on: req)
-        let authenticatedUser = try req.user()
-        
-        guard try requestedUser.requireID() == authenticatedUser.requireID() else {
-            // attemp to delete unowned resource
-            throw Abort(.forbidden)
-        }
-        
-        // delete requested user and revoke all of his tokens
-        return requestedUser.delete(on: req).flatMap(to: HTTPStatus.self) { _ in
-            return try authenticatedUser.authTokens.query(on: req).delete().transform(to: .ok)
-        }
-    }
-    
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<User.PublicUser> {
         return try req.parameter(User.self).map(to: User.PublicUser.self) { user in
             return try user.publicUser()
         }
+    }
+    
+    /// Updates a parameterized `User`.
+    func update(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try checkOwnership(req)
+        let updatedUser: RegisterRequest
+            
+        do {
+            updatedUser = try req.content.decode(RegisterRequest.self).await(on: req)
+        } catch {
+            // missing parameter
+            throw APIFail.invalidUpdateRequest
+        }
+        
+        let hasher = try req.make(BCryptHasher.self)
+        let hashedPassword = try hasher.make(updatedUser.password)
+        
+        user.email = updatedUser.email
+        user.username = updatedUser.username
+        user.password = hashedPassword
+        
+        return user.update(on: req).transform(to: .ok)
+    }
+    
+    /// Deletes a parameterized `User`.
+    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try checkOwnership(req)
+        
+        // delete requested user and revoke all of his tokens
+        return try user.authTokens.query(on: req).delete().flatMap(to: HTTPStatus.self) {
+            return user.delete(on: req).transform(to: .ok)
+        }
+    }
+    
+    /// Checks resource ownership for a parameterized `User` according to the supplied token.
+    func checkOwnership(_ req: Request) throws -> User {
+        let requestedUser = try req.parameter(User.self).await(on: req)
+        let authenticatedUser = try req.user()
+        
+        guard try requestedUser.requireID() == authenticatedUser.requireID() else {
+            // unowned resource
+            throw Abort(.forbidden)
+        }
+        
+        return authenticatedUser
     }
     
 }
