@@ -23,20 +23,27 @@ final class UserController {
             // missing parameter
             throw APIFail.invalidRegisterRequest
         }
-
+        
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: User.PublicUser.self) { existingUser in
             guard existingUser == nil else {
-                // duplicate email
-                throw Abort(.badRequest)
+                // email already registered
+                throw APIFail.emailTaken
             }
             
-            let hasher = try req.make(BCryptHasher.self)
-            let hashedPassword = try hasher.make(registerRequest.password)
-            
-            let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
-            
-            return newUser.create(on: req).map(to: User.PublicUser.self) { user in
-                return try user.publicUser()
+            return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: User.PublicUser.self) { existingUser in
+                guard existingUser == nil else {
+                    // username taken
+                    throw APIFail.usernameTaken
+                }
+                
+                let hasher = try req.make(BCryptHasher.self)
+                let hashedPassword = try hasher.make(registerRequest.password)
+                
+                let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
+                
+                return newUser.create(on: req).map(to: User.PublicUser.self) { user in
+                    return try user.publicUser()
+                }
             }
         }
     }

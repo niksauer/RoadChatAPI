@@ -9,6 +9,6 @@ import Foundation
 import Vapor
 
 struct LoginRequest: Codable {
-    let email: String
+    let user: String
     let password: String
 }
