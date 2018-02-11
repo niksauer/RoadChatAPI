@@ -1,5 +1,5 @@
 //
-//  ErrorMiddleware.swift
+//  JSendMiddleware.swift
 //  App
 //
 //  Created by Niklas Sauer on 07.02.18.
@@ -11,6 +11,8 @@ import Vapor
 enum APIFail: Error {
     case invalidRegisterRequest
     case invalidLoginRequest
+    case emailTaken
+    case usernameTaken
 }
 
 final class JSendMiddleware: Middleware {

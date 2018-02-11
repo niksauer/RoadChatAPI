@@ -10,12 +10,22 @@
     <img src="https://img.shields.io/readthedocs/pip.svg" alt="Docs">
 </a>
 
-### Developing with Docker 
-**Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally.
+### Swift Toolchain
+**Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally in Xcode.
 
+Also, in order to support command line development you will have to set the Swift version to be used via [swiftenv](https://github.com/kylef/swiftenv): 
+1. `swiftenv version`
+2. `swiftenv local <choose swift 4.1 snapshot here>`
+
+### Working with Xcode
+Please use the Swift Package Manager to create an Xcode project file, since this repository purposefully ***excludes*** it to preserve a developer's individual IDE settings. Again, [Vapor toolbox](https://github.com/vapor/toolbox) will not be necessary or required for setup.
+
+1. `swift package generate-xcodeproj`
+
+### Developing with Docker 
 The theory here is that you will build and run a Swift container, mounting your project directory, then keep it open during development using command-line Swift to build, test and run your project ([see tutorial](https://bygri.github.io/2018/01/25/vapor-3-with-docker.html)).
 
-Using Xcode? Then by all means build as you go in Xcode (it’s faster than building in Linux) but don’t forget to build and test in your container from time to time, and you should **always run from it**. Xcode and Linux use different build directories, so always swift build before you swift run to ensure your Linux build is up-to-date.
+Using Xcode? Then by all means build as you go in Xcode (it’s faster than building in Linux) but don’t forget to build and test in your container from time to time, and you should ***always run from it***. Xcode and Linux use different build directories, so always swift build before you swift run to ensure your Linux build is up-to-date.
 
 **Workflow**
 

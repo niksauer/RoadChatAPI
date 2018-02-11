@@ -24,19 +24,22 @@ final class LoginController {
             throw APIFail.invalidLoginRequest
         }
     
-        return User.query(on: req).filter(\User.email == loginRequest.email).first().flatMap(to: Token.PublicToken.self) { existingUser in
+        return try User.query(on: req).group(.or) { builder in
+            builder.filter(\User.email == loginRequest.user)
+            builder.filter(\User.username == loginRequest.user)
+        }.first().flatMap(to: Token.PublicToken.self) { existingUser in
             guard let user = existingUser else {
                 // user not found
                 throw Abort(.badRequest)
             }
-
+            
             let hasher = try req.make(BCryptHasher.self)
             
             guard try hasher.verify(message: loginRequest.password, matches: user.password) else {
                 // invalid password
                 throw Abort(.badRequest)
             }
-
+            
             return try Token(token: UUID().uuidString, userID: user.requireID()).create(on: req).map(to: Token.PublicToken.self) { token in
                 return token.publicToken()
             }

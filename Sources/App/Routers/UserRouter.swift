@@ -20,7 +20,7 @@ class UserRouter: RouteCollection {
         router.get("login", use: loginController.login)
         
         // /user/logout
-        router.get("logout", use: loginController.logout)
+        router.grouped(try User.tokenAuthMiddleware()).get("logout", use: loginController.logout)
         
         // /user/User.parameter
         let user = router.grouped(User.parameter)
