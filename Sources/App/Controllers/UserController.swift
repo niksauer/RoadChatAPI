@@ -13,27 +13,20 @@ import Crypto
 /// Controls basic CRUD operations on `User`s.
 final class UserController {
     
-    /// Saves a decoded new `User` to the database.
+    /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<User.PublicUser> {
-        let registerRequest: RegisterRequest
-        
-        do {
-            registerRequest = try req.content.decode(RegisterRequest.self).await(on: req)
-        } catch {
-            // missing parameter
-            throw APIFail.invalidRegisterRequest
-        }
+        let registerRequest = try RegisterRequest.validate(req)
         
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: User.PublicUser.self) { existingUser in
             guard existingUser == nil else {
                 // email already registered
-                throw APIFail.emailTaken
+                throw RegisterFail.emailTaken
             }
             
             return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: User.PublicUser.self) { existingUser in
                 guard existingUser == nil else {
                     // username taken
-                    throw APIFail.usernameTaken
+                    throw RegisterFail.usernameTaken
                 }
                 
                 let hasher = try req.make(BCryptHasher.self)
@@ -61,14 +54,7 @@ final class UserController {
     /// Updates a parameterized `User`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedUser: RegisterRequest
-            
-        do {
-            updatedUser = try req.content.decode(RegisterRequest.self).await(on: req)
-        } catch {
-            // missing parameter
-            throw APIFail.invalidUpdateRequest
-        }
+        let updatedUser = try RegisterRequest.validate(req)
         
         let hasher = try req.make(BCryptHasher.self)
         let hashedPassword = try hasher.make(updatedUser.password)
@@ -90,33 +76,25 @@ final class UserController {
         }
     }
     
+    /// Returns the settings for a parameterized `User`.
     func getSettings(_ req: Request) throws -> Future<Settings.PublicSettings> {
         let user = try checkOwnership(req)
+        
         return try user.getSettings(on: req).map(to: Settings.PublicSettings.self) { settings in
             return settings.publicSettings()
         }
     }
     
+    /// Updates the settings for a parameterized `User`.
     func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedSettings: SettingsRequest
-
-        do {
-            updatedSettings = try req.content.decode(SettingsRequest.self).await(on: req)
-        } catch {
-            // missing parameter
-            throw APIFail.invalidSettingsRequest
-        }
-
-        guard let privacyLevel = PrivacyLevel(rawValue: updatedSettings.privacy) else {
-            // invalid privacy level
-            throw APIFail.invalidPrivacyLevel
-        }
-
+        let updatedSettings = try SettingsRequest.validate(req)
+        
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
-            settings.privacy = privacyLevel.rawValue
+            settings.privacy = updatedSettings.privacy.rawValue
             settings.communityRadius = updatedSettings.communityRadius
             settings.trafficRadius = updatedSettings.trafficRadius
+            
             return settings.update(on: req).transform(to: .ok)
         }
     }

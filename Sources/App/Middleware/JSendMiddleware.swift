@@ -8,15 +8,7 @@
 import Foundation
 import Vapor
 
-enum APIFail: Error {
-    case invalidRegisterRequest
-    case invalidLoginRequest
-    case invalidUpdateRequest
-    case invalidSettingsRequest
-    case emailTaken
-    case usernameTaken
-    case invalidPrivacyLevel
-}
+protocol APIFail: Error { }
 
 final class JSendMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {

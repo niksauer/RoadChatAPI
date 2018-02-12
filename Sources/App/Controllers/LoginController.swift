@@ -15,14 +15,7 @@ final class LoginController {
     
     /// Saves a new `Token` to the database.
     func login(_ req: Request) throws -> Future<Token.PublicToken> {
-        let loginRequest: LoginRequest
-            
-        do {
-            loginRequest = try req.content.decode(LoginRequest.self).await(on: req)
-        } catch {
-            // missing parameter
-            throw APIFail.invalidLoginRequest
-        }
+        let loginRequest = try LoginRequest.validate(req)
     
         return try User.query(on: req).group(.or) { builder in
             builder.filter(\User.email == loginRequest.user)

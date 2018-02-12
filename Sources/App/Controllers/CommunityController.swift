@@ -12,7 +12,7 @@ import Fluent
 /// Controls basic CRUD operations on `CommunityMessage`s.
 final class CommunityController {
     
-    /// Returns a list of all `CommunityMessage`s.
+    /// Returns all `CommunityMessage`s.
     func index(_ req: Request) throws -> Future<[CommunityMessage]> {
         return CommunityMessage.query(on: req).all()
     }
