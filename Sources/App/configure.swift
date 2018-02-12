@@ -25,6 +25,7 @@ public func configure(
     migrations.add(model: User.self, database: .sqlite)
     migrations.add(model: Token.self, database: .sqlite)
     migrations.add(model: Settings.self, database: .sqlite)
+    migrations.add(model: Profile.self, database: .sqlite)
 //    migrations.add(model: CommunityMessage.self, database: .sqlite)
     services.register(migrations)
     

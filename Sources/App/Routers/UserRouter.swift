@@ -41,10 +41,10 @@ class UserRouter: RouteCollection {
 //        authenticatedUser.post("cars", use: )
         
         // /user/User.parameter/profile
-//        user.get("profile", use: )
+        user.get("profile", use: userController.getProfile)
         authenticatedUser.group("profile", use: { group in
 //            group.post(use: )
-//            group.put(use: )
+            group.put(use: userController.updateProfile)
         })
     }
 }

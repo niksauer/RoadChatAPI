@@ -12,12 +12,12 @@ import Authentication
 
 final class Token: Content {
     var id: Int?
-    var token: String
     var userID: User.ID
-
-    init(token: String, userID: User.ID) {
-        self.token = token
+    var token: String
+    
+    init(userID: User.ID, token: String) {
         self.userID = userID
+        self.token = token
     }
 }
 

@@ -9,32 +9,33 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-enum PrivacyLevel: String, Codable {
+enum PrivacyType: String, Codable {
     case `private`
     case `public`
 }
 
 final class Settings: Content {
     var id: Int?
-    var privacy: String = PrivacyLevel.private.rawValue
+    var userID: User.ID
+    var privacy: String = PrivacyType.private.rawValue
     var communityRadius: Int = 5
     var trafficRadius: Int = 10
-    var userID: User.ID
     
-    var user: Parent<Settings, User> {
-        return parent(\Settings.userID)
-    }
-
     init(userID: User.ID) {
         self.userID = userID
     }
     
-    init(privacy: PrivacyLevel, communityRadius: Int, trafficRadius: Int, userID: User.ID) {
+    init(userID: User.ID, privacy: PrivacyType, communityRadius: Int, trafficRadius: Int) {
+        self.userID = userID
         self.privacy = privacy.rawValue
         self.communityRadius = communityRadius
         self.trafficRadius = trafficRadius
-        self.userID = userID
     }
+    
+    convenience init(userID: User.ID, settingsRequest: SettingsRequest) {
+        self.init(userID: userID, privacy: settingsRequest.privacy, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius)
+    }
+
 }
 
 extension Settings {
@@ -58,5 +59,9 @@ extension Settings {
 extension Settings: SQLiteModel, Migration {
     static var idKey: ReferenceWritableKeyPath<Settings, Int?> {
         return \Settings.id
+    }
+    
+    var user: Parent<Settings, User> {
+        return parent(\Settings.userID)
     }
 }

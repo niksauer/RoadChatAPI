@@ -33,7 +33,7 @@ final class LoginController {
                 throw Abort(.badRequest)
             }
             
-            return try Token(token: UUID().uuidString, userID: user.requireID()).create(on: req).map(to: Token.PublicToken.self) { token in
+            return try Token(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: Token.PublicToken.self) { token in
                 return token.publicToken()
             }
         }

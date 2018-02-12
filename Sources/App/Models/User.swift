@@ -15,17 +15,12 @@ final class User: Content {
     var email: String
     var username: String
     var password: String
-    var registry: Date
-    
-    var settings: Children<User, Settings> {
-        return children(\Settings.userID)
-    }
+    var registry: Date = Date()
     
     init(email: String, username: String, password: String) {
         self.email = email
         self.username = username
         self.password = password
-        self.registry = Date()
     }
 
     convenience init(registerRequest: RegisterRequest) {
@@ -56,6 +51,14 @@ extension User {
 extension User: SQLiteModel, Migration {
     static var idKey: ReferenceWritableKeyPath<User, Int?> {
         return \User.id
+    }
+    
+    var settings: Children<User, Settings> {
+        return children(\Settings.userID)
+    }
+    
+    var profile: Children<User, Profile> {
+        return children(\Profile.userID)
     }
 }
 
@@ -98,6 +101,17 @@ extension User {
             }
             
             return settings
+        }
+    }
+    
+    func getProfile(on req: Request) throws -> Future<Profile> {
+        return try profile.query(on: req).first().map(to: Profile.self) { profile in
+            guard let profile = profile else {
+                // no profile associated to user
+                throw Abort(.internalServerError)
+            }
+            
+            return profile
         }
     }
 }

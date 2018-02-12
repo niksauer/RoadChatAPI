@@ -20,16 +20,16 @@ enum SettingsFail: APIFail {
 }
 
 struct SettingsRequest: Codable {
-    let privacy: PrivacyLevel
+    let privacy: PrivacyType
     let communityRadius: Int
     let trafficRadius: Int
     
     static func validate(_ req: Request) throws -> SettingsRequest {
         var missingFields = [SettingsFail.MissingParameter]()
         
-        var privacy: String?
-        var communityRadius: Int?
-        var trafficRadius: Int?
+        var privacy: String!
+        var communityRadius: Int!
+        var trafficRadius: Int!
 
         do {
             privacy = try req.content.get(String.self, at: "privacy").await(on: req)
@@ -53,10 +53,10 @@ struct SettingsRequest: Codable {
             throw SettingsFail.missingParameters(missingFields)
         }
         
-        guard let privacyLevel = PrivacyLevel(rawValue: privacy!) else {
+        guard let privacyType = PrivacyType(rawValue: privacy) else {
             throw SettingsFail.invalidPrivacyLevel
         }
         
-        return SettingsRequest(privacy: privacyLevel, communityRadius: communityRadius!, trafficRadius: trafficRadius!)
+        return SettingsRequest(privacy: privacyType, communityRadius: communityRadius, trafficRadius: trafficRadius)
     }
 }
