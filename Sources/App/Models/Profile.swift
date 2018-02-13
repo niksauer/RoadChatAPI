@@ -17,17 +17,17 @@ enum SexType: String, Codable {
 final class Profile: Content {
     var id: Int?
     var userID: User.ID
-    var sex: String
     var firstName: String
     var lastName: String
     var birth: Date
-    var streetName: String
-    var streetNumber: Int
-    var postalCode: Int
-    var country: String
-    var profession: String
+    var sex: String?
+    var streetName: String?
+    var streetNumber: Int?
+    var postalCode: Int?
+    var country: String?
+    var profession: String?
     
-    init(userID: User.ID, sex: SexType, firstName: String, lastName: String, birth: Date, streetName: String, streetNumber: Int, postalCode: Int, country: String, profession: String) {
+    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: SexType, streetName: String, streetNumber: Int, postalCode: Int, country: String, profession: String) {
         self.userID = userID
         self.sex = sex.rawValue
         self.firstName = firstName
@@ -41,36 +41,55 @@ final class Profile: Content {
     }
     
     convenience init(userID: User.ID, profileRequest: ProfileRequest) {
-        self.init(userID: userID, sex: profileRequest.sex, firstName: profileRequest.firstName, lastName: profileRequest.lastName, birth: profileRequest.birth, streetName: profileRequest.streetName, streetNumber: profileRequest.streetNumber, postalCode: profileRequest.postalCode, country: profileRequest.country, profession: profileRequest.profession)
+        self.init(userID: userID, firstName: profileRequest.firstName, lastName: profileRequest.lastName, birth: profileRequest.birth, sex: profileRequest.sex, streetName: profileRequest.streetName, streetNumber: profileRequest.streetNumber, postalCode: profileRequest.postalCode, country: profileRequest.country, profession: profileRequest.profession)
     }
 }
 
 extension Profile {
-    func publicProfile() -> PublicProfile {
-        return PublicProfile(profile: self)
+    func publicProfile(privacy: Settings) -> PublicProfile {
+        return PublicProfile(profile: self, privacy: privacy)
     }
     
     struct PublicProfile: Content {
-        let sex: String
-        let firstName: String
-        var lastName: String
-        var birth: Date
-        var streetName: String
-        var streetNumber: Int
-        var postalCode: Int
-        var country: String
-        var profession: String
+        var firstName: String?
+        var lastName: String?
+        var birth: Date?
+        var sex: String?
+        var streetName: String?
+        var streetNumber: Int?
+        var postalCode: Int?
+        var country: String?
+        var profession: String?
         
-        init(profile: Profile) {
-            self.sex = profile.sex
-            self.firstName = profile.firstName
-            self.lastName = profile.lastName
-            self.birth = profile.birth
-            self.streetName = profile.streetName
-            self.streetNumber = profile.streetNumber
-            self.postalCode = profile.postalCode
-            self.country = profile.country
-            self.profession = profile.profession
+        init(profile: Profile, privacy: Settings) {
+            if privacy.showsFirstName {
+                self.firstName = profile.firstName
+            }
+            
+            if privacy.showsLastName {
+                self.lastName = profile.lastName
+            } else if let firstCharacter = profile.lastName.first {
+                self.lastName = "\(firstCharacter)."
+            }
+            
+            if privacy.showsBirth {
+                self.birth = profile.birth
+            }
+            
+            if privacy.showsSex {
+                self.sex = profile.sex
+            }
+            
+            if privacy.showsAddress {
+                self.streetName = profile.streetName
+                self.streetNumber = profile.streetNumber
+                self.postalCode = profile.postalCode
+                self.country = profile.country
+            }
+            
+            if privacy.showsProfession {
+                self.profession = profile.profession
+            }
         }
     }
 }

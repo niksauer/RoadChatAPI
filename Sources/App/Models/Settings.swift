@@ -9,31 +9,38 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-enum PrivacyType: String, Codable {
-    case `private`
-    case `public`
-}
-
 final class Settings: Content {
     var id: Int?
     var userID: User.ID
-    var privacy: String = PrivacyType.private.rawValue
     var communityRadius: Int = 5
     var trafficRadius: Int = 10
+    
+    // data sharing options
+    var showsFirstName = true
+    var showsLastName = false
+    var showsBirth = false
+    var showsSex = true
+    var showsAddress = false
+    var showsProfession = true
     
     init(userID: User.ID) {
         self.userID = userID
     }
     
-    init(userID: User.ID, privacy: PrivacyType, communityRadius: Int, trafficRadius: Int) {
+    init(userID: User.ID, communityRadius: Int, trafficRadius: Int, showsFirstName: Bool, showsLastName: Bool, showsBirth: Bool, showsSex: Bool, showsAddress: Bool, showsProfession: Bool) {
         self.userID = userID
-        self.privacy = privacy.rawValue
         self.communityRadius = communityRadius
         self.trafficRadius = trafficRadius
+        self.showsFirstName = showsFirstName
+        self.showsLastName = showsLastName
+        self.showsBirth = showsBirth
+        self.showsSex = showsSex
+        self.showsAddress = showsAddress
+        self.showsProfession = showsProfession
     }
     
     convenience init(userID: User.ID, settingsRequest: SettingsRequest) {
-        self.init(userID: userID, privacy: settingsRequest.privacy, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius)
+        self.init(userID: userID, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius, showsFirstName: settingsRequest.showsFirstName, showsLastName: settingsRequest.showsLastName, showsBirth: settingsRequest.showsBirth, showsSex: settingsRequest.showsSex, showsAddress: settingsRequest.showsAddress, showsProfession: settingsRequest.showsProfession)
     }
 
 }
@@ -44,14 +51,24 @@ extension Settings {
     }
     
     struct PublicSettings: Content {
-        let privacy: String
         let communityRadius: Int
         let trafficRadius: Int
+        let showsFirstName: Bool
+        let showsLastName: Bool
+        let showsBirth: Bool
+        let showsSex: Bool
+        let showsAddress: Bool
+        let showsProfession: Bool
         
         init(settings: Settings) {
-            self.privacy = settings.privacy
             self.communityRadius = settings.communityRadius
             self.trafficRadius = settings.trafficRadius
+            self.showsFirstName = settings.showsFirstName
+            self.showsLastName = settings.showsLastName
+            self.showsBirth = settings.showsBirth
+            self.showsSex = settings.showsSex
+            self.showsAddress = settings.showsAddress
+            self.showsProfession = settings.showsProfession
         }
     }
 }

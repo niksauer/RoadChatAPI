@@ -91,9 +91,14 @@ final class UserController {
         let updatedSettings = try SettingsRequest.validate(req)
         
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
-            settings.privacy = updatedSettings.privacy.rawValue
             settings.communityRadius = updatedSettings.communityRadius
             settings.trafficRadius = updatedSettings.trafficRadius
+            settings.showsFirstName = updatedSettings.showsFirstName
+            settings.showsLastName = updatedSettings.showsLastName
+            settings.showsBirth = updatedSettings.showsBirth
+            settings.showsSex = updatedSettings.showsSex
+            settings.showsAddress = updatedSettings.showsAddress
+            settings.showsProfession = updatedSettings.showsProfession
             
             return settings.update(on: req).transform(to: .ok)
         }
@@ -102,13 +107,15 @@ final class UserController {
     /// Returns the profile for a parameterized `User`.
     func getProfile(_ req: Request) throws -> Future<Profile.PublicProfile> {
         return try req.parameter(User.self).flatMap(to: Profile.PublicProfile.self) { user in
-            return try user.getProfile(on: req).map(to: Profile.PublicProfile.self) { profile in
+            return try user.getProfile(on: req).flatMap(to: Profile.PublicProfile.self) { profile in
                 guard let profile = profile else {
                     // no profile associated to user
                     throw Abort(.notFound)
                 }
-                
-                return profile.publicProfile()
+            
+                return try user.getSettings(on: req).map(to: Profile.PublicProfile.self) { settings in
+                    return profile.publicProfile(privacy: settings)
+                }
             }
         }
     }
@@ -139,24 +146,18 @@ final class UserController {
     }
     
     /// Returns all `Cars`s associated to a parameterized `User`.
-    func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
-        return try req.parameter(User.self).flatMap(to: [Car.PublicCar].self) { user in
-            return try user.getCars(on: req).map(to: [Car.PublicCar].self) { cars in
-                return try cars.map({ try $0.publicCar() })
-            }
+    func getCars(_ req: Request) throws -> Future<[Car]> {
+        return try req.parameter(User.self).flatMap(to: [Car].self) { user in
+            return try user.getCars(on: req)
         }
     }
     
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
-    func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
+    func createCar(_ req: Request) throws -> Future<Car> {
         let user = try checkOwnership(req)
         let carRequest = try CarRequest.validate(req)
         
-        let newCar = Car(userID: try user.requireID(), carRequest: carRequest)
-        
-        return newCar.create(on: req).map(to: Car.PublicCar.self) { car in
-            return try car.publicCar()
-        }
+        return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }
     
     /// Checks resource ownership for a parameterized `User` according to the supplied token.
