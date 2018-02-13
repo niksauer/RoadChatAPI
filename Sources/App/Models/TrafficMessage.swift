@@ -30,7 +30,7 @@ final class TrafficMessage: Content {
 }
 
 extension TrafficMessage: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<TrafficMessage, Int?> {
+    static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
     }
     

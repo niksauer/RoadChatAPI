@@ -32,7 +32,7 @@ extension Token {
 }
 
 extension Token: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<Token, Int?> {
+    static var idKey: WritableKeyPath<Token, Int?> {
         return \Token.id
     }
 }

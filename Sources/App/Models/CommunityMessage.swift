@@ -29,8 +29,8 @@ final class CommunityMessage: Content {
     }
 }
 
-extension CommunityMessage: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<CommunityMessage, Int?> {
+extension CommunityMessage: SQLiteModel, Migration {    
+    static var idKey: WritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
     }
     

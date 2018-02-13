@@ -59,7 +59,7 @@ extension Car {
 }
 
 extension Car: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<Car, Int?> {
+    static var idKey: WritableKeyPath<Car, Int?> {
         return \Car.id
     }
     
