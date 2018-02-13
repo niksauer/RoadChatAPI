@@ -18,9 +18,11 @@ Also, in order to support command line development you will have to set the Swif
 2. `swiftenv local <choose swift 4.1 snapshot here>`
 
 ### Working with Xcode
-Please use the Swift Package Manager to create an Xcode project file, since this repository purposefully ***excludes*** it to preserve a developer's individual IDE settings. Again, [Vapor toolbox](https://github.com/vapor/toolbox) will not be necessary or required for setup.
+Please use the Swift Package Manager to create an Xcode project file, since this repository purposefully ***excludes*** it to preserve a developer's individual IDE settings. Again, [Vapor Toolbox](https://github.com/vapor/toolbox) will not be necessary or required for setup.
 
 1. `swift package generate-xcodeproj`
+2. `Product > Scheme > Run`
+3. `Xcode > Toolchains > <choose swift 4.1 snapshot here>`
 
 ### Developing with Docker 
 The theory here is that you will build and run a Swift container, mounting your project directory, then keep it open during development using command-line Swift to build, test and run your project ([see tutorial](https://bygri.github.io/2018/01/25/vapor-3-with-docker.html)).
