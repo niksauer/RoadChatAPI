@@ -76,7 +76,7 @@ extension Profile {
 }
 
 extension Profile: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<Profile, Int?> {
+    static var idKey: WritableKeyPath<Profile, Int?> {
         return \Profile.id
     }
     

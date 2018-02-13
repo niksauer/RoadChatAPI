@@ -57,7 +57,7 @@ extension Settings {
 }
 
 extension Settings: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<Settings, Int?> {
+    static var idKey: WritableKeyPath<Settings, Int?> {
         return \Settings.id
     }
     

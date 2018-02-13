@@ -49,7 +49,7 @@ extension User {
 }
 
 extension User: SQLiteModel, Migration {
-    static var idKey: ReferenceWritableKeyPath<User, Int?> {
+    static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }
     
