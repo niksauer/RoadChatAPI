@@ -138,8 +138,29 @@ final class UserController {
         }
     }
     
+    /// Returns all `Cars`s associated to a parameterized `User`.
+    func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
+        return try req.parameter(User.self).flatMap(to: [Car.PublicCar].self) { user in
+            return try user.getCars(on: req).map(to: [Car.PublicCar].self) { cars in
+                return try cars.map({ try $0.publicCar() })
+            }
+        }
+    }
+    
+    /// Saves a new `Car` to the database which is associated to a parameterized `User`.
+    func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
+        let user = try checkOwnership(req)
+        let carRequest = try CarRequest.validate(req)
+        
+        let newCar = Car(userID: try user.requireID(), carRequest: carRequest)
+        
+        return newCar.create(on: req).map(to: Car.PublicCar.self) { car in
+            return try car.publicCar()
+        }
+    }
+    
     /// Checks resource ownership for a parameterized `User` according to the supplied token.
-    func checkOwnership(_ req: Request) throws -> User {
+    private func checkOwnership(_ req: Request) throws -> User {
         let requestedUser = try req.parameter(User.self).await(on: req)
         let authenticatedUser = try req.user()
         

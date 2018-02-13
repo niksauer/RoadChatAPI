@@ -36,12 +36,18 @@ class UserRouter: RouteCollection {
             group.put(use: userController.updateSettings)
         })
         
-        // /user/User.parameter/cars
-//        user.get("cars", use: )
-//        authenticatedUser.post("cars", use: )
-        
         // /user/User.parameter/profile
         user.get("profile", use: userController.getProfile)
         authenticatedUser.put("profile", use: userController.createOrUpdateProfile)
+        
+        // /user/User.parameter/cars
+        user.get("cars", use: userController.getCars)
+        authenticatedUser.post("cars", use: userController.createCar)
+        
+        // /user/User.parameter/trafficMessages
+//        user.get("trafficMessages", use: userController.getTrafficMessages)
+        
+        // /user/User.parameter/communityMessages
+//        user.get("communityMessages", use: userController.getCommunityMessages)
     }
 }

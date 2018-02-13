@@ -1,14 +1,14 @@
 //
-//  CommunityRequest.swift
+//  TrafficMessageRequest.swift
 //  App
 //
-//  Created by Niklas Sauer on 08.02.18.
+//  Created by Niklas Sauer on 13.02.18.
 //
 
 import Foundation
 import Vapor
 
-struct CommunityRequest: Codable {
+struct TrafficMessageRequest: Codable {
     let senderID: Int
     let time: Date
     let location: String
