@@ -159,6 +159,15 @@ final class UserController {
         }
     }
     
+    /// Returns all 'TrafficMessage's associated to a parameterized 'User'.
+    func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage]> {
+        return try req.parameter(User.self).flatMap(to: [TrafficMessage].self) { user in
+            return try user.getTrafficMessages(on: req).map(to: [TrafficMessage].self) { trafficMessage in
+                return trafficMessage
+            }
+        }
+    }
+    
     /// Checks resource ownership for a parameterized `User` according to the supplied token.
     private func checkOwnership(_ req: Request) throws -> User {
         let requestedUser = try req.parameter(User.self).await(on: req)
