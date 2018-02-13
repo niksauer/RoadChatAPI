@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-final class CommunityMessage:  Content {
+final class CommunityMessage: Content {
     var id: Int?
     var senderID: Int
     var time: Date
@@ -24,7 +24,7 @@ final class CommunityMessage:  Content {
         self.message = message
     }
     
-    convenience init(communityRequest: CommunityRequest) {
+    convenience init(communityRequest: CommunityMessageRequest) {
         self.init(senderID: communityRequest.senderID, time: communityRequest.time, location: communityRequest.location, message: communityRequest.message)
     }
 }
@@ -32,6 +32,10 @@ final class CommunityMessage:  Content {
 extension CommunityMessage: SQLiteModel, Migration {
     static var idKey: ReferenceWritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
+    }
+    
+    var sender: Parent<CommunityMessage, User> {
+        return parent(\CommunityMessage.senderID)
     }
 }
 

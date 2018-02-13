@@ -60,6 +60,18 @@ extension User: SQLiteModel, Migration {
     var profile: Children<User, Profile> {
         return children(\Profile.userID)
     }
+    
+    var cars: Children<User, Car> {
+        return children(\Car.userID)
+    }
+    
+    var trafficMessages: Children<User, TrafficMessage> {
+        return children(\TrafficMessage.senderID)
+    }
+    
+    var communityMessages: Children<User, CommunityMessage> {
+        return children(\CommunityMessage.senderID)
+    }
 }
 
 extension User: Parameter {
@@ -106,6 +118,18 @@ extension User {
     
     func getProfile(on req: Request) throws -> Future<Profile?> {
         return try profile.query(on: req).first()
+    }
+    
+    func getCars(on req: Request) throws -> Future<[Car]> {
+        return try cars.query(on: req).all()
+    }
+    
+    func getCommunityMessages(on req: Request) throws -> Future<[CommunityMessage]> {
+        return try communityMessages.query(on: req).all()
+    }
+    
+    func getTrafficMessages(on req: Request) throws -> Future<[TrafficMessage]> {
+        return try trafficMessages.query(on: req).all()
     }
 }
 
