@@ -42,7 +42,7 @@ struct ProfileRequest: Codable {
         var sex: String!
         var firstName: String!
         var lastName: String!
-        var birth: Date!
+        var birth: Double!
         var streetName: String!
         var streetNumber: Int!
         var postalCode: Int!
@@ -68,7 +68,7 @@ struct ProfileRequest: Codable {
         }
         
         do {
-            birth = try req.content.get(Date.self, at: "birth").await(on: req)
+            birth = try req.content.get(Double.self, at: "birth").await(on: req)
         } catch {
             missingFields.append(.birth)
         }
@@ -92,7 +92,7 @@ struct ProfileRequest: Codable {
         }
         
         do {
-            country = try req.content.get(String.self, at: "county").await(on: req)
+            country = try req.content.get(String.self, at: "country").await(on: req)
         } catch {
             missingFields.append(.country)
         }
@@ -111,6 +111,6 @@ struct ProfileRequest: Codable {
             throw ProfileFail.invalidSexType
         }
         
-        return ProfileRequest(sex: sexType, firstName: firstName, lastName: lastName, birth: birth, streetName: streetName, streetNumber: streetNumber, postalCode: postalCode, country: country, profession: profession)
+        return ProfileRequest(sex: sexType, firstName: firstName, lastName: lastName, birth: Date(timeIntervalSince1970: birth), streetName: streetName, streetNumber: streetNumber, postalCode: postalCode, country: country, profession: profession)
     }
 }

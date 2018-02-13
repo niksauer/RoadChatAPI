@@ -104,15 +104,8 @@ extension User {
         }
     }
     
-    func getProfile(on req: Request) throws -> Future<Profile> {
-        return try profile.query(on: req).first().map(to: Profile.self) { profile in
-            guard let profile = profile else {
-                // no profile associated to user
-                throw Abort(.internalServerError)
-            }
-            
-            return profile
-        }
+    func getProfile(on req: Request) throws -> Future<Profile?> {
+        return try profile.query(on: req).first()
     }
 }
 

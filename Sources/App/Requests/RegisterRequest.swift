@@ -20,8 +20,6 @@ enum RegisterFail: APIFail {
     }
 }
 
-
-
 struct RegisterRequest: Codable {
     let email: String
     let username: String

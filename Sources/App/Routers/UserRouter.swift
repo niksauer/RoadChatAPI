@@ -42,9 +42,6 @@ class UserRouter: RouteCollection {
         
         // /user/User.parameter/profile
         user.get("profile", use: userController.getProfile)
-        authenticatedUser.group("profile", use: { group in
-//            group.post(use: )
-            group.put(use: userController.updateProfile)
-        })
+        authenticatedUser.put("profile", use: userController.createOrUpdateProfile)
     }
 }

@@ -37,7 +37,7 @@ final class UserController {
                 return newUser.create(on: req).map(to: User.PublicUser.self) { user in
                     // further user setup
                     _ = Settings(userID: try user.requireID()).create(on: req)
-                    _ = Profile(userID: try user.requireID(), sex: .male, firstName: "Niklas", lastName: "Sauer", birth: Date(), streetName: "Ernststraße", streetNumber: 12, postalCode: 63456, country: "Hanau", profession: "Dualer Student").create(on: req)
+            
                     return try user.publicUser()
                 }
             }
@@ -99,34 +99,40 @@ final class UserController {
         }
     }
     
-//    func createProfile(_ req: Request) throws -> Future<Profile.PublicProfile> {
-//        
-//    }
-    
     /// Returns the profile for a parameterized `User`.
     func getProfile(_ req: Request) throws -> Future<Profile.PublicProfile> {
         return try req.parameter(User.self).flatMap(to: Profile.PublicProfile.self) { user in
             return try user.getProfile(on: req).map(to: Profile.PublicProfile.self) { profile in
+                guard let profile = profile else {
+                    // no profile associated to user
+                    throw Abort(.notFound)
+                }
+                
                 return profile.publicProfile()
             }
         }
     }
     
-    /// Updates the profile for a parameterized `User`.
-    func updateProfile(_ req: Request) throws -> Future<HTTPStatus> {
+    /// Creates or updates the profile for a parameterized `User`.
+    func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedProfile = try ProfileRequest.validate(req)
+        let profileRequest = try ProfileRequest.validate(req)
         
-        return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { profile in
-            profile.sex = updatedProfile.sex.rawValue
-            profile.firstName = updatedProfile.firstName
-            profile.lastName = updatedProfile.firstName
-            profile.birth = updatedProfile.birth
-            profile.streetName = updatedProfile.streetName
-            profile.streetNumber = updatedProfile.streetNumber
-            profile.postalCode = updatedProfile.postalCode
-            profile.country = updatedProfile.country
-            profile.profession = updatedProfile.profession
+        return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
+            guard let profile = existingProfile else {
+                let newProfile = Profile(userID: try user.requireID(), profileRequest: profileRequest)
+                return newProfile.create(on: req).transform(to: .ok)
+            }
+
+            profile.sex = profileRequest.sex.rawValue
+            profile.firstName = profileRequest.firstName
+            profile.lastName = profileRequest.firstName
+            profile.birth = profileRequest.birth
+            profile.streetName = profileRequest.streetName
+            profile.streetNumber = profileRequest.streetNumber
+            profile.postalCode = profileRequest.postalCode
+            profile.country = profileRequest.country
+            profile.profession = profileRequest.profession
             
             return profile.update(on: req).transform(to: .ok)
         }
