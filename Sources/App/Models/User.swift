@@ -35,13 +35,11 @@ extension User {
     
     struct PublicUser: Content {
         let id: Int
-        let email: String
         let username: String
         let registry: Date
         
         init(user: User) throws {
             self.id = try user.requireID()
-            self.email = user.email
             self.username = user.username
             self.registry = user.registry
         }
