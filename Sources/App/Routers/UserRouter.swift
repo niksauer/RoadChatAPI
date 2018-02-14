@@ -45,7 +45,7 @@ class UserRouter: RouteCollection {
         authenticatedUser.post("cars", use: userController.createCar)
         
         // /user/User.parameter/trafficMessages
-//        user.get("trafficMessages", use: userController.getTrafficMessages)
+        user.get("trafficMessages", use: userController.getTrafficMessages)
         
         // /user/User.parameter/communityMessages
 //        user.get("communityMessages", use: userController.getCommunityMessages)
