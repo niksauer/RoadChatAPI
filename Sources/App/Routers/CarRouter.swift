@@ -10,14 +10,15 @@ import Vapor
 
 class CarRouter: RouteCollection {
     func boot(router: Router) throws {
-//        let carController = CarController()
+        let carController = CarController()
         
         // /car/Car.parameter
-//        let car = router.grouped(Car.parameter)
-
-//        car.get(use: )
-//        car.put(use: )
-//        car.delete(use: )
+        let car = router.grouped(Car.parameter)
+        let authenticatedCar = car.grouped(try User.tokenAuthMiddleware())
+        
+        car.get(use: carController.get)
+        authenticatedCar.put(use: carController.update)
+        authenticatedCar.delete(use: carController.delete)
     }
 }
 
