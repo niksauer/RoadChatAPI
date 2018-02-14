@@ -17,7 +17,7 @@ final class LoginController {
     func login(_ req: Request) throws -> Future<Token.PublicToken> {
         let loginRequest = try LoginRequest.validate(req)
     
-        return try User.query(on: req).group(.or) { builder in
+        return User.query(on: req).group(.or) { builder in
             builder.filter(\User.email == loginRequest.user)
             builder.filter(\User.username == loginRequest.user)
         }.first().flatMap(to: Token.PublicToken.self) { existingUser in
