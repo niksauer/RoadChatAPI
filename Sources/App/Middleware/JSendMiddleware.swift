@@ -8,8 +8,6 @@
 import Foundation
 import Vapor
 
-protocol APIFail: Error { }
-
 final class JSendMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
         do {
