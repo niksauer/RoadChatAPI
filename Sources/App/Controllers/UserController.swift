@@ -93,12 +93,12 @@ final class UserController {
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
             settings.communityRadius = updatedSettings.communityRadius
             settings.trafficRadius = updatedSettings.trafficRadius
-            settings.showsFirstName = updatedSettings.showsFirstName
-            settings.showsLastName = updatedSettings.showsLastName
-            settings.showsBirth = updatedSettings.showsBirth
-            settings.showsSex = updatedSettings.showsSex
-            settings.showsAddress = updatedSettings.showsAddress
-            settings.showsProfession = updatedSettings.showsProfession
+            settings.showFirstName = updatedSettings.showFirstName
+            settings.showLastName = updatedSettings.showLastName
+            settings.showBirth = updatedSettings.showBirth
+            settings.showSex = updatedSettings.showSex
+            settings.showAddress = updatedSettings.showAddress
+            settings.showProfession = updatedSettings.showProfession
             
             return settings.update(on: req).transform(to: .ok)
         }
@@ -131,7 +131,7 @@ final class UserController {
                 return newProfile.create(on: req).transform(to: .ok)
             }
 
-            profile.sex = profileRequest.sex.rawValue
+            profile.sex = profileRequest.sex
             profile.firstName = profileRequest.firstName
             profile.lastName = profileRequest.firstName
             profile.birth = profileRequest.birth
@@ -160,7 +160,7 @@ final class UserController {
         return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }
     
-    /// Returns all 'TrafficMessage's associated to a parameterized 'User'.
+    /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage]> {
         return try req.parameter(User.self).flatMap(to: [TrafficMessage].self) { user in
             return try user.getTrafficMessages(on: req)

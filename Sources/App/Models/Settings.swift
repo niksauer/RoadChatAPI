@@ -12,35 +12,33 @@ import FluentSQLite
 final class Settings: Content {
     var id: Int?
     var userID: User.ID
-    var communityRadius: Int = 5
-    var trafficRadius: Int = 10
-    
-    // data sharing options
-    var showsFirstName = true
-    var showsLastName = false
-    var showsBirth = false
-    var showsSex = true
-    var showsAddress = false
-    var showsProfession = true
+    var communityRadius: Int = 10
+    var trafficRadius: Int = 5
+    var showFirstName = true
+    var showLastName = false
+    var showBirth = false
+    var showSex = true
+    var showAddress = false
+    var showProfession = true
     
     init(userID: User.ID) {
         self.userID = userID
     }
     
-    init(userID: User.ID, communityRadius: Int, trafficRadius: Int, showsFirstName: Bool, showsLastName: Bool, showsBirth: Bool, showsSex: Bool, showsAddress: Bool, showsProfession: Bool) {
+    init(userID: User.ID, communityRadius: Int, trafficRadius: Int, showFirstName: Bool, showLastName: Bool, showBirth: Bool, showSex: Bool, showAddress: Bool, showProfession: Bool) {
         self.userID = userID
         self.communityRadius = communityRadius
         self.trafficRadius = trafficRadius
-        self.showsFirstName = showsFirstName
-        self.showsLastName = showsLastName
-        self.showsBirth = showsBirth
-        self.showsSex = showsSex
-        self.showsAddress = showsAddress
-        self.showsProfession = showsProfession
+        self.showFirstName = showFirstName
+        self.showLastName = showLastName
+        self.showBirth = showBirth
+        self.showSex = showSex
+        self.showAddress = showAddress
+        self.showProfession = showProfession
     }
     
     convenience init(userID: User.ID, settingsRequest: SettingsRequest) {
-        self.init(userID: userID, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius, showsFirstName: settingsRequest.showsFirstName, showsLastName: settingsRequest.showsLastName, showsBirth: settingsRequest.showsBirth, showsSex: settingsRequest.showsSex, showsAddress: settingsRequest.showsAddress, showsProfession: settingsRequest.showsProfession)
+        self.init(userID: userID, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius, showFirstName: settingsRequest.showFirstName, showLastName: settingsRequest.showLastName, showBirth: settingsRequest.showBirth, showSex: settingsRequest.showSex, showAddress: settingsRequest.showAddress, showProfession: settingsRequest.showProfession)
     }
 
 }
@@ -53,22 +51,22 @@ extension Settings {
     struct PublicSettings: Content {
         let communityRadius: Int
         let trafficRadius: Int
-        let showsFirstName: Bool
-        let showsLastName: Bool
-        let showsBirth: Bool
-        let showsSex: Bool
-        let showsAddress: Bool
-        let showsProfession: Bool
+        let showFirstName: Bool
+        let showLastName: Bool
+        let showBirth: Bool
+        let showSex: Bool
+        let showAddress: Bool
+        let showProfession: Bool
         
         init(settings: Settings) {
             self.communityRadius = settings.communityRadius
             self.trafficRadius = settings.trafficRadius
-            self.showsFirstName = settings.showsFirstName
-            self.showsLastName = settings.showsLastName
-            self.showsBirth = settings.showsBirth
-            self.showsSex = settings.showsSex
-            self.showsAddress = settings.showsAddress
-            self.showsProfession = settings.showsProfession
+            self.showFirstName = settings.showFirstName
+            self.showLastName = settings.showLastName
+            self.showBirth = settings.showBirth
+            self.showSex = settings.showSex
+            self.showAddress = settings.showAddress
+            self.showProfession = settings.showProfession
         }
     }
 }

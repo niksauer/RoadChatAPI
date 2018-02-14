@@ -9,10 +9,10 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-enum SexType: String, Codable {
-    case male
-    case female
-}
+//enum SexType: String, Codable {
+//    case male
+//    case female
+//}
 
 final class Profile: Content {
     var id: Int?
@@ -27,12 +27,12 @@ final class Profile: Content {
     var country: String?
     var profession: String?
     
-    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: SexType, streetName: String, streetNumber: Int, postalCode: Int, country: String, profession: String) {
+    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: String?, streetName: String?, streetNumber: Int?, postalCode: Int?, country: String?, profession: String?) {
         self.userID = userID
-        self.sex = sex.rawValue
         self.firstName = firstName
         self.lastName = lastName
         self.birth = birth
+        self.sex = sex
         self.streetName = streetName
         self.streetNumber = streetNumber
         self.postalCode = postalCode
@@ -62,32 +62,32 @@ extension Profile {
         var profession: String?
         
         init(profile: Profile, privacy: Settings) {
-            if privacy.showsFirstName {
+            if privacy.showFirstName {
                 self.firstName = profile.firstName
             }
             
-            if privacy.showsLastName {
+            if privacy.showLastName {
                 self.lastName = profile.lastName
             } else if let firstCharacter = profile.lastName.first {
                 self.lastName = "\(firstCharacter)."
             }
             
-            if privacy.showsBirth {
+            if privacy.showBirth {
                 self.birth = profile.birth
             }
             
-            if privacy.showsSex {
+            if privacy.showSex {
                 self.sex = profile.sex
             }
             
-            if privacy.showsAddress {
+            if privacy.showAddress {
                 self.streetName = profile.streetName
                 self.streetNumber = profile.streetNumber
                 self.postalCode = profile.postalCode
                 self.country = profile.country
             }
             
-            if privacy.showsProfession {
+            if privacy.showProfession {
                 self.profession = profile.profession
             }
         }
