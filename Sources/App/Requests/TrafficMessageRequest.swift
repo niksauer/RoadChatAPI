@@ -10,17 +10,20 @@ import Vapor
 
 struct TrafficMessageRequest: Codable, Validatable {
     let senderID: Int
+    let type: String
     let time: Date
     let location: String
-    let message: String
+    let direction: String
+    let note: String?
     
     // Validatable
     typealias RequestType = TrafficMessageRequest
     
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
         ("senderID", 1),
+        ("type", "traffic jam"),
         ("time", Date()),
         ("location", "a22exF"),
-        ("message", "Frau +  Steuer = Ungeheuer"),
+        ("direction", "North"),
     ]
 }

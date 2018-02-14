@@ -12,20 +12,25 @@ import FluentSQLite
 final class TrafficMessage: Content {
     var id: Int?
     var senderID: Int
+    var type: String
     var time: Date
     var location: String
-    var message: String
+    var direction: String
+    var note: String?
+    var validators: [String]?
     var upvotes: Int = 1
     
-    init(senderID: Int, time: Date, location: String, message: String) {
+    init(senderID: Int, type: String, time: Date, location: String, direction: String, note: String?) {
         self.senderID = senderID
+        self.type = type
         self.time = time
         self.location = location
-        self.message = message
+        self.direction = direction
+        self.note = note
     }
     
     convenience init(trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: trafficRequest.senderID, time: trafficRequest.time, location: trafficRequest.location, message: trafficRequest.message)
+        self.init(senderID: trafficRequest.senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
     }
 }
 
@@ -47,13 +52,13 @@ extension TrafficMessage: Parameter {
         }
         
         return container.requestConnection(to: .sqlite).flatMap(to: TrafficMessage.self) { database in
-            return TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingMessage in
-                guard let message = existingMessage else {
-                    // message not found
+            return TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
+                guard let trafficMessage = existingTrafficMessage else {
+                    // traffic message not found
                     throw Abort(.notFound)
                 }
                 
-                return message
+                return trafficMessage
             }
         }
     }
