@@ -167,6 +167,13 @@ final class UserController {
         }
     }
     
+    /// Returns all `CommunityMessage`s associated to a parameterized `User`.
+    func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage]> {
+        return try req.parameter(User.self).flatMap(to: [CommunityMessage].self) { user in
+            return try user.getCommunityMessages(on: req)
+        }
+    }
+    
     /// Checks resource ownership for a parameterized `User` according to the supplied token.
     private func checkOwnership(_ req: Request) throws -> User {
         let requestedUser = try req.parameter(User.self).await(on: req)
