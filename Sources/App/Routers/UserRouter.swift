@@ -17,7 +17,7 @@ class UserRouter: RouteCollection {
         router.post(use: userController.create)
         
         // /user/login
-        router.get("login", use: loginController.login)
+        router.post("login", use: loginController.login)
         
         // /user/logout
         router.grouped(try User.tokenAuthMiddleware()).get("logout", use: loginController.logout)
@@ -38,12 +38,6 @@ class UserRouter: RouteCollection {
             // /user/User.parameter/settings/privacy
             group.get("privacy", use: userController.getPrivacy)
             group.put("privacy", use: userController.updatePrivacy)
-        })
-        
-        // /user/User.parameter/settings/privacy
-        authenticatedUser.group("settings/", use: { group in
-            group.get(use: userController.getSettings)
-            group.put(use: userController.updateSettings)
         })
         
         // /user/User.parameter/profile
