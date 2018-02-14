@@ -12,5 +12,6 @@ struct TrafficMessageRequest: Codable {
     let senderID: Int
     let time: Date
     let location: String
-    let message: String
+    let direction: String
+    let note: String
 }
