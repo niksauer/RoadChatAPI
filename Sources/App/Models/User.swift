@@ -55,6 +55,10 @@ extension User: SQLiteModel, Migration {
         return children(\Settings.userID)
     }
     
+    var privacy: Children<User, Privacy> {
+        return children(\Privacy.userID)
+    }
+    
     var profile: Children<User, Profile> {
         return children(\Profile.userID)
     }
@@ -111,6 +115,17 @@ extension User {
             }
             
             return settings
+        }
+    }
+    
+    func getPrivacy(on req: Request) throws -> Future<Privacy> {
+        return try privacy.query(on: req).first().map(to: Privacy.self) { privacy in
+            guard let privacy = privacy else {
+                // no data sharing options associated to user
+                throw Abort(.internalServerError)
+            }
+            
+            return privacy
         }
     }
     

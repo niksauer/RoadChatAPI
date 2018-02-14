@@ -93,12 +93,6 @@ final class UserController {
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
             settings.communityRadius = updatedSettings.communityRadius
             settings.trafficRadius = updatedSettings.trafficRadius
-            settings.showFirstName = updatedSettings.showFirstName
-            settings.showLastName = updatedSettings.showLastName
-            settings.showBirth = updatedSettings.showBirth
-            settings.showSex = updatedSettings.showSex
-            settings.showAddress = updatedSettings.showAddress
-            settings.showProfession = updatedSettings.showProfession
             
             return settings.update(on: req).transform(to: .ok)
         }
@@ -113,8 +107,8 @@ final class UserController {
                     throw Abort(.notFound)
                 }
             
-                return try user.getSettings(on: req).map(to: Profile.PublicProfile.self) { settings in
-                    return profile.publicProfile(privacy: settings)
+                return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
+                    return profile.publicProfile(privacy: privacy)
                 }
             }
         }
