@@ -9,6 +9,11 @@
 <a href="https://swift.org">
     <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
 </a>
+<a href="https://app.getpostman.com/run-collection/21d22ca35d40ebb097f0">
+    <img src="http://img.shields.io/badge/Postman-import-orange.svg" alt="Postman">
+</a>
+
+
 
 ### Swift Toolchain
 **Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally in Xcode.
