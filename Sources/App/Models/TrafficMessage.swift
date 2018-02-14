@@ -12,6 +12,7 @@ import FluentSQLite
 final class TrafficMessage: Content {
     var id: Int?
     var senderID: Int
+    var type: String
     var time: Date
     var location: String
     var direction: String
@@ -19,8 +20,9 @@ final class TrafficMessage: Content {
     var validators: [String]?
     var upvotes: Int = 1
     
-    init(senderID: Int, time: Date, location: String, direction: String, note: String?) {
+    init(senderID: Int, type: String, time: Date, location: String, direction: String, note: String?) {
         self.senderID = senderID
+        self.type = type
         self.time = time
         self.location = location
         self.direction = direction
@@ -28,7 +30,7 @@ final class TrafficMessage: Content {
     }
     
     convenience init(trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: trafficRequest.senderID, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
+        self.init(senderID: trafficRequest.senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
     }
 }
 
