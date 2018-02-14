@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-enum CommunityMessageFail: APIFail{
+enum CommunityMessageFail: APIFail {
     case missingParameters([MissingParameter])
     
     enum MissingParameter {
@@ -28,36 +28,39 @@ struct CommunityMessageRequest: Codable {
     static func validate(_ req: Request) throws -> CommunityMessageRequest {
         var missingFields = [CommunityMessageFail.MissingParameter]()
         
-        var senderID: Int?
-        var time: Double?
-        var location: String?
-        var message: String?
+        var senderID: Int!
+        var time: Double!
+        var location: String!
+        var message: String!
         
-        do{
+        do {
             senderID = try req.content.get(Int.self, at: "senderID").await(on: req)
-        } catch{
+        } catch {
             missingFields.append(.senderID)
         }
-        do{
+        
+        do {
             time = try req.content.get(Double.self, at: "time").await(on: req)
-        } catch{
+        } catch {
             missingFields.append(.time)
         }
-        do{
+        
+        do {
             location = try req.content.get(String.self, at: "location").await(on: req)
         } catch {
             missingFields.append(.location)
         }
-        do{
+        
+        do {
             message = try req.content.get(String.self, at: "message").await(on: req)
-        } catch{
+        } catch {
             missingFields.append(.message)
         }
-        guard missingFields.isEmpty else{
+        
+        guard missingFields.isEmpty else {
             throw CommunityMessageFail.missingParameters(missingFields)
         }
-        return CommunityMessageRequest(senderID: senderID!, time: Date(timeIntervalSince1970: time!), location: location!, message: message!)
         
+        return CommunityMessageRequest(senderID: senderID, time: Date(timeIntervalSince1970: time), location: location, message: message)
     }
-    
 }

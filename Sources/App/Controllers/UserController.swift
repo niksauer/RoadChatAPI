@@ -159,9 +159,9 @@ final class UserController {
         }
     }
     
+    /// Returns all `CommunityMessage`s associated to a parameterized `User`.
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage]> {
-        return try req.parameter(User.self).flatMap(to: [CommunityMessage].self) {
-            user in
+        return try req.parameter(User.self).flatMap(to: [CommunityMessage].self) { user in
             return try user.getCommunityMessages(on: req)
         }
     }
