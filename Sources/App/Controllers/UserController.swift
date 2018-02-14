@@ -76,7 +76,7 @@ final class UserController {
         }
     }
     
-    /// Returns the settings for a parameterized `User`.
+    /// Returns the `Setting`s for a parameterized `User`.
     func getSettings(_ req: Request) throws -> Future<Settings.PublicSettings> {
         let user = try checkOwnership(req)
         
@@ -85,7 +85,7 @@ final class UserController {
         }
     }
     
-    /// Updates the settings for a parameterized `User`.
+    /// Updates the `Setting`s for a parameterized `User`.
     func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
         let updatedSettings = try SettingsRequest.validate(req)
@@ -93,18 +93,38 @@ final class UserController {
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
             settings.communityRadius = updatedSettings.communityRadius
             settings.trafficRadius = updatedSettings.trafficRadius
-            settings.showFirstName = updatedSettings.showFirstName
-            settings.showLastName = updatedSettings.showLastName
-            settings.showBirth = updatedSettings.showBirth
-            settings.showSex = updatedSettings.showSex
-            settings.showAddress = updatedSettings.showAddress
-            settings.showProfession = updatedSettings.showProfession
             
             return settings.update(on: req).transform(to: .ok)
         }
     }
     
-    /// Returns the profile for a parameterized `User`.
+    /// Returns the `Privacy` for a parameterized `User`.
+    func getPrivacy(_ req: Request) throws -> Future<Privacy.PublicPrivacy> {
+        let user = try checkOwnership(req)
+        
+        return try user.getPrivacy(on: req).map(to: Privacy.PublicPrivacy.self) { privacy in
+            return privacy.publicPrivacy()
+        }
+    }
+    
+    /// Updates the `Privacy` for a parameterized `User`.
+    func updatePrivacy(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try checkOwnership(req)
+        let updatedPrivacy = try PrivacyRequest.validate(req)
+        
+        return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
+            privacy.showFirstName = updatedPrivacy.showFirstName
+            privacy.showLastName = updatedPrivacy.showLastName
+            privacy.showBirth = updatedPrivacy.showBirth
+            privacy.showSex = updatedPrivacy.showSex
+            privacy.showAddress = updatedPrivacy.showAddress
+            privacy.showProfession = updatedPrivacy.showProfession
+            
+            return privacy.update(on: req).transform(to: .ok)
+        }
+    }
+    
+    /// Returns the `Profile` for a parameterized `User`.
     func getProfile(_ req: Request) throws -> Future<Profile.PublicProfile> {
         return try req.parameter(User.self).flatMap(to: Profile.PublicProfile.self) { user in
             return try user.getProfile(on: req).flatMap(to: Profile.PublicProfile.self) { profile in
@@ -113,14 +133,14 @@ final class UserController {
                     throw Abort(.notFound)
                 }
             
-                return try user.getSettings(on: req).map(to: Profile.PublicProfile.self) { settings in
-                    return profile.publicProfile(privacy: settings)
+                return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
+                    return profile.publicProfile(privacy: privacy)
                 }
             }
         }
     }
     
-    /// Creates or updates the profile for a parameterized `User`.
+    /// Creates or updates the `Profile` for a parameterized `User`.
     func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
         let profileRequest = try ProfileRequest.validate(req)

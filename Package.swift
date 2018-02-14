@@ -4,19 +4,13 @@ import PackageDescription
 let package = Package(
     name: "RoadChatAPI",
     dependencies: [
-        // 💧 A server-side Swift web framework. 
-        .package(url: "https://github.com/vapor/vapor.git", .branch("beta")),
-
-        // 🖋 Swift ORM framework (queries, models, and relations) for building NoSQL and SQL database integrations.
-        .package(url: "https://github.com/vapor/fluent.git", .branch("beta")),
-        
-        .package(url: "https://github.com/vapor/crypto.git", .branch("beta")),
-        .package(url: "https://github.com/vapor/auth.git", .branch("beta")),
+        .package(url: "https://github.com/vapor/vapor.git", .exact("3.0.0-beta.3")),
+        .package(url: "https://github.com/vapor/fluent.git", .exact("3.0.0-beta.2")),
+        .package(url: "https://github.com/vapor/auth.git", .exact("2.0.0-beta.2")),
     ],
     targets: [
-        .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Crypto", "Authentication"]),
+        .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Authentication"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"]),
     ]
 )
-

@@ -34,6 +34,16 @@ class UserRouter: RouteCollection {
         authenticatedUser.group("settings", use: { group in
             group.get(use: userController.getSettings)
             group.put(use: userController.updateSettings)
+            
+            // /user/User.parameter/settings/privacy
+            group.get("privacy", use: userController.getPrivacy)
+            group.put("privacy", use: userController.updatePrivacy)
+        })
+        
+        // /user/User.parameter/settings/privacy
+        authenticatedUser.group("settings/", use: { group in
+            group.get(use: userController.getSettings)
+            group.put(use: userController.updateSettings)
         })
         
         // /user/User.parameter/profile
@@ -48,6 +58,6 @@ class UserRouter: RouteCollection {
         user.get("trafficMessages", use: userController.getTrafficMessages)
         
         // /user/User.parameter/communityMessages
-//        user.get("communityMessages", use: userController.getCommunityMessages)
+        user.get("communityMessages", use: userController.getCommunityMessages)
     }
 }
