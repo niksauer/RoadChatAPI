@@ -46,7 +46,7 @@ final class Profile: Content {
 }
 
 extension Profile {
-    func publicProfile(privacy: Settings) -> PublicProfile {
+    func publicProfile(privacy: Privacy) -> PublicProfile {
         return PublicProfile(profile: self, privacy: privacy)
     }
     
@@ -61,7 +61,7 @@ extension Profile {
         var country: String?
         var profession: String?
         
-        init(profile: Profile, privacy: Settings) {
+        init(profile: Profile, privacy: Privacy) {
             if privacy.showFirstName {
                 self.firstName = profile.firstName
             }
