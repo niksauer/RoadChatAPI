@@ -37,6 +37,7 @@ final class UserController {
                 return newUser.create(on: req).map(to: User.PublicUser.self) { user in
                     // further user setup
                     _ = Settings(userID: try user.requireID()).create(on: req)
+                    _ = Privacy(userID: try user.requireID()).create(on: req)
             
                     return try user.publicUser()
                 }
