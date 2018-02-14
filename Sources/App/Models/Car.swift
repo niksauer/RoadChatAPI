@@ -41,3 +41,23 @@ extension Car: SQLiteModel, Migration {
         return parent(\Car.userID)
     }
 }
+
+extension Car: Parameter {
+    static func make(for parameter: String, using container: Container) throws -> Future<Car> {
+        guard let id = Int(parameter) else {
+            // id must be integer
+            throw Abort(.badRequest)
+        }
+        
+        return container.requestConnection(to: .sqlite).flatMap(to: Car.self) { database in
+            return Car.find(id, on: database).map(to: Car.self) { existingCar in
+                guard let car = existingCar else {
+                    // user not found
+                    throw Abort(.notFound)
+                }
+                
+                return car
+            }
+        }
+    }
+}
