@@ -21,27 +21,28 @@ final class Profile: Content {
     var lastName: String
     var birth: Date
     var sex: String?
+    var description: String?
     var streetName: String?
     var streetNumber: Int?
     var postalCode: Int?
     var country: String?
-    var profession: String?
     
-    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: String?, streetName: String?, streetNumber: Int?, postalCode: Int?, country: String?, profession: String?) {
+    
+    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: String?, description: String?, streetName: String?, streetNumber: Int?, postalCode: Int?, country: String?) {
         self.userID = userID
         self.firstName = firstName
         self.lastName = lastName
         self.birth = birth
         self.sex = sex
+        self.description = description
         self.streetName = streetName
         self.streetNumber = streetNumber
         self.postalCode = postalCode
         self.country = country
-        self.profession = profession
     }
     
     convenience init(userID: User.ID, profileRequest: ProfileRequest) {
-        self.init(userID: userID, firstName: profileRequest.firstName, lastName: profileRequest.lastName, birth: profileRequest.birth, sex: profileRequest.sex, streetName: profileRequest.streetName, streetNumber: profileRequest.streetNumber, postalCode: profileRequest.postalCode, country: profileRequest.country, profession: profileRequest.profession)
+        self.init(userID: userID, firstName: profileRequest.firstName, lastName: profileRequest.lastName, birth: profileRequest.birth, sex: profileRequest.sex, description: profileRequest.description, streetName: profileRequest.streetName, streetNumber: profileRequest.streetNumber, postalCode: profileRequest.postalCode, country: profileRequest.country)
     }
 }
 
@@ -55,11 +56,11 @@ extension Profile {
         var lastName: String?
         var birth: Date?
         var sex: String?
+        var description: String?
         var streetName: String?
         var streetNumber: Int?
         var postalCode: Int?
         var country: String?
-        var profession: String?
         
         init(profile: Profile, privacy: Privacy) {
             if privacy.showFirstName {
@@ -80,15 +81,13 @@ extension Profile {
                 self.sex = profile.sex
             }
             
+            self.description = profile.description
+            
             if privacy.showAddress {
                 self.streetName = profile.streetName
                 self.streetNumber = profile.streetNumber
                 self.postalCode = profile.postalCode
                 self.country = profile.country
-            }
-            
-            if privacy.showProfession {
-                self.profession = profile.profession
             }
         }
     }

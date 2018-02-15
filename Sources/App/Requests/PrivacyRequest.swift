@@ -7,16 +7,22 @@
 
 import Foundation
 import Vapor
+import Validation
 
-struct PrivacyRequest: Codable, Validatable {
+struct PrivacyRequest: Codable {
     let showFirstName: Bool
     let showLastName: Bool
     let showBirth: Bool
     let showSex: Bool
     let showAddress: Bool
-    let showProfession: Bool
-    
-    // Validatable
+    let showDescription: Bool
+}
+
+extension PrivacyRequest: Validatable {
+    static var validations: Validations = [:]
+}
+
+extension PrivacyRequest: RequestBody {
     typealias RequestType = PrivacyRequest
     
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [

@@ -15,7 +15,7 @@ final class UserController {
     
     /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<User.PublicUser> {
-        let registerRequest = try RegisterRequest.validate(req)
+        let registerRequest = try RegisterRequest.extract(from: req)
         
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: User.PublicUser.self) { existingUser in
             guard existingUser == nil else {
@@ -55,7 +55,7 @@ final class UserController {
     /// Updates a parameterized `User`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedUser = try RegisterRequest.validate(req)
+        let updatedUser = try RegisterRequest.extract(from: req)
         
         let hasher = try req.make(BCryptHasher.self)
         let hashedPassword = try hasher.make(updatedUser.password)
@@ -89,7 +89,7 @@ final class UserController {
     /// Updates the `Setting`s for a parameterized `User`.
     func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedSettings = try SettingsRequest.validate(req)
+        let updatedSettings = try SettingsRequest.extract(from: req)
         
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
             settings.communityRadius = updatedSettings.communityRadius
@@ -111,7 +111,7 @@ final class UserController {
     /// Updates the `Privacy` for a parameterized `User`.
     func updatePrivacy(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let updatedPrivacy = try PrivacyRequest.validate(req)
+        let updatedPrivacy = try PrivacyRequest.extract(from: req)
         
         return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
             privacy.showFirstName = updatedPrivacy.showFirstName
@@ -119,7 +119,7 @@ final class UserController {
             privacy.showBirth = updatedPrivacy.showBirth
             privacy.showSex = updatedPrivacy.showSex
             privacy.showAddress = updatedPrivacy.showAddress
-            privacy.showProfession = updatedPrivacy.showProfession
+            privacy.showDescription = updatedPrivacy.showDescription
             
             return privacy.update(on: req).transform(to: .ok)
         }
@@ -144,7 +144,7 @@ final class UserController {
     /// Creates or updates the `Profile` for a parameterized `User`.
     func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try checkOwnership(req)
-        let profileRequest = try ProfileRequest.validate(req)
+        let profileRequest = try ProfileRequest.extract(from: req)
         
         return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
             guard let profile = existingProfile else {
@@ -152,15 +152,15 @@ final class UserController {
                 return newProfile.create(on: req).transform(to: .ok)
             }
 
-            profile.sex = profileRequest.sex
             profile.firstName = profileRequest.firstName
             profile.lastName = profileRequest.firstName
             profile.birth = profileRequest.birth
+            profile.sex = profileRequest.sex
+            profile.description = profileRequest.description
             profile.streetName = profileRequest.streetName
             profile.streetNumber = profileRequest.streetNumber
             profile.postalCode = profileRequest.postalCode
             profile.country = profileRequest.country
-            profile.profession = profileRequest.profession
             
             return profile.update(on: req).transform(to: .ok)
         }
@@ -176,7 +176,7 @@ final class UserController {
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
     func createCar(_ req: Request) throws -> Future<Car> {
         let user = try checkOwnership(req)
-        let carRequest = try CarRequest.validate(req)
+        let carRequest = try CarRequest.extract(from: req)
         
         return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }

@@ -9,8 +9,10 @@ import Foundation
 
 protocol APIFail: Error { }
 
-enum ValidationFail: APIFail {
+enum RequestFail: APIFail {
     case missingParameters([String])
+    case invalidTypeForParameters([String])
+    case mismatchedContraints(Error)
 }
 
 enum RegisterFail: APIFail {
