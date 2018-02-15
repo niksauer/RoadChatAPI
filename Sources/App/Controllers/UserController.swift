@@ -119,7 +119,7 @@ final class UserController {
             privacy.showBirth = updatedPrivacy.showBirth
             privacy.showSex = updatedPrivacy.showSex
             privacy.showAddress = updatedPrivacy.showAddress
-            privacy.showProfession = updatedPrivacy.showProfession
+            privacy.showDescription = updatedPrivacy.showDescription
             
             return privacy.update(on: req).transform(to: .ok)
         }

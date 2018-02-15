@@ -11,7 +11,8 @@ protocol APIFail: Error { }
 
 enum RequestFail: APIFail {
     case missingParameters([String])
-    case invalidParameters(Error)
+    case invalidTypeForParameters([String])
+    case mismatchedContraints(Error)
 }
 
 enum RegisterFail: APIFail {

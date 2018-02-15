@@ -15,7 +15,7 @@ struct PrivacyRequest: Codable {
     let showBirth: Bool
     let showSex: Bool
     let showAddress: Bool
-    let showProfession: Bool
+    let showDescription: Bool
 }
 
 extension PrivacyRequest: Validatable {

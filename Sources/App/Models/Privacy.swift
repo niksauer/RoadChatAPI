@@ -17,7 +17,7 @@ final class Privacy: Content {
     var showBirth = false
     var showSex = true
     var showAddress = false
-    var showProfession = true
+    var showDescription = true
     
     init(userID: User.ID) {
         self.userID = userID
@@ -30,11 +30,11 @@ final class Privacy: Content {
         self.showBirth = showBirth
         self.showSex = showSex
         self.showAddress = showAddress
-        self.showProfession = showProfession
+        self.showDescription = showProfession
     }
     
     convenience init(userID: User.ID, PrivacyRequest: PrivacyRequest) {
-        self.init(userID: userID, showFirstName: PrivacyRequest.showFirstName, showLastName: PrivacyRequest.showLastName, showBirth: PrivacyRequest.showBirth, showSex: PrivacyRequest.showSex, showAddress: PrivacyRequest.showAddress, showProfession: PrivacyRequest.showProfession)
+        self.init(userID: userID, showFirstName: PrivacyRequest.showFirstName, showLastName: PrivacyRequest.showLastName, showBirth: PrivacyRequest.showBirth, showSex: PrivacyRequest.showSex, showAddress: PrivacyRequest.showAddress, showProfession: PrivacyRequest.showDescription)
     }
 }
 
@@ -49,7 +49,7 @@ extension Privacy {
         let showBirth: Bool
         let showSex: Bool
         let showAddress: Bool
-        let showProfession: Bool
+        let showDescription: Bool
         
         init(privacy: Privacy) {
             self.showFirstName = privacy.showFirstName
@@ -57,7 +57,7 @@ extension Privacy {
             self.showBirth = privacy.showBirth
             self.showSex = privacy.showSex
             self.showAddress = privacy.showAddress
-            self.showProfession = privacy.showProfession
+            self.showDescription = privacy.showDescription
         }
     }
 }
