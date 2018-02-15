@@ -25,22 +25,33 @@ extension ProfileRequest: Validatable {
     static var validations: Validations = [
         key(\ProfileRequest.firstName): IsCount(1...50),
         key(\ProfileRequest.lastName): IsCount(1...50),
-//        key(\ProfileRequest.birth): IsDate(),
-//        key(\ProfileRequest.sex): IsSex(),
-//        key(\ProfileRequest.description): IsCount(0...280),
-//        key(\ProfileRequest.streetName): IsCount(0...50),
-//        key(\ProfileRequest.streetNumber): IsInt(),
-//        key(\ProfileRequest.postalCode): IsInt(),
-//        key(\ProfileRequest.country): IsCount(0...50),
+    ]
+}
+
+extension ProfileRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [
+        key(\ProfileRequest.sex): IsSex(),
+        key(\ProfileRequest.description): IsCount(0...280),
+        key(\ProfileRequest.streetName): IsCount(0...50),
+        key(\ProfileRequest.country): IsCount(0...50),
     ]
 }
 
 extension ProfileRequest: RequestBody {
     typealias RequestType = ProfileRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("firstName", "Niklas"),
         ("lastName", "Sauer"),
         ("birth", Date()),
+    ]
+    
+    static var optionalParameters: Parameters = [
+        ("sex", "male"),
+        ("description", "Dualer Student"),
+        ("streetName", "Ernststraße"),
+        ("streetNumber", 12),
+        ("postalCode", 63456),
+        ("country", "Germany")
     ]
 }

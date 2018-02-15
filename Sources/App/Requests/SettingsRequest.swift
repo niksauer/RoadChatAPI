@@ -21,11 +21,17 @@ extension SettingsRequest: Validatable {
     ]
 }
 
+extension SettingsRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [:]
+}
+
 extension SettingsRequest: RequestBody {
     typealias RequestType = SettingsRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("communityRadius", 10),
         ("trafficRadius", 5),
     ]
+    
+    static var optionalParameters: Parameters = []
 }

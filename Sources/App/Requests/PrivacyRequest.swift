@@ -22,15 +22,21 @@ extension PrivacyRequest: Validatable {
     static var validations: Validations = [:]
 }
 
+extension PrivacyRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [:]
+}
+
 extension PrivacyRequest: RequestBody {
     typealias RequestType = PrivacyRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("showFirstName", true),
         ("showLastName", false),
         ("showBirth", false),
         ("showSex", true),
         ("showAddress", false),
-        ("showProfession", true)
+        ("showDescription", true)
     ]
+    
+    static var optionalParameters: Parameters = []
 }

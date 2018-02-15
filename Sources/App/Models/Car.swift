@@ -16,9 +16,9 @@ final class Car: Content {
     var model: String
     var production: Date
     var performance: Int?
-    var color: String?
+    var color: Int?
     
-    init(userID: User.ID, manufacturer: String, model: String, production: Date, performance: Int?, color: String?) {
+    init(userID: User.ID, manufacturer: String, model: String, production: Date, performance: Int?, color: Int?) {
         self.userID = userID
         self.manufacturer = manufacturer
         self.model = model

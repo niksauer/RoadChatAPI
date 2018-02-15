@@ -20,23 +20,29 @@ struct TrafficMessageRequest: Codable {
 
 extension TrafficMessageRequest: Validatable {
     static var validations: Validations = [
-//        key(\TrafficMessageRequest.senderID): IsInt(),
-//        key(\TrafficMessageRequest.type): IsTrafficType(),
-//        key(\TrafficMessageRequest.time): IsDate(),
+        key(\TrafficMessageRequest.type): IsTrafficType(),
         key(\TrafficMessageRequest.location): IsAlphanumeric(),
-//        key(\TrafficMessageRequest.direction): IsDouble(),
-//        key(\TrafficMessageRequest.note): IsCount(0...280),
+    ]
+}
+
+extension TrafficMessageRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [
+        key(\TrafficMessageRequest.note): IsCount(0...280)
     ]
 }
 
 extension TrafficMessageRequest: RequestBody {
     typealias RequestType = TrafficMessageRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("senderID", 1),
         ("type", "traffic jam"),
         ("time", Date()),
         ("location", "a22exF"),
         ("direction", "North"),
+    ]
+    
+    static var optionalParameters: Parameters = [
+        ("note", "Achtung, Kinder auf der Fahrbahn")
     ]
 }

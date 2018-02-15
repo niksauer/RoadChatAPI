@@ -23,12 +23,18 @@ extension RegisterRequest: Validatable {
     ]
 }
 
+extension RegisterRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [:]
+}
+
 extension RegisterRequest: RequestBody {
     typealias RequestType = RegisterRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("email", "nik.sauer@me.com"),
         ("username", "inik"),
         ("password", "safeharbour")
     ]
+    
+    static var optionalParameters: Parameters = []
 }
