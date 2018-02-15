@@ -17,4 +17,12 @@ final class TrafficController {
         return TrafficMessage.query(on: req).all()
     }
     
+    /// Saves a new 'TrafficMessage' to the database.
+    func create(_ req: Request) throws -> Future<TrafficMessage> {
+        let user = try req.user()
+        let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
+       
+        return TrafficMessage(senderID: try user.requireID(), trafficRequest: trafficMessageRequest).create(on: req)
+    }
+    
 }

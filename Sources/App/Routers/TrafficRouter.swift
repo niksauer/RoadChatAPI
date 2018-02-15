@@ -10,13 +10,14 @@ import Vapor
 
 class TrafficRouter: RouteCollection {
     func boot(router: Router) throws {
-//        let trafficController = TrafficController()
+        let trafficController = TrafficController()
+        
+        let trafficMessage = router.grouped(TrafficMessage.parameter)
+        let authenticatedTrafficMessage = trafficMessage.grouped(try User.tokenAuthMiddleware())
         
         // /traffic/board
-//        router.get("board", use: trafficController.index)
-        
-        // /traffic/message
-//        router.post("message", use: trafficController.create)
+        trafficMessage.get(use: trafficController.index)
+        authenticatedTrafficMessage.post(use: trafficController.create)
         
         // /traffic/message/TrafficMessage.parameter
 //        let message = router.grouped(TrafficMessage.parameter)

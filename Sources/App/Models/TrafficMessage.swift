@@ -17,7 +17,7 @@ final class TrafficMessage: Content {
     var location: String
     var direction: Double
     var note: String?
-    var validators: [String]?
+    var validators: Int = 0
     var upvotes: Int = 1
     
     init(senderID: Int, type: String, time: Date, location: String, direction: Double, note: String?) {
@@ -29,8 +29,8 @@ final class TrafficMessage: Content {
         self.note = note
     }
     
-    convenience init(trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: trafficRequest.senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
+    convenience init(senderID: Int, trafficRequest: TrafficMessageRequest) {
+        self.init(senderID: senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
     }
 }
 
