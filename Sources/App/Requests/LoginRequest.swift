@@ -7,12 +7,21 @@
 
 import Foundation
 import Vapor
+import Validation
 
-struct LoginRequest: Codable, Validatable {
+struct LoginRequest: Codable {
     let user: String
     let password: String
-    
-    // Validatable
+}
+
+extension LoginRequest: Validatable {
+    static var validations: Validations = [
+        key(\LoginRequest.user): IsASCII(),
+        key(\LoginRequest.password): IsCount(8...) && IsASCII()
+    ]
+}
+
+extension LoginRequest: RequestBody {
     typealias RequestType = LoginRequest
     
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [

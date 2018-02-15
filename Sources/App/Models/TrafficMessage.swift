@@ -15,12 +15,12 @@ final class TrafficMessage: Content {
     var type: String
     var time: Date
     var location: String
-    var direction: String
+    var direction: Double
     var note: String?
     var validators: [String]?
     var upvotes: Int = 1
     
-    init(senderID: Int, type: String, time: Date, location: String, direction: String, note: String?) {
+    init(senderID: Int, type: String, time: Date, location: String, direction: Double, note: String?) {
         self.senderID = senderID
         self.type = type
         self.time = time

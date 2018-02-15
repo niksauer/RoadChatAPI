@@ -20,7 +20,7 @@ final class CarController {
     /// Updates a parameterized `Car`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let car = try checkOwnership(req)
-        let updatedCar = try CarRequest.validate(req)
+        let updatedCar = try CarRequest.extract(from: req)
         
         car.manufacturer = updatedCar.manufacturer
         car.model = updatedCar.model

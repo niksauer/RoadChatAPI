@@ -1,5 +1,5 @@
 //
-//  Validatable.swift
+//  RequestBody.swift
 //  App
 //
 //  Created by Niklas Sauer on 14.02.18.
@@ -8,14 +8,15 @@
 import Foundation
 import Vapor
 import Fluent
+import Validation
 
-protocol Validatable {
-    associatedtype RequestType: Codable
+protocol RequestBody {
+    associatedtype RequestType: Validatable
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] { get }
 }
 
-extension Validatable {
-    static func validate(_ req: Request) throws -> RequestType {
+extension RequestBody {
+    static func extract(from req: Request) throws -> RequestType {
         var missingParameters = [String]()
         
         for (parameter, type) in requiredParameters {
@@ -40,9 +41,17 @@ extension Validatable {
         }
     
         guard missingParameters.isEmpty else {
-            throw ValidationFail.missingParameters(missingParameters)
+            throw RequestFail.missingParameters(missingParameters)
         }
         
-        return try req.content.decode(RequestType.self).await(on: req)
+        let body = try req.content.decode(RequestType.self).await(on: req)
+        
+        do {
+            try body.validate()
+        } catch {
+            throw RequestFail.invalidParameters(error)
+        }
+        
+        return body
     }
 }

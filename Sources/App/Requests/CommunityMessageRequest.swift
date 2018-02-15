@@ -7,14 +7,25 @@
 
 import Foundation
 import Vapor
+import Validation
 
-struct CommunityMessageRequest: Codable, Validatable {
+struct CommunityMessageRequest: Codable {
     let senderID: Int
     let time: Date
     let location: String
     let message: String
-    
-    // Validatable
+}
+
+extension CommunityMessageRequest: Validatable {
+    static var validations: Validations = [
+//        key(\CommunityMessageRequest.senderID): IsInt(),
+//        key(\CommunityMessageRequest.time): IsDate(),
+        key(\CommunityMessageRequest.location): IsAlphanumeric(),
+        key(\CommunityMessageRequest.message): IsCount(0...280),
+    ]
+}
+
+extension CommunityMessageRequest: RequestBody {
     typealias RequestType = CommunityMessageRequest
     
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [

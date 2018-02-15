@@ -7,13 +7,23 @@
 
 import Foundation
 import Vapor
+import Validation
 
-struct RegisterRequest: Codable, Validatable {
+struct RegisterRequest: Codable {
     let email: String
     let username: String
     let password: String
-    
-    // Validatable
+}
+
+extension RegisterRequest: Validatable {
+    static var validations: Validations = [
+        key(\RegisterRequest.email): IsEmail(),
+        key(\RegisterRequest.username): IsCount(4...) && IsAlphanumeric(),
+        key(\RegisterRequest.password): IsCount(8...) && IsASCII()
+    ]
+}
+
+extension RegisterRequest: RequestBody {
     typealias RequestType = RegisterRequest
     
     static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
