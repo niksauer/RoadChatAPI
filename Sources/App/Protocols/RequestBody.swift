@@ -17,28 +17,26 @@ protocol RequestBody {
 }
 
 extension RequestBody {
-    private static func checkParameterPresence(in req: Request, parameters: Parameters) throws {
-        var missingParameters = [String]()
+    typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
+    
+    private static func findMissingParameters(in req: Request, required parameters: Parameters) -> Parameters {
+        var missingParameters = [Parameter]()
         
         for parameter in parameters {
             do {
                 _ = try req.content.get(String.self, at: parameter.name).await(on: req)
             } catch {
-                let keyPath = parameter.name.makeBasicKey().stringValue
-                missingParameters.append(keyPath)
+                missingParameters.append(parameter)
             }
         }
-        
-        guard missingParameters.isEmpty else {
-            throw RequestFail.missingParameters(missingParameters)
-        }
+
+        return missingParameters
     }
     
     private static func checkParameterType(in req: Request, parameters: Parameters) throws {
         var invalidParameters = [String]()
         
         for parameter in parameters {
-//            let keyPath = parameter.name.makeBasicKey().stringValue
             var typeName = String()
             
             do {
@@ -59,6 +57,7 @@ extension RequestBody {
                     typeName = "Bool"
                     _ = try req.content.get(Bool.self, at: parameter.name).await(on: req)
                 default:
+                    // unknown data type in request
                     throw Abort(.badRequest)
                 }
             } catch {
@@ -72,9 +71,29 @@ extension RequestBody {
     }
     
     static func extract(from req: Request) throws -> RequestType {
-        try checkParameterPresence(in: req, parameters: requiredParameters)
+        let missingParameters = findMissingParameters(in: req, required: requiredParameters)
+        
+        guard missingParameters.isEmpty else {
+            throw RequestFail.missingParameters(missingParameters.map({ $0.name.makeBasicKey().stringValue }))
+        }
+        
         try checkParameterType(in: req, parameters: requiredParameters)
-        try checkParameterType(in: req, parameters: optionalParameters)
+        
+        let missingOptionalParameters = findMissingParameters(in: req, required: optionalParameters)
+        var presentOptionalParameters = Parameters()
+    
+        for parameter in optionalParameters {
+            let parameterName = parameter.name.makeBasicKey().stringValue
+            
+            if !missingOptionalParameters.contains(where: { missingParameter in
+                let missingParameterName = missingParameter.name.makeBasicKey().stringValue
+                return missingParameterName == parameterName
+            }) {
+                presentOptionalParameters.append(parameter)
+            }
+        }
+        
+        try checkParameterType(in: req, parameters: presentOptionalParameters)
         
         let body = try req.content.decode(RequestType.self).await(on: req)
         
