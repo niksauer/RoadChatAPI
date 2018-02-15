@@ -9,11 +9,6 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-//enum SexType: String, Codable {
-//    case male
-//    case female
-//}
-
 final class Profile: Content {
     var id: Int?
     var userID: User.ID
