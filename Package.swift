@@ -1,12 +1,12 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.1
 import PackageDescription
 
 let package = Package(
     name: "RoadChatAPI",
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", .exact("3.0.0-beta.3")),
-        .package(url: "https://github.com/vapor/fluent.git", .exact("3.0.0-beta.2")),
-        .package(url: "https://github.com/vapor/auth.git", .exact("2.0.0-beta.2")),
+        .package(url: "https://github.com/niksauer/vapor", .exact("3.0.0-beta.3.1")),
+        .package(url: "https://github.com/niksauer/fluent", .exact("3.0.0-beta.2.1")),
+        .package(url: "https://github.com/niksauer/auth", .branch("beta")),
     ],
     targets: [
         .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Authentication"]),
