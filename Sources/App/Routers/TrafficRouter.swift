@@ -12,19 +12,17 @@ class TrafficRouter: RouteCollection {
     func boot(router: Router) throws {
         let trafficController = TrafficController()
         
-        let trafficMessage = router.grouped(TrafficMessage.parameter)
-        let authenticatedTrafficMessage = trafficMessage.grouped(try User.tokenAuthMiddleware())
+        let trafficMessageBoard = router.grouped("board")
+        let trafficMessage = router.grouped("messages").grouped(TrafficMessage.parameter)
         
         // /traffic/board
-        trafficMessage.get(use: trafficController.index)
-        authenticatedTrafficMessage.post(use: trafficController.create)
+        trafficMessageBoard.get(use: trafficController.index)
+        trafficMessageBoard.grouped(try User.tokenAuthMiddleware()).post(use: trafficController.create)
         
-        // /traffic/message/TrafficMessage.parameter
-//        let message = router.grouped(TrafficMessage.parameter)
-        
-//        message.get(use: )
-//        message.delete(use: )
-//        message.get("upvote", use: )
-//        message.get("downvote", use: )
+        // /traffic/messages/TrafficMessage.parameter
+        trafficMessage.get(use: trafficController.get)
+//      trafficMessage.delete(use: trafficController.delete)
+//      trafficMessage.put("upvote", use: trafficController.upvote)
+//      trafficMessage.put("downvote", use: trafficController.downvote)
     }
 }

@@ -25,4 +25,9 @@ final class TrafficController {
         return TrafficMessage(senderID: try user.requireID(), trafficRequest: trafficMessageRequest).create(on: req)
     }
     
+    /// Returns a parameterized 'TrafficMessage'
+    func get(_ req: Request) throws -> Future<TrafficMessage> {
+        return try req.parameter(TrafficMessage.self)
+    }
+    
 }
