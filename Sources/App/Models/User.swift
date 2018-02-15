@@ -137,12 +137,12 @@ extension User {
         return try cars.query(on: req).all()
     }
     
-    func getCommunityMessages(on req: Request) throws -> Future<[CommunityMessage]> {
-        return try communityMessages.query(on: req).all()
-    }
-    
     func getTrafficMessages(on req: Request) throws -> Future<[TrafficMessage]> {
         return try trafficMessages.query(on: req).all()
+    }
+    
+    func getCommunityMessages(on req: Request) throws -> Future<[CommunityMessage]> {
+        return try communityMessages.query(on: req).all()
     }
 }
 
