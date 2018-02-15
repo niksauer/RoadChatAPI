@@ -21,11 +21,17 @@ extension LoginRequest: Validatable {
     ]
 }
 
+extension LoginRequest: OptionallyValidatable {
+    static var optionalValidations: OptionallyValidatable.Validations = [:]
+}
+
 extension LoginRequest: RequestBody {
     typealias RequestType = LoginRequest
     
-    static var requiredParameters: [(BasicKeyRepresentable, Decodable)] = [
+    static var requiredParameters: Parameters = [
         ("user", "inik"),
         ("password", "safeharbour")
     ]
+    
+    static var optionalParameters: Parameters = []
 }
