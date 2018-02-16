@@ -14,15 +14,17 @@ class CommunityRouter: RouteCollection {
 
         // /community/board
         router.get("board", use: communityController.index)
-
-        // /traffic/message
-//        router.post("message", use: communityController.create)
-
-        // /traffic/message/TrafficMessage.parameter
-//        let message = router.grouped(CommunityMessage.parameter)
-
-//        message.get(use: )
-//        message.delete(use: )
+        let communityMessageBoard = router.grouped("board")
+        let communityMessage = router.grouped("message").grouped(CommunityMessage.parameter)
+        let authenticatedCommunityMessage = communityMessage.grouped(try User.tokenAuthMiddleware())
+        
+        // /community/board
+        communityMessageBoard.get(use: communityController.index)
+        communityMessageBoard.grouped(try User.tokenAuthMiddleware()).post(use: communityController.create)
+        
+        // /community/message/communityMessage.parameter
+        communityMessage.get(use: communityController.get)
+        authenticatedcommunityMessage.delete(use: communityController.delete)
 //        message.get("upvote", use: )
 //        message.get("downvote", use: )
     }
