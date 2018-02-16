@@ -27,7 +27,7 @@ extension RegisterRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension RegisterRequest: RequestBody {
+extension RegisterRequest: Payload {
     typealias RequestType = RegisterRequest
     
     static var requiredParameters: Parameters = [

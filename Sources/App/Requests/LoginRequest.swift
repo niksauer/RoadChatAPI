@@ -25,7 +25,7 @@ extension LoginRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension LoginRequest: RequestBody {
+extension LoginRequest: Payload {
     typealias RequestType = LoginRequest
     
     static var requiredParameters: Parameters = [
