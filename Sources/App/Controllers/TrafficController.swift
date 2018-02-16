@@ -30,4 +30,23 @@ final class TrafficController {
         return try req.parameter(TrafficMessage.self)
     }
     
+    /// Deletes a parameterized 'TrafficMessage'.
+    func delete(_ req: Request) throws -> Future<HTTPStatus> {
+        let trafficMessage = try checkOwnership(req)
+        return trafficMessage.delete(on: req).transform(to: .ok)
+    }
+    
+    /// Checks resource ownership for a parameterized 'TrafficMessage' according to the supplied token.
+    private func checkOwnership(_ req: Request) throws -> TrafficMessage {
+        let requestedTrafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
+        let authenticatedUser = try req.user()
+        
+        guard try requestedTrafficMessage.senderID == authenticatedUser.requireID() else {
+            // unowned resource
+            throw Abort(.forbidden)
+        }
+        
+        return requestedTrafficMessage
+    }
 }
+

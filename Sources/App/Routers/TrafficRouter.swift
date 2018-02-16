@@ -14,6 +14,7 @@ class TrafficRouter: RouteCollection {
         
         let trafficMessageBoard = router.grouped("board")
         let trafficMessage = router.grouped("messages").grouped(TrafficMessage.parameter)
+        let authenticatedTrafficMessage = trafficMessage.grouped(try User.tokenAuthMiddleware())
         
         // /traffic/board
         trafficMessageBoard.get(use: trafficController.index)
@@ -21,8 +22,8 @@ class TrafficRouter: RouteCollection {
         
         // /traffic/messages/TrafficMessage.parameter
         trafficMessage.get(use: trafficController.get)
-//      trafficMessage.delete(use: trafficController.delete)
-//      trafficMessage.put("upvote", use: trafficController.upvote)
-//      trafficMessage.put("downvote", use: trafficController.downvote)
+        authenticatedTrafficMessage.delete(use: trafficController.delete)
+//      authenticatedTrafficMessage.get("upvote", use: trafficController.upvote)
+//      authenticatedTrafficMessage.get("downvote", use: trafficController.downvote)
     }
 }
