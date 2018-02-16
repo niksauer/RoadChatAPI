@@ -46,7 +46,7 @@ extension User {
     }
 }
 
-extension User: SQLiteModel, Migration {
+extension User: SQLiteModel, Migration, Owner {
     static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }
@@ -73,6 +73,12 @@ extension User: SQLiteModel, Migration {
     
     var communityMessages: Children<User, CommunityMessage> {
         return children(\CommunityMessage.senderID)
+    }
+}
+
+extension User: Ownable {
+    var owner: Parent<User, User> {
+        return parent(\User.id!)
     }
 }
 

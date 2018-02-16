@@ -25,7 +25,7 @@ extension SettingsRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension SettingsRequest: RequestBody {
+extension SettingsRequest: Payload {
     typealias RequestType = SettingsRequest
     
     static var requiredParameters: Parameters = [

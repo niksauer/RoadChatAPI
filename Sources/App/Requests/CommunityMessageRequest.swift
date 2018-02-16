@@ -27,7 +27,7 @@ extension CommunityMessageRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension CommunityMessageRequest: RequestBody {
+extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest
     
     static var requiredParameters: Parameters = [

@@ -19,7 +19,9 @@ final class CarController {
     
     /// Updates a parameterized `Car`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
-        let car = try checkOwnership(req)
+        let car = try req.parameter(Car.self).await(on: req)
+        try req.checkOwnership(for: car)
+        
         let updatedCar = try CarRequest.extract(from: req)
         
         car.manufacturer = updatedCar.manufacturer
@@ -33,21 +35,10 @@ final class CarController {
     
     /// Deletes a parameterized `Car`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let car = try checkOwnership(req)
+        let car = try req.parameter(Car.self).await(on: req)
+        try req.checkOwnership(for: car)
+        
         return car.delete(on: req).transform(to: .ok)
-    }
-    
-    /// Checks resource ownership for a parameterized `Car` according to the supplied token.
-    private func checkOwnership(_ req: Request) throws -> Car {
-        let requestedCar = try req.parameter(Car.self).await(on: req)
-        let authenticatedUser = try req.user()
-        
-        guard try requestedCar.userID == authenticatedUser.requireID() else {
-            // unowned resource
-            throw Abort(.forbidden)
-        }
-        
-        return requestedCar
     }
     
 }

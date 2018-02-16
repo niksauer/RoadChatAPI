@@ -20,28 +20,4 @@ enum RegisterFail: APIFail {
     case usernameTaken
 }
 
-enum LoginFail: APIFail {
-    
-}
-
-enum SettingsFail: APIFail {
-    
-}
-
-enum ProfileFail: APIFail {
-    case invalidSexType
-}
-
-enum CarFail: APIFail {
-    
-}
-
-enum TrafficFail: APIFail {
-    
-}
-
-enum CommunityFail: APIFail {
-    
-}
-
 

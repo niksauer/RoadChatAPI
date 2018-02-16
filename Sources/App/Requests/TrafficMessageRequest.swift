@@ -31,7 +31,7 @@ extension TrafficMessageRequest: OptionallyValidatable {
     ]
 }
 
-extension TrafficMessageRequest: RequestBody {
+extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest
     
     static var requiredParameters: Parameters = [
