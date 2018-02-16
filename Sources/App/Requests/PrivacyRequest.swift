@@ -26,7 +26,7 @@ extension PrivacyRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension PrivacyRequest: RequestBody {
+extension PrivacyRequest: Payload {
     typealias RequestType = PrivacyRequest
     
     static var requiredParameters: Parameters = [

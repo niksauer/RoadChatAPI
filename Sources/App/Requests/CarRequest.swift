@@ -31,7 +31,7 @@ extension CarRequest: OptionallyValidatable {
     ]
 }
 
-extension CarRequest: RequestBody {
+extension CarRequest: Payload {
     typealias RequestType = CarRequest
     
     static var requiredParameters: Parameters = [

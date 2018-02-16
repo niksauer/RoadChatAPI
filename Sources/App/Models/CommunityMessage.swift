@@ -29,12 +29,14 @@ final class CommunityMessage: Content {
     }
 }
 
-extension CommunityMessage: SQLiteModel, Migration {    
+extension CommunityMessage: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
     }
-    
-    var sender: Parent<CommunityMessage, User> {
+}
+
+extension CommunityMessage: Ownable {
+    var owner: Parent<CommunityMessage, User> {
         return parent(\CommunityMessage.senderID)
     }
 }

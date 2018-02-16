@@ -36,8 +36,10 @@ extension Car: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<Car, Int?> {
         return \Car.id
     }
-    
-    var user: Parent<Car, User> {
+}
+
+extension Car: Ownable {
+    var owner: Parent<Car, User> {
         return parent(\Car.userID)
     }
 }

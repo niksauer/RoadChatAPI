@@ -37,7 +37,7 @@ extension ProfileRequest: OptionallyValidatable {
     ]
 }
 
-extension ProfileRequest: RequestBody {
+extension ProfileRequest: Payload {
     typealias RequestType = ProfileRequest
     
     static var requiredParameters: Parameters = [

@@ -38,8 +38,10 @@ extension TrafficMessage: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
     }
-    
-    var sender: Parent<TrafficMessage, User> {
+}
+
+extension TrafficMessage: Ownable {
+    var owner: Parent<TrafficMessage, User> {
         return parent(\TrafficMessage.senderID)
     }
 }

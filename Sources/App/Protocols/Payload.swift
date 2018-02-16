@@ -1,5 +1,5 @@
 //
-//  RequestBody.swift
+//  Payload.swift
 //  App
 //
 //  Created by Niklas Sauer on 14.02.18.
@@ -9,14 +9,14 @@ import Foundation
 import Vapor
 import Validation
 
-protocol RequestBody {
+protocol Payload {
     associatedtype RequestType: Validatable, OptionallyValidatable
     typealias Parameters = [(name: BasicKeyRepresentable, type: Decodable)]
     static var requiredParameters: Parameters { get }
     static var optionalParameters: Parameters { get }
 }
 
-extension RequestBody {
+extension Payload {
     typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
     
     private static func findMissingParameters(in req: Request, required parameters: Parameters) -> Parameters {
