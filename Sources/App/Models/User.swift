@@ -74,6 +74,19 @@ extension User: SQLiteModel, Migration, Owner {
     var communityMessages: Children<User, CommunityMessage> {
         return children(\CommunityMessage.senderID)
     }
+    
+    var directMessages: Children<User, DirectMessage> {
+        return children(\DirectMessage.senderID)
+    }
+    
+    var createdConversations: Children<User, Conversation> {
+        return children(\Conversation.creatorID)
+    }
+    
+    var activeConversations: Siblings<User, Conversation, IsParticipant> {
+        return siblings()
+    }
+
 }
 
 extension User: Ownable {
