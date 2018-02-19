@@ -27,5 +27,10 @@ class ConversationRouter: RouteCollection {
             group.get(use: conversationController.getMessages)
             group.post(use: conversationController.createMessage)
         })
+        
+        // /conversation/Conversation.parameter/participants
+        authenticatedConversation.group("participants", use: { group in
+            group.get(use: conversationController.getParticipants)
+        })
     }
 }
