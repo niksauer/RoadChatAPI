@@ -41,15 +41,69 @@ final class TrafficController {
     /// Upvotes a parameterized 'TrafficMessage'.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
-        trafficMessage.upvotes += 1
+        let user = try req.user()
+    
+        let upvoteStatus = try checkUpvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
+        
+        if (upvoteStatus != nil) {
+            trafficMessage.upvotes -= 1
+            _ = upvoteStatus!.delete(on: req)
+        }
+        else {
+            let downvoteStatus = try checkDownvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
+            if (downvoteStatus != nil) {
+                trafficMessage.upvotes += 2
+                _ = downvoteStatus!.delete(on: req)
+                _ = UpvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
+                
+            }
+            else {
+                trafficMessage.upvotes += 1
+                _ = UpvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
+            }
+        }
         return trafficMessage.update(on: req).transform(to: .ok)
     }
+
     
     /// Downvotes a parameterized 'TrafficMessage'.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
-        trafficMessage.upvotes -= 1
+        let user = try req.user()
+        
+        let downvoteStatus = try checkDownvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
+        if (downvoteStatus != nil) {
+            trafficMessage.upvotes += 1
+            _ = downvoteStatus!.delete(on: req)
+        }
+        else {
+            let upvoteStatus = try checkUpvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
+            if (upvoteStatus != nil) {
+                trafficMessage.upvotes -= 2
+                _ = upvoteStatus!.delete(on: req)
+                _ = DownvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
+                
+            }
+            else {
+                trafficMessage.upvotes -= 1
+                _ = DownvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
+            }
+        }
         return trafficMessage.update(on: req).transform(to: .ok)
+    }
+    
+    func checkUpvoteStatus(req: Request, trafficMessage: TrafficMessage, user: User)  -> Future<UpvotedBy?> {
+        return UpvotedBy.query(on: req).group(.and) { builder in
+            builder.filter(\UpvotedBy.messageID == trafficMessage.id!)
+            builder.filter(\UpvotedBy.userID == user.id!)
+            }.first()
+    }
+    
+    func checkDownvoteStatus(req: Request, trafficMessage: TrafficMessage, user: User) -> Future<DownvotedBy?> {
+        return DownvotedBy.query(on: req).group(.and) { builder in
+            builder.filter(\DownvotedBy.messageID == trafficMessage.id!)
+            builder.filter(\DownvotedBy.userID == user.id!)
+            }.first()
     }
 }
 

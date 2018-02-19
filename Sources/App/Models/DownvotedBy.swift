@@ -1,5 +1,5 @@
 //
-//  UpvotedBy.swift
+//  DownvotedBy.swift
 //  App
 //
 //  Created by Phillip Rust on 19.02.18.
@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-final class UpvotedBy: Content {
+final class DownvotedBy: Content {
     var id: Int?
     var messageID: TrafficMessage.ID
     var userID: User.ID
@@ -20,8 +20,8 @@ final class UpvotedBy: Content {
     }
 }
 
-extension UpvotedBy: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<UpvotedBy, Int?> {
-        return \UpvotedBy.id
+extension DownvotedBy: SQLiteModel, Migration {
+    static var idKey: WritableKeyPath<DownvotedBy, Int?> {
+        return \DownvotedBy.id
     }
 }
