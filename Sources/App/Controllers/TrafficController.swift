@@ -13,24 +13,35 @@ import Fluent
 final class TrafficController {
     
     /// Returns all `TrafficMessage`s.
-    func index(_ req: Request) throws -> Future<[TrafficMessage]> {
-        return TrafficMessage.query(on: req).all()
+    func index(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
+        return TrafficMessage.query(on: req).all().map(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
+            return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req)) })
+        }
     }
     
-    /// Saves a new 'TrafficMessage' to the database.
-    func create(_ req: Request) throws -> Future<TrafficMessage> {
-        let user = try req.user()
+    /// Saves a new `TrafficMessage` to the database.
+    func create(_ req: Request) throws -> Future<TrafficMessage.PublicTrafficMessage> {
         let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
-       
-        return TrafficMessage(senderID: try user.requireID(), trafficRequest: trafficMessageRequest).create(on: req)
+        let creator = try req.user()
+        
+        return TrafficMessage(senderID: try creator.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { message in
+            return message.interactions.attach(creator, on: req).map(to: TrafficMessage.PublicTrafficMessage.self) { interaction in
+                interaction.karma = KarmaType.upvote.rawValue
+                _ = interaction.save(on: req)
+                return try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req).await(on: req))
+            }
+        }
     }
     
-    /// Returns a parameterized 'TrafficMessage'
-    func get(_ req: Request) throws -> Future<TrafficMessage> {
-        return try req.parameter(TrafficMessage.self)
+    /// Returns a parameterized `TrafficMessage`.
+    func get(_ req: Request) throws -> Future<TrafficMessage.PublicTrafficMessage> {
+        return try req.parameter(TrafficMessage.self).map(to: TrafficMessage.PublicTrafficMessage.self) { message in
+            let upvotes = try message.getKarmaLevel(on: req).await(on: req)
+            return try message.publicTrafficMessage(upvotes: upvotes)
+        }
     }
     
-    /// Deletes a parameterized 'TrafficMessage'.
+    /// Deletes a parameterized `TrafficMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
         try req.checkOwnership(for: trafficMessage)
@@ -38,72 +49,18 @@ final class TrafficController {
         return trafficMessage.delete(on: req).transform(to: .ok)
     }
     
-    /// Upvotes a parameterized 'TrafficMessage'.
+    /// Upvotes a parameterized `TrafficMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
-        let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
-        let user = try req.user()
-    
-        let upvoteStatus = try checkUpvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
-        
-        if (upvoteStatus != nil) {
-            trafficMessage.upvotes -= 1
-            _ = upvoteStatus!.delete(on: req)
+        return try req.parameter(TrafficMessage.self).flatMap(to: HTTPStatus.self) { message in
+            return try message.donate(.upvote, on: req)
         }
-        else {
-            let downvoteStatus = try checkDownvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
-            if (downvoteStatus != nil) {
-                trafficMessage.upvotes += 2
-                _ = downvoteStatus!.delete(on: req)
-                _ = UpvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
-                
-            }
-            else {
-                trafficMessage.upvotes += 1
-                _ = UpvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
-            }
-        }
-        return trafficMessage.update(on: req).transform(to: .ok)
     }
 
-    
-    /// Downvotes a parameterized 'TrafficMessage'.
+    /// Downvotes a parameterized `TrafficMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
-        let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
-        let user = try req.user()
-        
-        let downvoteStatus = try checkDownvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
-        if (downvoteStatus != nil) {
-            trafficMessage.upvotes += 1
-            _ = downvoteStatus!.delete(on: req)
+        return try req.parameter(TrafficMessage.self).flatMap(to: HTTPStatus.self) { message in
+            return try message.donate(.downvote, on: req)
         }
-        else {
-            let upvoteStatus = try checkUpvoteStatus(req: req, trafficMessage: trafficMessage, user: user).await(on: req)
-            if (upvoteStatus != nil) {
-                trafficMessage.upvotes -= 2
-                _ = upvoteStatus!.delete(on: req)
-                _ = DownvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
-                
-            }
-            else {
-                trafficMessage.upvotes -= 1
-                _ = DownvotedBy(messageID: trafficMessage.id!, userID: user.id!).create(on: req)
-            }
-        }
-        return trafficMessage.update(on: req).transform(to: .ok)
-    }
-    
-    func checkUpvoteStatus(req: Request, trafficMessage: TrafficMessage, user: User)  -> Future<UpvotedBy?> {
-        return UpvotedBy.query(on: req).group(.and) { builder in
-            builder.filter(\UpvotedBy.messageID == trafficMessage.id!)
-            builder.filter(\UpvotedBy.userID == user.id!)
-            }.first()
-    }
-    
-    func checkDownvoteStatus(req: Request, trafficMessage: TrafficMessage, user: User) -> Future<DownvotedBy?> {
-        return DownvotedBy.query(on: req).group(.and) { builder in
-            builder.filter(\DownvotedBy.messageID == trafficMessage.id!)
-            builder.filter(\DownvotedBy.userID == user.id!)
-            }.first()
     }
 }
 

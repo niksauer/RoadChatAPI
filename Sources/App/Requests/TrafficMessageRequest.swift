@@ -37,7 +37,7 @@ extension TrafficMessageRequest: Payload {
         ("type", "traffic jam"),
         ("time", Date()),
         ("location", "a22exF"),
-        ("direction", "North"),
+        ("direction", 2.0),
     ]
     
     static var optionalParameters: Parameters = [

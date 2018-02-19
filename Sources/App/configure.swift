@@ -29,9 +29,8 @@ public func configure(
     migrations.add(model: Profile.self, database: .sqlite)
     migrations.add(model: Car.self, database: .sqlite)
     migrations.add(model: TrafficMessage.self, database: .sqlite)
+    migrations.add(model: TrafficKarma.self, database: .sqlite)
     migrations.add(model: CommunityMessage.self, database: .sqlite)
-    migrations.add(model: UpvotedBy.self, database: .sqlite)
-    migrations.add(model: DownvotedBy.self, database: .sqlite)
     services.register(migrations)
     
     // Configure middleware
