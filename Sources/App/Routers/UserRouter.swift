@@ -56,6 +56,6 @@ class UserRouter: RouteCollection {
         user.get("communityMessages", use: userController.getCommunityMessages)
         
         // /user/User.parameter/conversations
-        user.get("conversations", use: conversationController.index)
+        authenticatedUser.get("conversations", use: conversationController.index)
     }
 }

@@ -32,11 +32,17 @@ final class ConversationController {
     /// Saves a new `Conversation` to the database.
     func create(_ req: Request) throws -> Future<Conversation.PublicConversation> {
         let conversationRequest = try ConversationRequest.extract(from: req)
+        let creator = try req.user()
         
-        var participants = [try req.user()]
+        var participants = [creator]
         var invalidParticipants = [Int]()
         
         for userID in conversationRequest.participants {
+            guard try userID != creator.requireID() else {
+                // leave out conversation creator
+                continue
+            }
+            
             if let user = try User.query(on: req).filter(\User.id == userID).first().await(on: req) {
                 participants.append(user)
             } else {
@@ -49,7 +55,7 @@ final class ConversationController {
             throw ConversationFail.invalidParticipants(invalidParticipants)
         }
 
-        return Conversation(creatorID: try req.user().requireID(), title: conversationRequest.title).create(on: req).map(to: Conversation.PublicConversation.self) { conversation in
+        return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Conversation.PublicConversation.self) { conversation in
             // add participants to conversation via pivot table
             for participant in participants {
                 _ = conversation.participants.attach(participant, on: req)
