@@ -35,25 +35,31 @@ final class ConversationController {
         let creator = try req.user()
         
         var participants = [creator]
-        var invalidParticipants = [Int]()
+//        var invalidParticipants = [Int]()
         
-        for userID in conversationRequest.participants {
-            guard try userID != creator.requireID() else {
-                // leave out conversation creator
-                continue
-            }
-            
-            if let user = try User.query(on: req).filter(\User.id == userID).first().await(on: req) {
-                participants.append(user)
-            } else {
-                // participant not found
-                invalidParticipants.append(userID)
-            }
+//        for userID in conversationRequest.participants {
+//            guard try userID != creator.requireID() else {
+//                // leave out conversation creator
+//                continue
+//            }
+//
+//            if let user = try User.query(on: req).filter(\User.id == userID).first().await(on: req) {
+//                participants.append(user)
+//            } else {
+//                // participant not found
+//                invalidParticipants.append(userID)
+//            }
+//        }
+        
+        guard let user = try User.query(on: req).filter(\User.id == conversationRequest.participants).first().await(on: req) else {
+            throw ConversationFail.invalidParticipants([conversationRequest.participants])
         }
         
-        guard invalidParticipants.isEmpty else {
-            throw ConversationFail.invalidParticipants(invalidParticipants)
-        }
+        participants.append(user)
+        
+//        guard invalidParticipants.isEmpty else {
+//            throw ConversationFail.invalidParticipants(invalidParticipants)
+//        }
 
         return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Conversation.PublicConversation.self) { conversation in
             // add participants to conversation via pivot table
