@@ -22,6 +22,31 @@ final class DirectMessage: Content {
         self.time = time
         self.message = message
     }
+    
+    init(senderID: User.ID, conversationID: Conversation.ID, messageRequest: DirectMessageRequest) {
+        self.senderID = senderID
+        self.conversationID = conversationID
+        self.time = messageRequest.time
+        self.message = messageRequest.message
+    }
+}
+
+extension DirectMessage {
+    func publicDirectMessage() throws -> PublicDirectMessage {
+        return PublicDirectMessage(directMessage: self)
+    }
+    
+    struct PublicDirectMessage: Content {
+        let senderID: Int
+        let time: Date
+        let message: String
+        
+        init(directMessage: DirectMessage) {
+            self.senderID = directMessage.senderID
+            self.time = directMessage.time
+            self.message = directMessage.message
+        }
+    }
 }
 
 extension DirectMessage: SQLiteModel, Migration {

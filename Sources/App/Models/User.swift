@@ -78,10 +78,6 @@ extension User: SQLiteModel, Migration, Owner {
     var conversations: Siblings<User, Conversation, IsParticipant> {
         return siblings()
     }
-    
-    var directMessages: Children<User, DirectMessage> {
-        return children(\DirectMessage.senderID)
-    }
 
 }
 
@@ -158,6 +154,10 @@ extension User {
     
     func getCommunityMessages(on req: Request) throws -> Future<[CommunityMessage]> {
         return try communityMessages.query(on: req).all()
+    }
+    
+    func getConversations(on req: Request) throws -> Future<[Conversation]> {
+        return try conversations.query(on: req).all()
     }
 }
 

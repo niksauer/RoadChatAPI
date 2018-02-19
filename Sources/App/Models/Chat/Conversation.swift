@@ -21,12 +21,34 @@ final class Conversation: Content {
     }
 }
 
+extension Conversation {
+    func publicConversation(newestMessage: DirectMessage?) throws -> PublicConversation {
+        return try PublicConversation(conversation: self, newestMessage: newestMessage)
+    }
+    
+    struct PublicConversation: Content {
+        let id: Int
+        let creatorID: Int
+        let title: String
+        let creation: Date
+        let newestMessage: DirectMessage.PublicDirectMessage?
+        
+        init(conversation: Conversation, newestMessage: DirectMessage?) throws {
+            self.id = try conversation.requireID()
+            self.creatorID = conversation.creatorID
+            self.title = conversation.title
+            self.creation = conversation.creation
+            self.newestMessage = try newestMessage?.publicDirectMessage()
+        }
+    }
+}
+
 extension Conversation: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<Conversation, Int?> {
         return \Conversation.id
     }
     
-    var directMessages: Children<Conversation, DirectMessage> {
+    var messages: Children<Conversation, DirectMessage> {
         return children(\DirectMessage.conversationID)
     }
     
@@ -58,5 +80,19 @@ extension Conversation: Parameter {
                 return conversation
             }
         }
+    }
+}
+
+extension Conversation {
+    func getNewestMessage(on req: Request) throws -> Future<DirectMessage?> {
+        return try messages.query(on: req).sort(\DirectMessage.time, .descending).first()
+    }
+    
+    func getMessages(on req: Request) throws -> Future<[DirectMessage]> {
+        return try messages.query(on: req).all()
+    }
+    
+    func getParticipants(on req: Request) throws -> Future<[User]> {
+        return try participants.query(on: req).all()
     }
 }

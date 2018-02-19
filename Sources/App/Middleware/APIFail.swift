@@ -21,5 +21,5 @@ enum RegisterFail: APIFail {
 }
 
 enum ConversationFail: APIFail {
-    case invalidParticipants
+    case invalidParticipants([Int])
 }
