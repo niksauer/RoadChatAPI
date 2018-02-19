@@ -37,5 +37,19 @@ final class TrafficController {
         
         return trafficMessage.delete(on: req).transform(to: .ok)
     }
+    
+    /// Upvotes a parameterized 'TrafficMessage'.
+    func upvote(_ req: Request) throws -> Future<HTTPStatus> {
+        let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
+        trafficMessage.upvotes += 1
+        return trafficMessage.update(on: req).transform(to: .ok)
+    }
+    
+    /// Downvotes a parameterized 'TrafficMessage'.
+    func downvote(_ req: Request) throws -> Future<HTTPStatus> {
+        let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
+        trafficMessage.upvotes -= 1
+        return trafficMessage.update(on: req).transform(to: .ok)
+    }
 }
 
