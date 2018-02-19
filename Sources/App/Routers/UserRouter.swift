@@ -12,6 +12,7 @@ class UserRouter: RouteCollection {
     func boot(router: Router) throws {
         let userController = UserController()
         let loginController = LoginController()
+        let conversationController = ConversationController()
         
         // /user
         router.post(use: userController.create)
@@ -53,5 +54,8 @@ class UserRouter: RouteCollection {
         
         // /user/User.parameter/communityMessages
         user.get("communityMessages", use: userController.getCommunityMessages)
+        
+        // /user/User.parameter/conversations
+        user.get("conversations", use: conversationController.index)
     }
 }

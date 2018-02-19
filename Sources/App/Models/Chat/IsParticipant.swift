@@ -25,12 +25,6 @@ final class IsParticipant: Content {
         self.userID = userID
         self.conversationID = conversationID
     }
-    
-    init(userID: User.ID, conversationID: Conversation.ID, approvalStatus: ApprovalStatus) {
-        self.userID = userID
-        self.conversationID = conversationID
-        self.approvalStatus = approvalStatus.rawValue
-    }
 }
 
 extension IsParticipant: SQLiteModel, Migration {
@@ -39,7 +33,7 @@ extension IsParticipant: SQLiteModel, Migration {
     }
 }
 
-extension IsParticipant: Pivot {
+extension IsParticipant: ModifiablePivot {
     typealias Left = User
     typealias Right = Conversation
     
@@ -49,5 +43,9 @@ extension IsParticipant: Pivot {
     
     static var rightIDKey: ReferenceWritableKeyPath<IsParticipant, Int> {
         return \IsParticipant.conversationID
+    }
+    
+    convenience init(_ left: User, _ right: Conversation) throws {
+        try self.init(userID: left.requireID(), conversationID: right.requireID())
     }
 }

@@ -75,16 +75,12 @@ extension User: SQLiteModel, Migration, Owner {
         return children(\CommunityMessage.senderID)
     }
     
+    var conversations: Siblings<User, Conversation, IsParticipant> {
+        return siblings()
+    }
+    
     var directMessages: Children<User, DirectMessage> {
         return children(\DirectMessage.senderID)
-    }
-    
-    var createdConversations: Children<User, Conversation> {
-        return children(\Conversation.creatorID)
-    }
-    
-    var activeConversations: Siblings<User, Conversation, IsParticipant> {
-        return siblings()
     }
 
 }
