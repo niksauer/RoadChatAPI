@@ -37,7 +37,7 @@ extension DirectMessage {
     }
     
     struct PublicDirectMessage: Content {
-        let senderID: Int
+        let senderID: User.ID
         let time: Date
         let message: String
         

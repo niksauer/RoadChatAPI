@@ -44,7 +44,7 @@ final class TrafficController {
     /// Deletes a parameterized `TrafficMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         let trafficMessage = try req.parameter(TrafficMessage.self).await(on: req)
-        try req.checkOwnership(for: trafficMessage)
+        try req.user().checkOwnership(for: trafficMessage, on: req)
         
         return trafficMessage.delete(on: req).transform(to: .ok)
     }

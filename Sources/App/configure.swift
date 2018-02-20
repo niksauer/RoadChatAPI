@@ -31,13 +31,13 @@ public func configure(
     migrations.add(model: Car.self, database: .sqlite)
     
     migrations.add(model: TrafficMessage.self, database: .sqlite)
-    migrations.add(model: TrafficKarma.self, database: .sqlite)
+    migrations.add(model: TrafficKarmaDonation.self, database: .sqlite)
     
     migrations.add(model: CommunityMessage.self, database: .sqlite)
     
     migrations.add(model: Conversation.self, database: .sqlite)
     migrations.add(model: DirectMessage.self, database: .sqlite)
-    migrations.add(model: IsParticipant.self, database: .sqlite)
+    migrations.add(model: Participation.self, database: .sqlite)
     
     services.register(migrations)
 }

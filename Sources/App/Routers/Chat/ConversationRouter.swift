@@ -32,5 +32,11 @@ class ConversationRouter: RouteCollection {
         authenticatedConversation.group("participants", use: { group in
             group.get(use: conversationController.getParticipants)
         })
+        
+        // /chat/Conversation.parameter/approve
+        authenticatedConversation.get("accept", use: conversationController.acceptConversation)
+        
+        // /chat/Conversation.parameter/deny
+        authenticatedConversation.get("deny", use: conversationController.denyConversation)
     }
 }

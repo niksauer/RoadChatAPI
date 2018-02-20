@@ -28,7 +28,7 @@ extension Conversation {
     
     struct PublicConversation: Content {
         let id: Int
-        let creatorID: Int
+        let creatorID: User.ID
         let title: String
         let creation: Date
         let newestMessage: DirectMessage.PublicDirectMessage?
@@ -52,7 +52,7 @@ extension Conversation: SQLiteModel, Migration {
         return children(\DirectMessage.conversationID)
     }
     
-    var participants: Siblings<Conversation, User, IsParticipant> {
+    var participations: Siblings<Conversation, User, Participation> {
         return siblings()
     }
 }
@@ -92,7 +92,7 @@ extension Conversation {
         return try messages.query(on: req).all()
     }
     
-    func getParticipants(on req: Request) throws -> Future<[User]> {
-        return try participants.query(on: req).all()
+    func getParticipations(on req: Request) throws -> Future<[Participation]> {
+        return Participation.query(on: req).filter(try \Participation.conversationID == self.requireID()).all()
     }
 }
