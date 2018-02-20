@@ -31,11 +31,11 @@ extension TrafficKarmaDonation: ModifiablePivot {
     typealias Left = User
     typealias Right = TrafficMessage
     
-    static var leftIDKey: ReferenceWritableKeyPath<TrafficKarmaDonation, Int> {
+    static var leftIDKey: WritableKeyPath<TrafficKarmaDonation, Int> {
         return \TrafficKarmaDonation.userID
     }
-
-    static var rightIDKey: ReferenceWritableKeyPath<TrafficKarmaDonation, Int> {
+    
+    static var rightIDKey: WritableKeyPath<TrafficKarmaDonation, Int> {
         return \TrafficKarmaDonation.trafficMessageID
     }
     

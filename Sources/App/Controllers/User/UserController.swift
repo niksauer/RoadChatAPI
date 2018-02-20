@@ -148,12 +148,17 @@ final class UserController {
                     throw Abort(.notFound)
                 }
             
-                return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
-                    do {
-                        try req.checkOwnership(for: user)
-                        return profile.publicProfile(privacy: privacy, isOwner: true)
-                    } catch {
-                        return profile.publicProfile(privacy: privacy, isOwner: false)
+                return try user.getPrivacy(on: req).flatMap(to: Profile.PublicProfile.self) { privacy in
+                    if let token = req.http.headers.bearerAuthorization?.token {
+                        return Token.query(on: req).filter(\Token.token == token).first().map(to: Profile.PublicProfile.self) { token in
+                            if token?.userID == profile.userID {
+                                return profile.publicProfile(privacy: privacy, isOwner: true)
+                            } else {
+                                return profile.publicProfile(privacy: privacy, isOwner: false)
+                            }
+                        }
+                    } else {
+                        return Future(profile.publicProfile(privacy: privacy, isOwner: false))
                     }
                 }
             }

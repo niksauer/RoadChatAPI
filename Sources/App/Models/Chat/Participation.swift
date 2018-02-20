@@ -56,11 +56,11 @@ extension Participation: ModifiablePivot {
     typealias Left = User
     typealias Right = Conversation
     
-    static var leftIDKey: ReferenceWritableKeyPath<Participation, Int> {
+    static var leftIDKey: WritableKeyPath<Participation, Int> {
         return \Participation.userID
     }
     
-    static var rightIDKey: ReferenceWritableKeyPath<Participation, Int> {
+    static var rightIDKey: WritableKeyPath<Participation, Int> {
         return \Participation.conversationID
     }
     

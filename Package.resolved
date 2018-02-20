@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/niksauer/auth",
         "state": {
           "branch": "beta",
-          "revision": "fc9f0ab4dec0aa1c02b5a39d79aee171d309eb72",
+          "revision": "089d6cca2fef244600edeb7523ff5e612ee202fe",
           "version": null
         }
       },
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/vapor/database-kit.git",
         "state": {
           "branch": null,
-          "revision": "73c8635eccd93e3b23c69318ef79d1ea27738c0d",
-          "version": "1.0.0-beta.2.2"
+          "revision": "ebe23557499d2214d5350e7234c96d3e9bb7e1b4",
+          "version": "1.0.0-beta.4"
         }
       },
       {
@@ -66,11 +66,11 @@
       },
       {
         "package": "Fluent",
-        "repositoryURL": "https://github.com/vapor/fluent.git",
+        "repositoryURL": "https://github.com/vapor/fluent",
         "state": {
           "branch": null,
-          "revision": "5f6157911fcb4e43075c69d637a3a5dfd62c476a",
-          "version": "3.0.0-beta.2.1"
+          "revision": "085acf08ae9d41b2803fb83c12aee3650068bca3",
+          "version": "3.0.0-beta.3"
         }
       },
       {
@@ -120,11 +120,11 @@
       },
       {
         "package": "Vapor",
-        "repositoryURL": "https://github.com/vapor/vapor.git",
+        "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
-          "revision": "be9a2681e06b5d29419c14c493e48032d0c08743",
-          "version": "3.0.0-beta.3.1"
+          "revision": "3685f50e677d85da22c639584f0d5313aa3b3d81",
+          "version": "3.0.0-beta.3.1.3"
         }
       }
     ]
