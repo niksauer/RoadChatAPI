@@ -31,6 +31,10 @@ public func configure(
     migrations.add(model: TrafficMessage.self, database: .sqlite)
     migrations.add(model: TrafficKarma.self, database: .sqlite)
     migrations.add(model: CommunityMessage.self, database: .sqlite)
+    
+    migrations.add(model: Conversation.self, database: .sqlite)
+    migrations.add(model: DirectMessage.self, database: .sqlite)
+    migrations.add(model: IsParticipant.self, database: .sqlite)
     services.register(migrations)
     
     // Configure middleware

@@ -19,7 +19,7 @@ protocol Ownable: SQLiteModel {
 }
 
 extension Request {
-    /// Checks resource ownership for a parameterized `Ownable` according to the supplied token.
+    /// Checks resource ownership for an `Ownable` according to the supplied `Token`.
     func checkOwnership<T: Ownable>(for resource: T) throws {
         guard let owner = try resource.owner.query(on: self).first().await(on: self) else {
             // no owner associated to resource

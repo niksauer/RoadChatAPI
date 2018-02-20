@@ -20,4 +20,6 @@ enum RegisterFail: APIFail {
     case usernameTaken
 }
 
-
+enum ConversationFail: APIFail {
+    case invalidParticipants([Int])
+}
