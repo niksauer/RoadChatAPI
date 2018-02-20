@@ -121,6 +121,19 @@ extension Request {
     func user() throws -> User {
         return try requireAuthenticated(User.self)
     }
+    
+    func optionalUser() throws -> User? {
+        if let token = self.http.headers.bearerAuthorization?.token {
+            guard let storedToken = try Token.query(on: self).filter(\Token.token == token).first().await(on: self) else {
+                return nil
+            }
+            
+            return try storedToken.authUser.get(on: self).await(on: self) as User
+        } else {
+            return nil
+        }
+    }
+    
 }
 
 extension User {

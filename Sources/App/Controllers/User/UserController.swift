@@ -49,7 +49,7 @@ final class UserController {
     func get(_ req: Request) throws -> Future<User.PublicUser> {
         return try req.parameter(User.self).map(to: User.PublicUser.self) { user in
             do {
-                try req.checkOwnership(for: user)
+                try req.checkOptionalOwnership(for: user)
                 return try user.publicUser(isOwner: true)
             } catch {
                 return try user.publicUser(isOwner: false)
@@ -60,7 +60,7 @@ final class UserController {
     /// Updates a parameterized `User`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
 
         let updatedUser = try RegisterRequest.extract(from: req)
         
@@ -77,7 +77,7 @@ final class UserController {
     /// Deletes a parameterized `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         // delete requested user and revoke all of his tokens
         return try user.authTokens.query(on: req).delete().flatMap(to: HTTPStatus.self) {
@@ -88,7 +88,7 @@ final class UserController {
     /// Returns the `Setting`s for a parameterized `User`.
     func getSettings(_ req: Request) throws -> Future<Settings.PublicSettings> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         return try user.getSettings(on: req).map(to: Settings.PublicSettings.self) { settings in
             return settings.publicSettings()
@@ -98,7 +98,7 @@ final class UserController {
     /// Updates the `Setting`s for a parameterized `User`.
     func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         let updatedSettings = try SettingsRequest.extract(from: req)
         
@@ -113,7 +113,7 @@ final class UserController {
     /// Returns the `Privacy` for a parameterized `User`.
     func getPrivacy(_ req: Request) throws -> Future<Privacy.PublicPrivacy> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         return try user.getPrivacy(on: req).map(to: Privacy.PublicPrivacy.self) { privacy in
             return privacy.publicPrivacy()
@@ -123,7 +123,7 @@ final class UserController {
     /// Updates the `Privacy` for a parameterized `User`.
     func updatePrivacy(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         let updatedPrivacy = try PrivacyRequest.extract(from: req)
         
@@ -148,17 +148,12 @@ final class UserController {
                     throw Abort(.notFound)
                 }
             
-                return try user.getPrivacy(on: req).flatMap(to: Profile.PublicProfile.self) { privacy in
-                    if let token = req.http.headers.bearerAuthorization?.token {
-                        return Token.query(on: req).filter(\Token.token == token).first().map(to: Profile.PublicProfile.self) { token in
-                            if token?.userID == profile.userID {
-                                return profile.publicProfile(privacy: privacy, isOwner: true)
-                            } else {
-                                return profile.publicProfile(privacy: privacy, isOwner: false)
-                            }
-                        }
-                    } else {
-                        return Future(profile.publicProfile(privacy: privacy, isOwner: false))
+                return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
+                    do {
+                        try req.checkOptionalOwnership(for: user)
+                        return profile.publicProfile(privacy: privacy, isOwner: true)
+                    } catch {
+                        return profile.publicProfile(privacy: privacy, isOwner: false)
                     }
                 }
             }
@@ -168,7 +163,7 @@ final class UserController {
     /// Creates or updates the `Profile` for a parameterized `User`.
     func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         let profileRequest = try ProfileRequest.extract(from: req)
         
@@ -202,7 +197,7 @@ final class UserController {
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
     func createCar(_ req: Request) throws -> Future<Car> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         let carRequest = try CarRequest.extract(from: req)
         
@@ -222,5 +217,5 @@ final class UserController {
             return try user.getCommunityMessages(on: req)
         }
     }
-
+    
 }

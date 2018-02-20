@@ -15,7 +15,7 @@ final class ConversationController {
     /// Returns all `Conversation`s associated to a parameterized `User`.
     func index(_ req: Request) throws -> Future<[Conversation.PublicConversation]> {
         let user = try req.parameter(User.self).await(on: req)
-        try req.checkOwnership(for: user)
+        try req.user().checkOwnership(for: user, on: req)
         
         return try user.getConversations(on: req).flatMap(to: [Conversation.PublicConversation].self) { conversations in
             var fullConversations = [Conversation.PublicConversation]()
