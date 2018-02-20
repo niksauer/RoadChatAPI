@@ -11,7 +11,7 @@ import FluentSQLite
 
 final class CommunityMessage: Content {
     var id: Int?
-    var senderID: Int
+    var senderID: User.ID
     var time: Date
     var location: String
     var message: String
