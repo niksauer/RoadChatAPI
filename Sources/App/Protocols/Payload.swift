@@ -56,6 +56,9 @@ extension Payload {
                 case is Bool:
                     typeName = "Bool"
                     _ = try req.content.get(Bool.self, at: parameter.name).await(on: req)
+                case is [Int]:
+                    typeName = "Array<Int>"
+                    _ = try req.content.get([Int].self, at: parameter.name).await(on: req)
                 default:
                     // unknown data type in request
                     throw Abort(.badRequest)

@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/vapor/database-kit.git",
         "state": {
           "branch": null,
-          "revision": "cc502dc266172f5e5a85da11ab1907b955836564",
-          "version": "1.0.0-beta.2.1"
+          "revision": "73c8635eccd93e3b23c69318ef79d1ea27738c0d",
+          "version": "1.0.0-beta.2.2"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/vapor/engine.git",
         "state": {
           "branch": null,
-          "revision": "90ade369e3832477ede6397d7173b391ae430c9f",
-          "version": "3.0.0-beta.2.1"
+          "revision": "a81f4565a2a2c3dc99c059180c317be6c6b71134",
+          "version": "3.0.0-beta.2.3"
         }
       },
       {
