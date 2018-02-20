@@ -35,36 +35,22 @@ final class ConversationController {
         let creator = try req.user()
         
         var participants = [creator]
-//        var invalidParticipants = [Int]()
         
-//        for userID in conversationRequest.participants {
-//            guard try userID != creator.requireID() else {
-//                // leave out conversation creator
-//                continue
-//            }
-//
-//            if let user = try User.query(on: req).filter(\User.id == userID).first().await(on: req) {
-//                participants.append(user)
-//            } else {
-//                // participant not found
-//                invalidParticipants.append(userID)
-//            }
-//        }
-        
-        guard let user = try User.query(on: req).filter(\User.id == conversationRequest.participants).first().await(on: req) else {
+        guard let receipient = try User.query(on: req).filter(\User.id == conversationRequest.participants).first().await(on: req) else {
             throw ConversationFail.invalidParticipants([conversationRequest.participants])
         }
         
-        participants.append(user)
-        
-//        guard invalidParticipants.isEmpty else {
-//            throw ConversationFail.invalidParticipants(invalidParticipants)
-//        }
+        participants.append(receipient)
 
         return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Conversation.PublicConversation.self) { conversation in
             // add participants to conversation via pivot table
             for participant in participants {
-                _ = conversation.participants.attach(participant, on: req)
+                let participation = try conversation.participations.attach(participant, on: req).await(on: req)
+                
+                if try participant.requireID() == creator.requireID() {
+                    // default approval status of creator to approved
+                    participation.approvalStatus = ApprovalStatus.accepted.rawValue
+                }
             }
             
             return try conversation.publicConversation(newestMessage: nil)
@@ -86,7 +72,7 @@ final class ConversationController {
         let conversation = try req.parameter(Conversation.self).await(on: req)
         try req.checkParticipation(in: conversation)
         
-        return conversation.participants.detach(try req.user(), on: req).transform(to: .ok)
+        return conversation.participations.detach(try req.user(), on: req).transform(to: .ok)
     }
     
     /// Returns all `DirectMessage`s associated to a parameterized `Conversation`.
@@ -110,24 +96,33 @@ final class ConversationController {
     }
     
     /// Returns all `User`s associated to a parameterized `Conversation`.
-    func getParticipants(_ req: Request) throws -> Future<[User.PublicUser]> {
+    func getParticipants(_ req: Request) throws -> Future<[Participation.PublicParticipant]> {
         let conversation = try req.parameter(Conversation.self).await(on: req)
         try req.checkParticipation(in: conversation)
         
-        return try conversation.getParticipants(on: req).map(to: [User.PublicUser].self) { participants in
-            return try participants.map({ try $0.publicUser() })
+        return try conversation.getParticipations(on: req).map(to: [Participation.PublicParticipant].self) { participations in
+            return participations.map({ $0.publicParticipant() })
         }
     }
     
-}
-
-extension Request {
-    /// Checks participation in a `Conversaton` according to the supplied `Token`.
-    func checkParticipation(in conversation: Conversation) throws {
-        guard try conversation.participants.isAttached(try self.user(), on: self).await(on: self) else {
-            // authenticated user is not a participant
-            throw Abort(.unauthorized)
+    /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.accepted`.
+    func acceptConversation(_ req: Request) throws -> Future<HTTPStatus> {
+        return try setApprovalStatus(.accepted, on: req)
+    }
+    
+    /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.denied`.
+    func denyConversation(_ req: Request) throws -> Future<HTTPStatus> {
+        return try setApprovalStatus(.denied, on: req)
+    }
+    
+    private func setApprovalStatus(_ status: ApprovalStatus, on req: Request) throws -> Future<HTTPStatus> {
+        let conversation = try req.parameter(Conversation.self).await(on: req)
+        
+        return try req.getParticipation(in: conversation).flatMap(to: HTTPStatus.self) { participation in
+            participation.approvalStatus = status.rawValue
+            return participation.save(on: req).transform(to: .ok)
         }
     }
+    
 }
 

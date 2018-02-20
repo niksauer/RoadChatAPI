@@ -29,17 +29,23 @@ final class User: Content {
 }
 
 extension User {
-    func publicUser() throws -> PublicUser {
-        return try PublicUser(user: self)
+    func publicUser(isOwner: Bool) throws -> PublicUser {
+        return try PublicUser(user: self, isOwner: isOwner)
     }
     
     struct PublicUser: Content {
         let id: Int
+        var email: String?
         let username: String
         let registry: Date
         
-        init(user: User) throws {
+        init(user: User, isOwner: Bool) throws {
             self.id = try user.requireID()
+            
+            if isOwner {
+                self.email = user.email
+            }
+            
             self.username = user.username
             self.registry = user.registry
         }
@@ -75,7 +81,7 @@ extension User: SQLiteModel, Migration, Owner {
         return children(\CommunityMessage.senderID)
     }
     
-    var conversations: Siblings<User, Conversation, IsParticipant> {
+    var conversations: Siblings<User, Conversation, Participation> {
         return siblings()
     }
 

@@ -39,7 +39,7 @@ final class UserController {
                     _ = Settings(userID: try user.requireID()).create(on: req)
                     _ = Privacy(userID: try user.requireID()).create(on: req)
             
-                    return try user.publicUser()
+                    return try user.publicUser(isOwner: true)
                 }
             }
         }
@@ -48,7 +48,12 @@ final class UserController {
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<User.PublicUser> {
         return try req.parameter(User.self).map(to: User.PublicUser.self) { user in
-            return try user.publicUser()
+            do {
+                try req.checkOwnership(for: user)
+                return try user.publicUser(isOwner: true)
+            } catch {
+                return try user.publicUser(isOwner: false)
+            }
         }
     }
     
@@ -144,7 +149,12 @@ final class UserController {
                 }
             
                 return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
-                    return profile.publicProfile(privacy: privacy)
+                    do {
+                        try req.checkOwnership(for: user)
+                        return profile.publicProfile(privacy: privacy, isOwner: true)
+                    } catch {
+                        return profile.publicProfile(privacy: privacy, isOwner: false)
+                    }
                 }
             }
         }

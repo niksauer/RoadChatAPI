@@ -1,5 +1,5 @@
 //
-//  TrafficKarma.swift
+//  TrafficKarmaDonation.swift
 //  App
 //
 //  Created by Niklas Sauer on 19.02.18.
@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import FluentSQLite
 
-final class TrafficKarma: Content {
+final class TrafficKarmaDonation: Content {
     var id: Int?
     var userID: User.ID
     var trafficMessageID: TrafficMessage.ID
@@ -21,30 +21,30 @@ final class TrafficKarma: Content {
     }
 }
 
-extension TrafficKarma: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<TrafficKarma, Int?> {
-        return \TrafficKarma.id
+extension TrafficKarmaDonation: SQLiteModel, Migration {
+    static var idKey: WritableKeyPath<TrafficKarmaDonation, Int?> {
+        return \TrafficKarmaDonation.id
     }
 }
 
-extension TrafficKarma: ModifiablePivot {
+extension TrafficKarmaDonation: ModifiablePivot {
     typealias Left = User
     typealias Right = TrafficMessage
     
-    static var leftIDKey: ReferenceWritableKeyPath<TrafficKarma, Int> {
-        return \TrafficKarma.userID
+    static var leftIDKey: ReferenceWritableKeyPath<TrafficKarmaDonation, Int> {
+        return \TrafficKarmaDonation.userID
     }
 
-    static var rightIDKey: ReferenceWritableKeyPath<TrafficKarma, Int> {
-        return \TrafficKarma.trafficMessageID
+    static var rightIDKey: ReferenceWritableKeyPath<TrafficKarmaDonation, Int> {
+        return \TrafficKarmaDonation.trafficMessageID
     }
     
-    convenience init(_ left: TrafficKarma.Left, _ right: TrafficKarma.Right) throws {
+    convenience init(_ left: User, _ right: TrafficMessage) throws {
         try self.init(userID: left.requireID(), trafficMessageID: right.requireID())
     }
 }
 
-extension TrafficKarma: KarmaDonation {
+extension TrafficKarmaDonation: KarmaDonation {
     var karmableID: Int {
         return self.trafficMessageID
     }

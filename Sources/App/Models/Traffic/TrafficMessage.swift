@@ -94,11 +94,8 @@ extension TrafficMessage: Parameter {
     }
 }
 
-extension TrafficMessage: Karmable {
-    typealias Donator = User
-    typealias Donation = TrafficKarma
-    
-    var interactions: Siblings<TrafficMessage, User, TrafficKarma> {
+extension TrafficMessage: Karmable {    
+    var interactions: Siblings<TrafficMessage, User, TrafficKarmaDonation> {
         return siblings()
     }
     
