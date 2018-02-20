@@ -10,7 +10,6 @@ import Vapor
 import Validation
 
 struct TrafficMessageRequest: Codable {
-    let senderID: Int
     let type: String
     let time: Date
     let location: String
@@ -35,11 +34,10 @@ extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest
     
     static var requiredParameters: Parameters = [
-        ("senderID", 1),
         ("type", "traffic jam"),
         ("time", Date()),
         ("location", "a22exF"),
-        ("direction", "North"),
+        ("direction", 2.0),
     ]
     
     static var optionalParameters: Parameters = [

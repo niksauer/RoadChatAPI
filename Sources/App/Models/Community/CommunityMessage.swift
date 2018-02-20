@@ -11,11 +11,10 @@ import FluentSQLite
 
 final class CommunityMessage: Content {
     var id: Int?
-    var senderID: Int
+    var senderID: User.ID
     var time: Date
     var location: String
     var message: String
-    var upvotes: Int = 1
     
     init(senderID: Int, time: Date, location: String, message: String) {
         self.senderID = senderID

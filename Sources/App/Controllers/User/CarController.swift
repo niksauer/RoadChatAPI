@@ -20,7 +20,7 @@ final class CarController {
     /// Updates a parameterized `Car`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
         let car = try req.parameter(Car.self).await(on: req)
-        try req.checkOwnership(for: car)
+        try req.user().checkOwnership(for: car, on: req)
         
         let updatedCar = try CarRequest.extract(from: req)
         
@@ -36,7 +36,7 @@ final class CarController {
     /// Deletes a parameterized `Car`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         let car = try req.parameter(Car.self).await(on: req)
-        try req.checkOwnership(for: car)
+        try req.user().checkOwnership(for: car, on: req)
         
         return car.delete(on: req).transform(to: .ok)
     }

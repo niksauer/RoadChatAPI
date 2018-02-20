@@ -42,8 +42,8 @@ final class Profile: Content {
 }
 
 extension Profile {
-    func publicProfile(privacy: Privacy) -> PublicProfile {
-        return PublicProfile(profile: self, privacy: privacy)
+    func publicProfile(privacy: Privacy, isOwner: Bool) -> PublicProfile {
+        return PublicProfile(profile: self, privacy: privacy, isOwner: isOwner)
     }
     
     struct PublicProfile: Content {
@@ -57,32 +57,44 @@ extension Profile {
         var postalCode: Int?
         var country: String?
         
-        init(profile: Profile, privacy: Privacy) {
-            if privacy.showFirstName {
+        init(profile: Profile, privacy: Privacy, isOwner: Bool) {
+            if isOwner {
                 self.firstName = profile.firstName
-            }
-            
-            if privacy.showLastName {
                 self.lastName = profile.lastName
-            } else if let firstCharacter = profile.lastName.first {
-                self.lastName = "\(firstCharacter)."
-            }
-            
-            if privacy.showBirth {
                 self.birth = profile.birth
-            }
-            
-            if privacy.showSex {
                 self.sex = profile.sex
-            }
-            
-            self.description = profile.description
-            
-            if privacy.showAddress {
+                self.description = profile.description
                 self.streetName = profile.streetName
                 self.streetNumber = profile.streetNumber
                 self.postalCode = profile.postalCode
                 self.country = profile.country
+            } else {
+                if privacy.showFirstName {
+                    self.firstName = profile.firstName
+                }
+                
+                if privacy.showLastName {
+                    self.lastName = profile.lastName
+                } else if let firstCharacter = profile.lastName.first {
+                    self.lastName = "\(firstCharacter)."
+                }
+                
+                if privacy.showBirth {
+                    self.birth = profile.birth
+                }
+                
+                if privacy.showSex {
+                    self.sex = profile.sex
+                }
+                
+                self.description = profile.description
+                
+                if privacy.showAddress {
+                    self.streetName = profile.streetName
+                    self.streetNumber = profile.streetNumber
+                    self.postalCode = profile.postalCode
+                    self.country = profile.country
+                }
             }
         }
     }
