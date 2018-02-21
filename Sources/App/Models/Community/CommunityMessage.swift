@@ -37,6 +37,7 @@ extension CommunityMessage {
         let id: Int
         let senderID: User.ID
         let time: Date
+        let location: String
         let message: String
         let upvotes: Int
         
@@ -44,6 +45,7 @@ extension CommunityMessage {
             self.id = try communityMessage.requireID()
             self.senderID = communityMessage.senderID
             self.time = communityMessage.time
+            self.location = communityMessage.location
             self.message = communityMessage.message
             self.upvotes = upvotes
         }
@@ -82,11 +84,11 @@ extension CommunityMessage: Parameter {
     }
     
 }
+
 extension CommunityMessage: Karmable {
-    
-        var interactions: Siblings<CommunityMessage, User, CommunityKarmaDonation> {
-            return siblings()
-        }
+    var interactions: Siblings<CommunityMessage, User, CommunityKarmaDonation> {
+        return siblings()
+    }
     
     func donate(_ karma: KarmaType, on req: Request) throws -> Future<HTTPStatus> {
         return try req.getInteraction(with: self).flatMap(to: HTTPStatus.self) { interaction in
@@ -119,7 +121,6 @@ extension CommunityMessage: Karmable {
             
             return interaction.save(on: req).transform(to: HTTPStatus.ok)
         }
-        }
-        
+    }
 }
 

@@ -39,7 +39,7 @@ extension CommunityKarmaDonation: ModifiablePivot {
         return \CommunityKarmaDonation.communityMessageID
     }
     
-    convenience init(_ left: User, _ right: CommunityMessage) throws {
+    convenience init(_ left: Left, _ right: Right) throws {
         try self.init(userID: left.requireID(), communityMessageID: right.requireID())
     }
 }

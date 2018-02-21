@@ -13,11 +13,8 @@ class CommunityRouter: RouteCollection {
         let communityController = CommunityController()
 
         // /community/board
-        router.get("board", use: communityController.index)
         let communityMessageBoard = router.grouped("board")
-       
-        
-        // /community/board
+    
         communityMessageBoard.get(use: communityController.index)
         communityMessageBoard.grouped(try User.tokenAuthMiddleware()).post(use: communityController.create)
         
