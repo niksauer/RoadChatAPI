@@ -19,7 +19,7 @@ final class TrafficController {
     /// Returns all `TrafficMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicTrafficMessage(upvotes: $0.getKarmaLevel(on: req), validations: $0.getValidationLevel(on: req)) })
+            return try messages.map({ try $0.publicTrafficMessage(on: req) })
         }
     }
     
@@ -46,7 +46,7 @@ final class TrafficController {
             
             if coreLocation.distance(from: requestCLLocation) < 500 {
                 _ = message.validations.attach(creator, on: req)
-                return Future(try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req), validations: message.getValidationLevel(on: req)))
+                return Future(try message.publicTrafficMessage(on: req))
             }
         }
         
@@ -55,7 +55,7 @@ final class TrafficController {
                 return message.interactions.attach(creator, on: req).map(to: TrafficMessage.PublicTrafficMessage.self) { interaction in
                     interaction.karma = KarmaType.upvote.rawValue
                     _ = interaction.save(on: req)
-                    return try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req), validations: message.getValidationLevel(on: req))
+                    return try message.publicTrafficMessage(on: req)
                 }
             }
         }
@@ -64,7 +64,7 @@ final class TrafficController {
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
         return try req.parameter(Resource.self).map(to: Result.self) { message in
-            return try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req), validations: message.getValidationLevel(on: req))
+            return try message.publicTrafficMessage(on: req)
         }
     }
     
