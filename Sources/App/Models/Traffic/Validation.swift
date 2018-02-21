@@ -25,6 +25,10 @@ extension Validation: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<Validation, Int?> {
         return \Validation.id
     }
+    
+    static var entity: String {
+        return "Validation"
+    }
 }
 
 extension Validation: ModifiablePivot {

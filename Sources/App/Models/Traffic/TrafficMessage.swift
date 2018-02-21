@@ -16,7 +16,6 @@ final class TrafficMessage: Content {
     var type: String
     var time: Date
     var note: String?
-//    var validators: Int = 0
     
     init(senderID: User.ID, locationID: Location.ID, type: String, time: Date, note: String?) {
         self.senderID = senderID
@@ -32,8 +31,8 @@ final class TrafficMessage: Content {
 }
 
 extension TrafficMessage {
-    func publicTrafficMessage(upvotes: Int) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: upvotes)
+    func publicTrafficMessage(upvotes: Int, validations: Int) throws -> PublicTrafficMessage {
+        return try PublicTrafficMessage(trafficMessage: self, upvotes: upvotes, validations: validations)
     }
     
     struct PublicTrafficMessage: Content {
@@ -43,10 +42,10 @@ extension TrafficMessage {
         var type: String
         var time: Date
         var note: String?
-        //    var validators: Int = 0
+        var validations: Int
         var upvotes: Int
         
-        init(trafficMessage: TrafficMessage, upvotes: Int) throws {
+        init(trafficMessage: TrafficMessage, upvotes: Int, validations: Int) throws {
             self.id = try trafficMessage.requireID()
             self.senderID = trafficMessage.senderID
             self.locationID = trafficMessage.locationID
@@ -54,6 +53,7 @@ extension TrafficMessage {
             self.time = trafficMessage.time
             self.note = trafficMessage.note
             self.upvotes = upvotes
+            self.validations = validations
         }
     }
 }
@@ -130,5 +130,11 @@ extension TrafficMessage: Karmable {
             
             return interaction.save(on: req).transform(to: HTTPStatus.ok)
         }
+    }
+}
+
+extension TrafficMessage {
+    func getValidationLevel(on req: Request) throws -> Int {
+        return try Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count().await(on: req)
     }
 }
