@@ -12,15 +12,20 @@ import Validation
 struct TrafficMessageRequest: Codable {
     let type: String
     let time: Date
-    let location: String
-    let direction: Double
     let note: String?
+    let latitude: Double
+    let longitude: Double
+    let altitude: Double
+    let horizontalAccuracy: Double
+    let verticalAccuracy: Double
+    let course: Double
+    let speed: Double
+    
 }
 
 extension TrafficMessageRequest: Validatable {
     static var validations: Validations = [
-        key(\TrafficMessageRequest.type): IsTrafficType(),
-        key(\TrafficMessageRequest.location): IsAlphanumeric(),
+        key(\TrafficMessageRequest.type): IsTrafficType()
     ]
 }
 
@@ -36,8 +41,13 @@ extension TrafficMessageRequest: Payload {
     static var requiredParameters: Parameters = [
         ("type", "traffic jam"),
         ("time", Date()),
-        ("location", "a22exF"),
-        ("direction", 2.0),
+        ("latitude", 45.123),
+        ("longitude", 42.0),
+        ("altitude", 24.2),
+        ("horizontalAccuracy", 34.0),
+        ("verticalAccuracy", 34.0),
+        ("course", 0.0),
+        ("speed", 60.0),
     ]
     
     static var optionalParameters: Parameters = [
