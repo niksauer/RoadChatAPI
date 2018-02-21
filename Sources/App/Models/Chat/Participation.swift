@@ -64,7 +64,7 @@ extension Participation: ModifiablePivot {
         return \Participation.conversationID
     }
     
-    convenience init(_ left: User, _ right: Conversation) throws {
+    convenience init(_ left: Left, _ right: Right) throws {
         try self.init(userID: left.requireID(), conversationID: right.requireID())
     }
 }

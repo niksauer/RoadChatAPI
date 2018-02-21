@@ -16,8 +16,8 @@ final class TrafficController {
     typealias Result = TrafficMessage.PublicTrafficMessage
     
     /// Returns all `TrafficMessage`s.
-    func index(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
-        return TrafficMessage.query(on: req).all().map(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
+    func index(_ req: Request) throws -> Future<[Result]> {
+        return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
             return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req)) })
         }
     }
@@ -37,8 +37,8 @@ final class TrafficController {
     }
     
     /// Returns a parameterized `TrafficMessage`.
-    func get(_ req: Request) throws -> Future<TrafficMessage.PublicTrafficMessage> {
-        return try req.parameter(TrafficMessage.self).map(to: TrafficMessage.PublicTrafficMessage.self) { message in
+    func get(_ req: Request) throws -> Future<Result> {
+        return try req.parameter(Resource.self).map(to: Result.self) { message in
             return try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req))
         }
     }
