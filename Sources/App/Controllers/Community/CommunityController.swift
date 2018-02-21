@@ -18,7 +18,7 @@ final class CommunityController {
     /// Returns all `CommunityMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return CommunityMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicCommunityMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req))})
+            return try messages.map({ try $0.publicCommunityMessage(upvotes: try $0.getKarmaLevel(on: req)) })
         }
     }
     
@@ -39,7 +39,7 @@ final class CommunityController {
     /// Returns a parameterized `CommunityMessage`.
     func get(_ req: Request) throws -> Future<Result> {
         return try req.parameter(Resource.self).map(to: Result.self) { message in
-            let upvotes = try message.getKarmaLevel(on: req).await(on: req)
+            let upvotes = try message.getKarmaLevel(on: req)
             return try message.publicCommunityMessage(upvotes: upvotes)
         }
     }
