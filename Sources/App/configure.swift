@@ -34,6 +34,7 @@ public func configure(
     migrations.add(model: TrafficKarmaDonation.self, database: .sqlite)
     
     migrations.add(model: CommunityMessage.self, database: .sqlite)
+    migrations.add(model: CommunityKarmaDonation.self, database: .sqlite)
     
     migrations.add(model: Conversation.self, database: .sqlite)
     migrations.add(model: DirectMessage.self, database: .sqlite)

@@ -10,7 +10,6 @@ import Vapor
 import Validation
 
 struct CommunityMessageRequest: Codable {
-    let senderID: Int
     let time: Date
     let location: String
     let message: String
@@ -31,7 +30,6 @@ extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest
     
     static var requiredParameters: Parameters = [
-        ("senderID", 1),
         ("time", Date()),
         ("location", "a22exF"),
         ("message", "Stau auf der A3"),

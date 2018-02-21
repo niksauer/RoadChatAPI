@@ -16,24 +16,24 @@ final class ConversationController {
     var activeChatrooms = [Chatroom]()
     
     /// Returns all `Conversation`s associated to a parameterized `User`.
-    func index(_ req: Request) throws -> Future<[Conversation.PublicConversation]> {
+    func index(_ req: Request) throws -> Future<[Result]> {
         let user = try req.parameter(User.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        return try user.getConversations(on: req).flatMap(to: [Conversation.PublicConversation].self) { conversations in
-            var fullConversations = [Conversation.PublicConversation]()
+        return try user.getConversations(on: req).map(to: [Result].self) { conversations in
+            var fullConversations = [Result]()
             
             for conversation in conversations {
                 let newestMessage = try conversation.getNewestMessage(on: req).await(on: req)
                 fullConversations.append(try conversation.publicConversation(newestMessage: newestMessage))
             }
             
-            return Future(fullConversations)
+            return fullConversations
         }
     }
 
     /// Saves a new `Conversation` to the database.
-    func create(_ req: Request) throws -> Future<Conversation.PublicConversation> {
+    func create(_ req: Request) throws -> Future<Result> {
         let conversationRequest = try ConversationRequest.extract(from: req)
         let creator = try req.user()
         
@@ -42,10 +42,10 @@ final class ConversationController {
         guard let receipient = try User.query(on: req).filter(\User.id == conversationRequest.participants).first().await(on: req) else {
             throw ConversationFail.invalidParticipants([conversationRequest.participants])
         }
-        
+    
         participants.append(receipient)
 
-        return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Conversation.PublicConversation.self) { conversation in
+        return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Result.self) { conversation in
             // add participants to conversation via pivot table
             for participant in participants {
                 let participation = try conversation.participations.attach(participant, on: req).await(on: req)
@@ -66,7 +66,7 @@ final class ConversationController {
         let conversation = try req.parameter(Conversation.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
-        return try conversation.getNewestMessage(on: req).map(to: Conversation.PublicConversation.self) { newestMessage in
+        return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
             return try conversation.publicConversation(newestMessage: newestMessage)
         }
     }
@@ -171,7 +171,7 @@ final class ConversationController {
     }
     
     private func setApprovalStatus(_ status: ApprovalStatus, on req: Request) throws -> Future<HTTPStatus> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+        let conversation = try req.parameter(Resource.self).await(on: req)
         
         return try req.user().getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
             participation.approvalStatus = status.rawValue
