@@ -12,48 +12,52 @@ import FluentSQLite
 final class TrafficMessage: Content {
     var id: Int?
     var senderID: User.ID
-    var locationID: Location.ID
     var type: String
     var time: Date
+    var location: String
+    var direction: Double
     var note: String?
+//    var validators: Int = 0
     
-    init(senderID: User.ID, locationID: Location.ID, type: String, time: Date, note: String?) {
+    init(senderID: User.ID, type: String, time: Date, location: String, direction: Double, note: String?) {
         self.senderID = senderID
-        self.locationID = locationID
         self.type = type
         self.time = time
+        self.location = location
+        self.direction = direction
         self.note = note
     }
     
-    convenience init(senderID: User.ID, locationID: Location.ID, trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: senderID, locationID: locationID, type: trafficRequest.type, time: trafficRequest.time, note: trafficRequest.note)
+    convenience init(senderID: User.ID, trafficRequest: TrafficMessageRequest) {
+        self.init(senderID: senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
     }
 }
 
 extension TrafficMessage {
-    func publicTrafficMessage(on req: Request) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: self.getKarmaLevel(on: req), validations: self.getValidationLevel(on: req))
+    func publicTrafficMessage(upvotes: Int) throws -> PublicTrafficMessage {
+        return try PublicTrafficMessage(trafficMessage: self, upvotes: upvotes)
     }
     
     struct PublicTrafficMessage: Content {
-        var id: Int
-        var senderID: User.ID
-        var locationID: Location.ID
-        var type: String
-        var time: Date
-        var note: String?
-        var validations: Int
-        var upvotes: Int
+        let id: Int
+        let senderID: User.ID
+        let type: String
+        let time: Date
+        let location: String
+        let direction: Double
+        let note: String?
+//        let validators: Int
+        let upvotes: Int
         
-        init(trafficMessage: TrafficMessage, upvotes: Int, validations: Int) throws {
+        init(trafficMessage: TrafficMessage, upvotes: Int) throws {
             self.id = try trafficMessage.requireID()
             self.senderID = trafficMessage.senderID
-            self.locationID = trafficMessage.locationID
             self.type = trafficMessage.type
             self.time = trafficMessage.time
+            self.location = trafficMessage.location
+            self.direction = trafficMessage.direction
             self.note = trafficMessage.note
             self.upvotes = upvotes
-            self.validations = validations
         }
     }
 }
@@ -61,10 +65,6 @@ extension TrafficMessage {
 extension TrafficMessage: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
-    }
-    
-    var validations: Siblings<TrafficMessage, User, Validation> {
-        return siblings()
     }
 }
 
@@ -130,11 +130,5 @@ extension TrafficMessage: Karmable {
             
             return interaction.save(on: req).transform(to: HTTPStatus.ok)
         }
-    }
-}
-
-extension TrafficMessage {
-    func getValidationLevel(on req: Request) throws -> Int {
-        return try Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count().await(on: req)
     }
 }
