@@ -50,6 +50,10 @@ extension Participation: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<Participation, Int?> {
         return \Participation.id
     }
+    
+    static var entity: String {
+        return "Participation"
+    }
 }
 
 extension Participation: ModifiablePivot {
