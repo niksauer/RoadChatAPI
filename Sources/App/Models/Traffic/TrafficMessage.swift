@@ -31,8 +31,8 @@ final class TrafficMessage: Content {
 }
 
 extension TrafficMessage {
-    func publicTrafficMessage(upvotes: Int, validations: Int) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: upvotes, validations: validations)
+    func publicTrafficMessage(on req: Request) throws -> PublicTrafficMessage {
+        return try PublicTrafficMessage(trafficMessage: self, upvotes: self.getKarmaLevel(on: req), validations: self.getValidationLevel(on: req))
     }
     
     struct PublicTrafficMessage: Content {

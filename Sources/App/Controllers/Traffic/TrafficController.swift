@@ -42,9 +42,9 @@ final class TrafficController {
                 continue
             }
             
-            let clLocation = CLLocation(location: location)
+            let coreLocation = CLLocation(location: location)
             
-            if clLocation.distance(from: requestCLLocation) < 500 {
+            if coreLocation.distance(from: requestCLLocation) < 500 {
                 _ = message.validations.attach(creator, on: req)
                 return Future(try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req), validations: message.getValidationLevel(on: req)))
             }

@@ -29,8 +29,8 @@ final class CommunityMessage: Content {
 }
 
 extension CommunityMessage {
-    func publicCommunityMessage(upvotes: Int) throws -> PublicCommunityMessage {
-        return try PublicCommunityMessage(communityMessage: self, upvotes: upvotes)
+    func publicCommunityMessage(on req: Request) throws -> PublicCommunityMessage {
+        return try PublicCommunityMessage(communityMessage: self, upvotes: self.getKarmaLevel(on: req))
     }
     
     struct PublicCommunityMessage: Content {
@@ -82,7 +82,6 @@ extension CommunityMessage: Parameter {
             }
         }
     }
-    
 }
 
 extension CommunityMessage: Karmable {

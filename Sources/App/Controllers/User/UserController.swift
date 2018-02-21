@@ -211,7 +211,7 @@ final class UserController {
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
             return try user.getTrafficMessages(on: req).map(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
-                return try messages.map({ try $0.publicTrafficMessage(upvotes: $0.getKarmaLevel(on: req), validations: $0.getValidationLevel(on: req)) })
+                return try messages.map({ try $0.publicTrafficMessage(on: req) })
             }
         }
     }
@@ -220,7 +220,7 @@ final class UserController {
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
             return try user.getCommunityMessages(on: req).map(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
-                return try messages.map({ try $0.publicCommunityMessage(upvotes: try $0.getKarmaLevel(on: req)) })
+                return try messages.map({ try $0.publicCommunityMessage(on: req) })
             }
         }
     }
