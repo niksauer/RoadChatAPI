@@ -29,17 +29,23 @@ final class User: Content {
 }
 
 extension User {
-    func publicUser() throws -> PublicUser {
-        return try PublicUser(user: self)
+    func publicUser(isOwner: Bool) throws -> PublicUser {
+        return try PublicUser(user: self, isOwner: isOwner)
     }
     
     struct PublicUser: Content {
         let id: Int
+        var email: String?
         let username: String
         let registry: Date
         
-        init(user: User) throws {
+        init(user: User, isOwner: Bool) throws {
             self.id = try user.requireID()
+            
+            if isOwner {
+                self.email = user.email
+            }
+            
             self.username = user.username
             self.registry = user.registry
         }
@@ -74,6 +80,11 @@ extension User: SQLiteModel, Migration, Owner {
     var communityMessages: Children<User, CommunityMessage> {
         return children(\CommunityMessage.senderID)
     }
+    
+    var conversations: Siblings<User, Conversation, Participation> {
+        return siblings()
+    }
+
 }
 
 extension User: Ownable {
@@ -110,6 +121,19 @@ extension Request {
     func user() throws -> User {
         return try requireAuthenticated(User.self)
     }
+    
+    func optionalUser() throws -> User? {
+        if let token = self.http.headers.bearerAuthorization?.token {
+            guard let storedToken = try Token.query(on: self).filter(\Token.token == token).first().await(on: self) else {
+                return nil
+            }
+            
+            return try storedToken.authUser.get(on: self).await(on: self) as User
+        } else {
+            return nil
+        }
+    }
+    
 }
 
 extension User {
@@ -149,6 +173,10 @@ extension User {
     
     func getCommunityMessages(on req: Request) throws -> Future<[CommunityMessage]> {
         return try communityMessages.query(on: req).all()
+    }
+    
+    func getConversations(on req: Request) throws -> Future<[Conversation]> {
+        return try conversations.query(on: req).all()
     }
 }
 
