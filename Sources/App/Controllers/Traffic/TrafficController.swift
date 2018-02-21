@@ -18,7 +18,7 @@ final class TrafficController {
     /// Returns all `TrafficMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req)) })
+            return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req)) })
         }
     }
     
@@ -39,8 +39,7 @@ final class TrafficController {
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
         return try req.parameter(Resource.self).map(to: Result.self) { message in
-            let upvotes = try message.getKarmaLevel(on: req).await(on: req)
-            return try message.publicTrafficMessage(upvotes: upvotes)
+            return try message.publicTrafficMessage(upvotes: message.getKarmaLevel(on: req))
         }
     }
     
