@@ -13,6 +13,9 @@ import WebSocket
 /// Controls basic CRUD operations on `Conversation`s.
 final class ConversationController {
     
+    typealias Resource = Conversation
+    typealias Result = Conversation.PublicConversation
+    
     var activeChatrooms = [Chatroom]()
     
     /// Returns all `Conversation`s associated to a parameterized `User`.
@@ -61,9 +64,8 @@ final class ConversationController {
         }
     }
     
-    /// Returns a parameterized `Conversation`.
-    func get(_ req: Request) throws -> Future<Conversation.PublicConversation> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+    func get(_ req: Request) throws -> Future<Result> {
+        let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
         return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
@@ -124,7 +126,7 @@ final class ConversationController {
     
     /// Deletes a parameterized `Conversation` from the `Conversation`s associated to a `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+        let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
         return conversation.participations.detach(try req.user(), on: req).transform(to: .ok)
@@ -132,7 +134,7 @@ final class ConversationController {
     
     /// Returns all `DirectMessage`s associated to a parameterized `Conversation`.
     func getMessages(_ req: Request) throws -> Future<[DirectMessage.PublicDirectMessage]> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+        let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
         return try conversation.getMessages(on: req).map(to: [DirectMessage.PublicDirectMessage].self) { messages in
@@ -142,7 +144,7 @@ final class ConversationController {
     
     /// Saves a new `DirectMessage` associated to a parameterized `Conversation` to the database.
     func createMessage(_ req: Request) throws -> Future<HTTPStatus> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+        let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
         let messageRequest = try DirectMessageRequest.extract(from: req)
@@ -152,7 +154,7 @@ final class ConversationController {
     
     /// Returns all `User`s associated to a parameterized `Conversation`.
     func getParticipants(_ req: Request) throws -> Future<[Participation.PublicParticipant]> {
-        let conversation = try req.parameter(Conversation.self).await(on: req)
+        let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
         return try conversation.getParticipations(on: req).map(to: [Participation.PublicParticipant].self) { participations in
