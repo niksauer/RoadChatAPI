@@ -22,4 +22,5 @@ enum RegisterFail: APIFail {
 
 enum ConversationFail: APIFail {
     case invalidParticipants([Int])
+    case minimumParticipants
 }
