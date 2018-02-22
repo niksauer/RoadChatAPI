@@ -26,7 +26,8 @@ extension Payload {
             do {
                 switch parameter.type {
                 case is [Any]:
-                    _ = try req.content.get([String].self, at: parameter.name).await(on: req)
+//                    _ = try req.content.get([String].self, at: parameter.name).await(on: req)
+                    break
                 default:
                     _ = try req.content.get(String.self, at: parameter.name).await(on: req)
                 }
