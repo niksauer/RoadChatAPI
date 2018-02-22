@@ -92,7 +92,16 @@ final class ConversationController {
         let conversation = try req.parameter(Resource.self).await(on: req)
         try req.checkParticipation(in: conversation)
         
-        return conversation.participations.detach(try req.user(), on: req).transform(to: .ok)
+        return conversation.participations.detach(try req.user(), on: req).flatMap(to: HTTPStatus.self) { _ in
+            return try conversation.participations.query(on: req).count().flatMap(to: HTTPStatus.self) { count in
+                if count == 0 {
+                    // delete conversation if no more participations
+                    return conversation.delete(on: req).transform(to: .ok)
+                } else {
+                    return Future(HTTPStatus.ok)
+                }
+            }
+        }
     }
     
     /// Returns all `DirectMessage`s associated to a parameterized `Conversation`.

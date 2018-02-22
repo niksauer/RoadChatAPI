@@ -82,10 +82,15 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        // delete requested user and revoke all of his tokens
-        return try user.authTokens.query(on: req).delete().flatMap(to: HTTPStatus.self) {
-            return user.delete(on: req).transform(to: .ok)
-        }
+        // delete requested user and all of his associated resources and participations in chat
+        _ = try user.authTokens.query(on: req).delete()
+        _ = try user.settings.query(on: req).delete()
+        _ = try user.privacy.query(on: req).delete()
+        _ = try user.profile.query(on: req).delete()
+        _ = try user.cars.query(on: req).delete()
+        _ = Participation.query(on: req).filter(try \Participation.userID == user.requireID()).delete()
+        
+        return user.delete(on: req).transform(to: .ok)
     }
     
     /// Returns the `Setting`s for a parameterized `User`.
