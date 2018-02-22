@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Vapor
 
 protocol APIFail: Error {
     var message: String { get }

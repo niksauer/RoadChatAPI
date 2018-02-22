@@ -25,7 +25,7 @@ final class JSendMiddleware: Middleware {
             default:
                 // error
                 // use received details as payload
-                throw Abort(.internalServerError)
+                return try JSendManager.error(error, using: request.superContainer)
             }
         }
     }
@@ -74,6 +74,18 @@ struct JSendManager {
         
         let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: container)
         response.http.status = .badRequest
+        
+        return Future(response)
+    }
+ 
+    static func error(_ error: Error, using container: Container) throws -> Future<Response> {
+        let result: JSON = [
+            "status": "error",
+            "message": error.localizedDescription
+        ]
+        
+        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: container)
+        response.http.status = .internalServerError
         
         return Future(response)
     }
