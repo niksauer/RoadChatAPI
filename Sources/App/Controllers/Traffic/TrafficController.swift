@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
-import CoreLocation
+// import CoreLocation
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
 final class TrafficController {
