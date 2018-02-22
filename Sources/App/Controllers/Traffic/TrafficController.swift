@@ -8,7 +8,8 @@
 import Foundation
 import Vapor
 import Fluent
-import CoreLocation
+//import CoreLocation
+import GeoSwift
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
 final class TrafficController {
@@ -22,14 +23,14 @@ final class TrafficController {
             return try messages.map({ try $0.publicTrafficMessage(on: req) })
         }
     }
-    
+
     /// Saves a new `TrafficMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
         let creator = try req.user()
         
         let requestLocation = Location(userID: try creator.requireID(), trafficMessageRequest: trafficMessageRequest)
-        let requestCLLocation = CLLocation(location: requestLocation)
+        let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
         
         guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
             throw Abort(.internalServerError)
@@ -38,13 +39,13 @@ final class TrafficController {
         let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
     
         for message in recentMessages {
-            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).first().await(on: req) else {
+            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).filter(\Location.course >= requestLocation.course - 90).filter(\Location.course <= requestLocation.course + 90).first().await(on: req) else {
                 continue
             }
             
-            let coreLocation = CLLocation(location: location)
+            let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
             
-            if coreLocation.distance(from: requestCLLocation) < 500 {
+            if geoLocation.distance(from: requestGeoLocation) < 500 {
                 _ = message.validations.attach(creator, on: req)
                 return Future(try message.publicTrafficMessage(on: req))
             }
