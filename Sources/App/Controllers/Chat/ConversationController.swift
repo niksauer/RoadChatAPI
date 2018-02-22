@@ -38,13 +38,29 @@ final class ConversationController {
         let creator = try req.user()
         
         var participants = [creator]
+        var invalidParticipants = [Int]()
         
-        guard let receipient = try User.query(on: req).filter(\User.id == conversationRequest.participants).first().await(on: req) else {
-            throw ConversationFail.invalidParticipants([conversationRequest.participants])
+        for participant in conversationRequest.participants {
+            guard try participant != creator.requireID() else {
+                continue
+            }
+            
+            guard let receipient = try User.query(on: req).filter(\User.id == participant).first().await(on: req) else {
+                invalidParticipants.append(participant)
+                continue
+            }
+            
+            participants.append(receipient)
         }
     
-        participants.append(receipient)
+        guard invalidParticipants.isEmpty else {
+            throw ConversationFail.invalidParticipants(invalidParticipants)
+        }
 
+        guard participants.count > 1 else {
+            throw ConversationFail.minimumParticipants
+        }
+        
         return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Result.self) { conversation in
             // add participants to conversation via pivot table
             for participant in participants {
@@ -53,6 +69,7 @@ final class ConversationController {
                 if try participant.requireID() == creator.requireID() {
                     // default approval status of creator to approved
                     participation.approvalStatus = ApprovalStatus.accepted.rawValue
+                    _ = participation.save(on: req)
                 }
             }
             
