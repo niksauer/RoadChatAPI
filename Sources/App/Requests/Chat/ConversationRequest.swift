@@ -29,7 +29,7 @@ extension ConversationRequest: Payload {
     
     static var requiredParameters: Parameters = [
         ("title", "CryptoBros"),
-//        ("participants", [1]),
+        ("participants", [1]),
     ]
     
     static var optionalParameters: Parameters = []
