@@ -8,7 +8,6 @@
 import Foundation
 import Vapor
 import FluentSQLite
-import CoreLocation
 
 final class Location: Content {
     var id: Int?
@@ -50,8 +49,3 @@ extension Location: SQLiteModel, Migration {
     }
 }
 
-extension CLLocation {
-    convenience init(location: Location) {
-        self.init(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
-    }
-}

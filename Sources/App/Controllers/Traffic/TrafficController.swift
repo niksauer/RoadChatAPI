@@ -8,7 +8,8 @@
 import Foundation
 import Vapor
 import Fluent
-import CoreLocation
+//import CoreLocation
+import GeoSwift
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
 final class TrafficController {
@@ -22,14 +23,14 @@ final class TrafficController {
             return try messages.map({ try $0.publicTrafficMessage(on: req) })
         }
     }
-    
+
     /// Saves a new `TrafficMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
         let creator = try req.user()
         
         let requestLocation = Location(userID: try creator.requireID(), trafficMessageRequest: trafficMessageRequest)
-        let requestCLLocation = CLLocation(location: requestLocation)
+        let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
         
         guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
             throw Abort(.internalServerError)
@@ -42,9 +43,9 @@ final class TrafficController {
                 continue
             }
             
-            let coreLocation = CLLocation(location: location)
+            let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
             
-            if coreLocation.distance(from: requestCLLocation) < 500 {
+            if geoLocation.distance(from: requestGeoLocation) < 500 && validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
                 _ = message.validations.attach(creator, on: req)
                 return Future(try message.publicTrafficMessage(on: req))
             }
@@ -89,5 +90,29 @@ final class TrafficController {
             return try message.donate(.downvote, on: req)
         }
     }
+    
+    /// Checks if the course of a `Location` in the database is within 90 degrees range of the `Location` from the request
+    func validateCourse(course: Double, requestCourse: Double) -> Bool {
+        let left: Double
+        let right: Double
+        
+        if requestCourse < 90 {
+            left = 360-abs(requestCourse - 90).truncatingRemainder(dividingBy: 360)
+        } else {
+            left = (requestCourse - 90).truncatingRemainder(dividingBy: 360)
+        }
+        right = (requestCourse + 90).truncatingRemainder(dividingBy: 360)
+        
+        if requestCourse >= 270 || requestCourse < 90 {
+            
+            if course >= 0 && course < 180 {
+                return course <= left && course <= right
+            } else {
+                return course >= left
+            }
+            
+        } else {
+            return course >= left && course <= right
+        }
+    }
 }
-
