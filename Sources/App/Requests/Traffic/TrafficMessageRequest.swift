@@ -26,7 +26,7 @@ struct TrafficMessageRequest: Codable {
 extension TrafficMessageRequest: Validatable {
     static var validations: Validations = [
         key(\TrafficMessageRequest.type): IsTrafficType(),
-        key(\TrafficMessageRequest.course): IsCount(0...360)
+        key(\TrafficMessageRequest.course): IsCount(0.0...360.0)
     ]
 }
 

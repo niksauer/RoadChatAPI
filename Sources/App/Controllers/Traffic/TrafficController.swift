@@ -8,7 +8,6 @@
 import Foundation
 import Vapor
 import Fluent
-//import CoreLocation
 import GeoSwift
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
