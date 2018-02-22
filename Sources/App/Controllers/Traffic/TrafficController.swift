@@ -29,26 +29,26 @@ final class TrafficController {
         let creator = try req.user()
         
         let requestLocation = Location(userID: try creator.requireID(), trafficMessageRequest: trafficMessageRequest)
-        let requestCLLocation = CLLocation(location: requestLocation)
-        
-        guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
-            throw Abort(.internalServerError)
-        }
-        
-        let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
-    
-        for message in recentMessages {
-            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).first().await(on: req) else {
-                continue
-            }
-            
-            let coreLocation = CLLocation(location: location)
-            
-            if coreLocation.distance(from: requestCLLocation) < 500 {
-                _ = message.validations.attach(creator, on: req)
-                return Future(try message.publicTrafficMessage(on: req))
-            }
-        }
+//        let requestCLLocation = CLLocation(location: requestLocation)
+//
+//        guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
+//            throw Abort(.internalServerError)
+//        }
+//
+//        let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
+//
+//        for message in recentMessages {
+//            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).first().await(on: req) else {
+//                continue
+//            }
+//
+//            let coreLocation = CLLocation(location: location)
+//
+//            if coreLocation.distance(from: requestCLLocation) < 500 {
+//                _ = message.validations.attach(creator, on: req)
+//                return Future(try message.publicTrafficMessage(on: req))
+//            }
+//        }
         
         return requestLocation.create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { location in
             return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { message in
