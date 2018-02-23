@@ -30,11 +30,11 @@ extension RegisterRequest: OptionallyValidatable {
 extension RegisterRequest: Payload {
     typealias RequestType = RegisterRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("email", "nik.sauer@me.com"),
         ("username", "inik"),
         ("password", "safeharbour")
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

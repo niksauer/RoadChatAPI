@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
+import GeoSwift
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
 final class TrafficController {
@@ -18,20 +19,44 @@ final class TrafficController {
     /// Returns all `TrafficMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req)) })
+            return try messages.map({ try $0.publicTrafficMessage(on: req) })
         }
     }
-    
+
     /// Saves a new `TrafficMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
         let creator = try req.user()
         
-        return TrafficMessage(senderID: try creator.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-            return message.interactions.attach(creator, on: req).map(to: Result.self) { interaction in
-                interaction.karma = KarmaType.upvote.rawValue
-                _ = interaction.save(on: req)
-                return try message.publicTrafficMessage(upvotes: 1)
+        let requestLocation = Location(userID: try creator.requireID(), trafficMessageRequest: trafficMessageRequest)
+        let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
+        
+        guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
+            throw Abort(.internalServerError)
+        }
+        
+        let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
+    
+        for message in recentMessages {
+            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).first().await(on: req) else {
+                continue
+            }
+            
+            let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+            
+            if geoLocation.distance(from: requestGeoLocation) < 500 && validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
+                _ = message.validations.attach(creator, on: req)
+                return Future(try message.publicTrafficMessage(on: req))
+            }
+        }
+        
+        return requestLocation.create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { location in
+            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { message in
+                return message.interactions.attach(creator, on: req).map(to: TrafficMessage.PublicTrafficMessage.self) { interaction in
+                    interaction.karma = KarmaType.upvote.rawValue
+                    _ = interaction.save(on: req)
+                    return try message.publicTrafficMessage(on: req)
+                }
             }
         }
     }
@@ -39,8 +64,7 @@ final class TrafficController {
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
         return try req.parameter(Resource.self).map(to: Result.self) { message in
-            let upvotes = try message.getKarmaLevel(on: req).await(on: req)
-            return try message.publicTrafficMessage(upvotes: upvotes)
+            return try message.publicTrafficMessage(on: req)
         }
     }
     
@@ -65,5 +89,29 @@ final class TrafficController {
             return try message.donate(.downvote, on: req)
         }
     }
+    
+    /// Checks if the course of a `Location` in the database is within 90 degrees range of the `Location` from the request
+    func validateCourse(course: Double, requestCourse: Double) -> Bool {
+        let left: Double
+        let right: Double
+        
+        if requestCourse < 90 {
+            left = 360-abs(requestCourse - 90).truncatingRemainder(dividingBy: 360)
+        } else {
+            left = (requestCourse - 90).truncatingRemainder(dividingBy: 360)
+        }
+        right = (requestCourse + 90).truncatingRemainder(dividingBy: 360)
+        
+        if requestCourse >= 270 || requestCourse < 90 {
+            
+            if course >= 0 && course < 180 {
+                return course <= left && course <= right
+            } else {
+                return course >= left
+            }
+            
+        } else {
+            return course >= left && course <= right
+        }
+    }
 }
-

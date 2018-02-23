@@ -29,9 +29,11 @@ public func configure(
     migrations.add(model: Privacy.self, database: .sqlite)
     migrations.add(model: Profile.self, database: .sqlite)
     migrations.add(model: Car.self, database: .sqlite)
+    migrations.add(model: Location.self, database: .sqlite)
     
     migrations.add(model: TrafficMessage.self, database: .sqlite)
     migrations.add(model: TrafficKarmaDonation.self, database: .sqlite)
+    migrations.add(model: Validation.self, database: .sqlite)
     
     migrations.add(model: CommunityMessage.self, database: .sqlite)
     migrations.add(model: CommunityKarmaDonation.self, database: .sqlite)

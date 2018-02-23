@@ -84,7 +84,6 @@ extension User: SQLiteModel, Migration, Owner {
     var conversations: Siblings<User, Conversation, Participation> {
         return siblings()
     }
-
 }
 
 extension User: Ownable {

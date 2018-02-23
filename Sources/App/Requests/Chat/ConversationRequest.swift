@@ -11,7 +11,7 @@ import Validation
 
 struct ConversationRequest: Codable {
     let title: String
-    let participants: Int
+    let participants: [Int]
 }
 
 extension ConversationRequest: Validatable {
@@ -27,10 +27,10 @@ extension ConversationRequest: OptionallyValidatable {
 extension ConversationRequest: Payload {
     typealias RequestType = ConversationRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("title", "CryptoBros"),
-        ("participants", 1),
+        ("participants", [1]),
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

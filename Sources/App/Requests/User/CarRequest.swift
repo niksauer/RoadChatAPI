@@ -34,13 +34,13 @@ extension CarRequest: OptionallyValidatable {
 extension CarRequest: Payload {
     typealias RequestType = CarRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("manufacturer", "BMW"),
         ("model", "118d"),
         ("production", Date())
     ]
     
-    static var optionalParameters: Parameters = [
+    static var optionalParameters: [Payload.Parameter] = [
         ("performance", 142),
         ("color", 255),
     ]

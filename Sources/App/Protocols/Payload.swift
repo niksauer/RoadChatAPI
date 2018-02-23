@@ -11,20 +11,23 @@ import Validation
 
 protocol Payload {
     associatedtype RequestType: Validatable, OptionallyValidatable
-    typealias Parameters = [(name: BasicKeyRepresentable, type: Decodable)]
-    static var requiredParameters: Parameters { get }
-    static var optionalParameters: Parameters { get }
+    typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
+    static var requiredParameters: [Parameter] { get }
+    static var optionalParameters: [Parameter] { get }
 }
 
-extension Payload {
-    typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
-    
-    private static func findMissingParameters(in req: Request, required parameters: Parameters) -> Parameters {
+extension Payload {    
+    private static func findMissingParameters(in req: Request, required parameters: [Parameter]) -> [Parameter] {
         var missingParameters = [Parameter]()
         
         for parameter in parameters {
             do {
-                _ = try req.content.get(String.self, at: parameter.name).await(on: req)
+                switch parameter.type {
+                case is [Any]:
+                    _ = try req.content.get([String].self, at: parameter.name).await(on: req)
+                default:
+                    _ = try req.content.get(String.self, at: parameter.name).await(on: req)
+                }
             } catch {
                 missingParameters.append(parameter)
             }
@@ -33,7 +36,7 @@ extension Payload {
         return missingParameters
     }
     
-    private static func checkParameterType(in req: Request, parameters: Parameters) throws {
+    private static func checkParameterType(in req: Request, parameters: [Parameter]) throws {
         var invalidParameters = [String]()
         
         for parameter in parameters {
@@ -83,7 +86,7 @@ extension Payload {
         try checkParameterType(in: req, parameters: requiredParameters)
         
         let missingOptionalParameters = findMissingParameters(in: req, required: optionalParameters)
-        var presentOptionalParameters = Parameters()
+        var presentOptionalParameters = [Parameter]()
     
         for parameter in optionalParameters {
             let parameterName = parameter.name.makeBasicKey().stringValue

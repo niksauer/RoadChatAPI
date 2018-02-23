@@ -82,10 +82,15 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        // delete requested user and revoke all of his tokens
-        return try user.authTokens.query(on: req).delete().flatMap(to: HTTPStatus.self) {
-            return user.delete(on: req).transform(to: .ok)
-        }
+        // delete requested user and all of his associated resources and participations in chat
+        _ = try user.authTokens.query(on: req).delete()
+        _ = try user.settings.query(on: req).delete()
+        _ = try user.privacy.query(on: req).delete()
+        _ = try user.profile.query(on: req).delete()
+        _ = try user.cars.query(on: req).delete()
+        _ = Participation.query(on: req).filter(try \Participation.userID == user.requireID()).delete()
+        
+        return user.delete(on: req).transform(to: .ok)
     }
     
     /// Returns the `Setting`s for a parameterized `User`.
@@ -211,7 +216,7 @@ final class UserController {
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
             return try user.getTrafficMessages(on: req).map(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
-                return try messages.map({ try $0.publicTrafficMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req)) })
+                return try messages.map({ try $0.publicTrafficMessage(on: req) })
             }
         }
     }
@@ -220,7 +225,7 @@ final class UserController {
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
             return try user.getCommunityMessages(on: req).map(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
-                return try messages.map({ try $0.publicCommunityMessage(upvotes: try $0.getKarmaLevel(on: req).await(on: req)) })
+                return try messages.map({ try $0.publicCommunityMessage(on: req) })
             }
         }
     }
