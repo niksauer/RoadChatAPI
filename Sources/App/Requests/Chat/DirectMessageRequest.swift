@@ -27,10 +27,10 @@ extension DirectMessageRequest: OptionallyValidatable {
 extension DirectMessageRequest: Payload {
     typealias RequestType = DirectMessageRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("time", Date()),
         ("message", "Hey, wie gehts?"),
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

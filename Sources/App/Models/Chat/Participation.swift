@@ -73,18 +73,18 @@ extension Participation: ModifiablePivot {
     }
 }
 
-extension Request {
-    /// Checks participation in a `Conversaton` according to the supplied `Token`.
-    func checkParticipation(in conversation: Conversation) throws {
-        guard try conversation.participations.isAttached(try self.user(), on: self).await(on: self) else {
+extension User {
+    /// Checks participation of the `User` in a `Conversaton`.
+    func checkParticipation(in conversation: Conversation, on req: Request) throws {
+        guard try conversation.participations.isAttached(self, on: req).await(on: req) else {
             // user does not participate in conversation
             throw Abort(.unauthorized)
         }
     }
     
-    /// Returns a `Participation` in a `Conversaton` according to the supplied `Token`.
-    func getParticipation(in conversation: Conversation) throws -> Future<Participation> {
-        return Participation.query(on: self).filter(try \Participation.userID == self.user().requireID()).filter(try \Participation.conversationID == conversation.requireID()).first().map(to: Participation.self) { participation in
+    /// Returns a `Participation` of the `User` in a `Conversaton`.
+    func getParticipation(in conversation: Conversation, on req: Request) throws -> Future<Participation> {
+        return Participation.query(on: req).filter(try \Participation.userID == self.requireID()).filter(try \Participation.conversationID == conversation.requireID()).first().map(to: Participation.self) { participation in
             guard let participation = participation else {
                 // user does not participate in conversation
                 throw Abort(.unauthorized)

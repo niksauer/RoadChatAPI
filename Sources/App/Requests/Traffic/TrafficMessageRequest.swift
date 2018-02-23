@@ -39,7 +39,7 @@ extension TrafficMessageRequest: OptionallyValidatable {
 extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("type", "traffic jam"),
         ("time", Date()),
         ("latitude", 45.123),
@@ -51,7 +51,7 @@ extension TrafficMessageRequest: Payload {
         ("speed", 60.0),
     ]
     
-    static var optionalParameters: Parameters = [
+    static var optionalParameters: [Payload.Parameter] = [
         ("note", "Achtung, Kinder auf der Fahrbahn")
     ]
 }

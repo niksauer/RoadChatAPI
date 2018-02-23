@@ -40,13 +40,13 @@ extension ProfileRequest: OptionallyValidatable {
 extension ProfileRequest: Payload {
     typealias RequestType = ProfileRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("firstName", "Niklas"),
         ("lastName", "Sauer"),
         ("birth", Date()),
     ]
     
-    static var optionalParameters: Parameters = [
+    static var optionalParameters: [Payload.Parameter] = [
         ("sex", "male"),
         ("description", "Dualer Student"),
         ("streetName", "Ernststraße"),
