@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Car: Content {
     var id: Int?
@@ -32,9 +32,13 @@ final class Car: Content {
     }
 }
 
-extension Car: SQLiteModel, Migration {
+extension Car: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Car, Int?> {
         return \Car.id
+    }
+    
+    static var entity: String {
+        return "car"
     }
 }
 
@@ -51,7 +55,7 @@ extension Car: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: Car.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: Car.self) { database in
             return Car.find(id, on: database).map(to: Car.self) { existingCar in
                 guard let car = existingCar else {
                     // user not found

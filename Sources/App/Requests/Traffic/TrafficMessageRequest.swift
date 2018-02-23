@@ -20,7 +20,6 @@ struct TrafficMessageRequest: Codable {
     let verticalAccuracy: Double
     let course: Double
     let speed: Double
-    
 }
 
 extension TrafficMessageRequest: Validatable {
@@ -32,7 +31,7 @@ extension TrafficMessageRequest: Validatable {
 
 extension TrafficMessageRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\TrafficMessageRequest.note): IsCount(0...280)
+        key(\TrafficMessageRequest.note): IsCount(0...255)
     ]
 }
 

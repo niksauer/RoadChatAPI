@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Conversation: Content {
     var id: Int?
@@ -43,9 +43,13 @@ extension Conversation {
     }
 }
 
-extension Conversation: SQLiteModel, Migration {
+extension Conversation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Conversation, Int?> {
         return \Conversation.id
+    }
+    
+    static var entity: String {
+        return "conversation"
     }
     
     var messages: Children<Conversation, DirectMessage> {
@@ -70,7 +74,7 @@ extension Conversation: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: Conversation.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: Conversation.self) { database in
             return Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
                 guard let conversation = existingConversation else {
                     // conversation not found

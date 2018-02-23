@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Validation: Content {
     var id: Int?
@@ -21,13 +21,13 @@ final class Validation: Content {
     }
 }
 
-extension Validation: SQLiteModel, Migration {
+extension Validation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Validation, Int?> {
         return \Validation.id
     }
     
     static var entity: String {
-        return "Validation"
+        return "trafficValidation"
     }
 }
 

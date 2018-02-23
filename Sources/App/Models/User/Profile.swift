@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Profile: Content {
     var id: Int?
@@ -100,9 +100,13 @@ extension Profile {
     }
 }
 
-extension Profile: SQLiteModel, Migration {
+extension Profile: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Profile, Int?> {
         return \Profile.id
+    }
+    
+    static var entity: String {
+        return "profile"
     }
     
     var user: Parent<Profile, User> {

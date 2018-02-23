@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class TrafficMessage: Content {
     var id: Int?
@@ -58,9 +58,13 @@ extension TrafficMessage {
     }
 }
 
-extension TrafficMessage: SQLiteModel, Migration {
+extension TrafficMessage: MySQLModel, Migration {
     static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
+    }
+    
+    static var entity: String {
+        return "trafficMessage"
     }
     
     var validations: Siblings<TrafficMessage, User, Validation> {
@@ -81,7 +85,7 @@ extension TrafficMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: TrafficMessage.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: TrafficMessage.self) { database in
             return TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
                 guard let trafficMessage = existingTrafficMessage else {
                     // traffic message not found

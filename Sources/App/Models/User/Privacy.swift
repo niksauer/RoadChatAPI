@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Privacy: Content {
     var id: Int?
@@ -62,9 +62,13 @@ extension Privacy {
     }
 }
 
-extension Privacy: SQLiteModel, Migration {
+extension Privacy: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Privacy, Int?> {
         return \Privacy.id
+    }
+    
+    static var entity: String {
+        return "privacy"
     }
     
     var user: Parent<Privacy, User> {

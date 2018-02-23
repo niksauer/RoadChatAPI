@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import Authentication
 
 final class User: Content {
@@ -52,9 +52,13 @@ extension User {
     }
 }
 
-extension User: SQLiteModel, Migration, Owner {
+extension User: MySQLModel, Migration, Owner {
     static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
+    }
+    
+    static var entity: String {
+        return "user"
     }
     
     var settings: Children<User, Settings> {
@@ -99,7 +103,7 @@ extension User: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: User.self) { database in
             return User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found

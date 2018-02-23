@@ -18,7 +18,7 @@ struct CommunityMessageRequest: Codable {
 extension CommunityMessageRequest: Validatable {
     static var validations: Validations = [
         key(\CommunityMessageRequest.location): IsAlphanumeric(),
-        key(\CommunityMessageRequest.message): IsCount(0...280),
+        key(\CommunityMessageRequest.message): IsCount(0...255),
     ]
 }
 

@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Settings: Content {
     var id: Int?
@@ -47,9 +47,13 @@ extension Settings {
     }
 }
 
-extension Settings: SQLiteModel, Migration {
+extension Settings: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Settings, Int?> {
         return \Settings.id
+    }
+    
+    static var entity: String {
+        return "settings"
     }
     
     var user: Parent<Settings, User> {

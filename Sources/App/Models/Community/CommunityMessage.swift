@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class CommunityMessage: Content {
     var id: Int?
@@ -52,9 +52,13 @@ extension CommunityMessage {
     }
 }
 
-extension CommunityMessage: SQLiteModel, Migration {
+extension CommunityMessage: MySQLModel, Migration {
     static var idKey: WritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
+    }
+    
+    static var entity: String {
+        return "communityMessage"
     }
 }
 
@@ -71,7 +75,7 @@ extension CommunityMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: CommunityMessage.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: CommunityMessage.self) { database in
             return CommunityMessage.find(id, on: database).map(to: CommunityMessage.self) { existingMessage in
                 guard let message = existingMessage else {
                     // message not found

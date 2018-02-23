@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class TrafficKarmaDonation: Content {
     var id: Int?
@@ -21,9 +21,13 @@ final class TrafficKarmaDonation: Content {
     }
 }
 
-extension TrafficKarmaDonation: SQLiteModel, Migration {
+extension TrafficKarmaDonation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<TrafficKarmaDonation, Int?> {
         return \TrafficKarmaDonation.id
+    }
+    
+    static var entity: String {
+        return "trafficKarmaDonation"
     }
 }
 

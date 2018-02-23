@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 enum ApprovalStatus: String {
     case requested
@@ -46,13 +46,13 @@ extension Participation {
     }
 }
 
-extension Participation: SQLiteModel, Migration {
+extension Participation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Participation, Int?> {
         return \Participation.id
     }
     
     static var entity: String {
-        return "Participation"
+        return "conversationParticipation"
     }
 }
 

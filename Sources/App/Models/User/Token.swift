@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import Authentication
 
 final class Token: Content {
@@ -31,9 +31,13 @@ extension Token {
     }
 }
 
-extension Token: SQLiteModel, Migration {
+extension Token: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Token, Int?> {
         return \Token.id
+    }
+    
+    static var entity: String {
+        return "token"
     }
 }
 

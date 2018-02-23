@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class Location: Content {
     var id: Int?
@@ -39,9 +39,13 @@ final class Location: Content {
     
 }
 
-extension Location: SQLiteModel, Migration {
+extension Location: MySQLModel, Migration {
     static var idKey: WritableKeyPath<Location, Int?> {
         return \Location.id
+    }
+    
+    static var entity: String {
+        return "location"
     }
     
     var user: Parent<Location, User> {

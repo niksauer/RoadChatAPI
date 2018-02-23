@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 final class DirectMessage: Content {
     var id: Int?
@@ -49,13 +49,27 @@ extension DirectMessage {
     }
 }
 
-extension DirectMessage: SQLiteModel, Migration {
+extension DirectMessage: MySQLModel, Migration {
     static var idKey: WritableKeyPath<DirectMessage, Int?> {
         return \DirectMessage.id
     }
     
+    static var entity: String {
+        return "directMessage"
+    }
+    
     var conversation: Parent<DirectMessage, Conversation> {
         return parent(\DirectMessage.conversationID)
+    }
+    
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
+        return MySQLDatabase.create(self, on: connection) { builder in
+            try builder.field(for: \DirectMessage.id)
+            try builder.field(for: \DirectMessage.senderID)
+            try builder.field(for: \DirectMessage.conversationID)
+            try builder.field(for: \DirectMessage.time)
+            builder.field(type: .text(), for: \DirectMessage.message)
+        }
     }
 }
 

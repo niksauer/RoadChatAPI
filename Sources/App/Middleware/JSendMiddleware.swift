@@ -21,11 +21,11 @@ final class JSendMiddleware: Middleware {
             case let fail as APIFail:
                 // fail
                 // use details mapped to error as payload
-                return try JSendManager.fail(type: fail, using: request.superContainer)
+                return try JSendManager.fail(type: fail, using: request)
             default:
                 // error
                 // use received details as payload
-                return try JSendManager.error(error, using: request.superContainer)
+                return try JSendManager.error(error, using: request)
             }
         }
     }
@@ -66,25 +66,25 @@ struct JSendManager {
         }
     }
     
-    static func fail(type fail: APIFail, using container: Container) throws -> Future<Response> {
+    static func fail(type fail: APIFail, using req: Request) throws -> Future<Response> {
         let result: JSON = [
             "status": "fail",
             "data": fail.message
         ]
         
-        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: container)
+        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: req)
         response.http.status = .badRequest
         
         return Future(response)
     }
  
-    static func error(_ error: Error, using container: Container) throws -> Future<Response> {
+    static func error(_ error: Error, using req: Request) throws -> Future<Response> {
         let result: JSON = [
             "status": "error",
             "message": error.localizedDescription
         ]
         
-        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: container)
+        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: req)
         response.http.status = .internalServerError
         
         return Future(response)

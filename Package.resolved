@@ -66,11 +66,20 @@
       },
       {
         "package": "Fluent",
-        "repositoryURL": "https://github.com/vapor/fluent",
+        "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "085acf08ae9d41b2803fb83c12aee3650068bca3",
-          "version": "3.0.0-beta.3"
+          "revision": "c16a15d2d9c9a2617ef3f655825673e1a4f179e2",
+          "version": "3.0.0-beta.3.1"
+        }
+      },
+      {
+        "package": "FluentMySQL",
+        "repositoryURL": "https://github.com/vapor/fluent-mysql",
+        "state": {
+          "branch": null,
+          "revision": "31e00520adbd1a2d35d1cf6abc3e6ca37fd36f61",
+          "version": "3.0.0-beta.3.1.0"
         }
       },
       {
@@ -80,6 +89,15 @@
           "branch": "master",
           "revision": "525b007a521219abc4351cbd96432df93caa5255",
           "version": null
+        }
+      },
+      {
+        "package": "MySQL",
+        "repositoryURL": "https://github.com/vapor/mysql.git",
+        "state": {
+          "branch": null,
+          "revision": "06257bc9bf8a4614bc427583923d26d7b3d8a91d",
+          "version": "3.0.0-beta.4"
         }
       },
       {
