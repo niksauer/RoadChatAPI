@@ -12,10 +12,10 @@
       },
       {
         "package": "Auth",
-        "repositoryURL": "https://github.com/niksauer/auth",
+        "repositoryURL": "https://github.com/vapor/auth",
         "state": {
-          "branch": "beta",
-          "revision": "089d6cca2fef244600edeb7523ff5e612ee202fe",
+          "branch": null,
+          "revision": "3b2a5d8980e24089b250a46e1cca11c9951747b6",
           "version": null
         }
       },
