@@ -29,11 +29,11 @@ extension CommunityMessageRequest: OptionallyValidatable {
 extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("time", Date()),
         ("location", "a22exF"),
         ("message", "Stau auf der A3"),
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

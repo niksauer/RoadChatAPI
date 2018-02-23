@@ -28,10 +28,10 @@ extension SettingsRequest: OptionallyValidatable {
 extension SettingsRequest: Payload {
     typealias RequestType = SettingsRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("communityRadius", 10),
         ("trafficRadius", 5),
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

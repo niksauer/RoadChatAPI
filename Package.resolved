@@ -20,30 +20,12 @@
         }
       },
       {
-        "package": "CEpoll",
-        "repositoryURL": "https://github.com/vapor/cepoll.git",
-        "state": {
-          "branch": null,
-          "revision": "0b4aa90aae3a97fd6f5316501636f2bdf6292489",
-          "version": "0.2.0"
-        }
-      },
-      {
         "package": "Console",
         "repositoryURL": "https://github.com/vapor/console.git",
         "state": {
           "branch": null,
           "revision": "b78ad7bfd75efafed1e6e4325b575bc1820f6715",
           "version": "3.0.0-beta.1.1"
-        }
-      },
-      {
-        "package": "COpenSSL",
-        "repositoryURL": "https://github.com/vapor/copenssl.git",
-        "state": {
-          "branch": null,
-          "revision": "edede8271dacf511561ddcc80a0cfb13c8915486",
-          "version": "1.0.0-alpha.1"
         }
       },
       {
@@ -93,11 +75,11 @@
       },
       {
         "package": "GeoSwift",
-        "repositoryURL": "https://github.com/petrpavlik/GeoSwift.git",
+        "repositoryURL": "https://github.com/niksauer/GeoSwift",
         "state": {
-          "branch": null,
-          "revision": "ea4b4882c93a2392069a88178d1383748408660b",
-          "version": "1.0.3"
+          "branch": "master",
+          "revision": "525b007a521219abc4351cbd96432df93caa5255",
+          "version": null
         }
       },
       {

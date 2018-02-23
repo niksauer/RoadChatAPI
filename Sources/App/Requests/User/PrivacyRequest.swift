@@ -29,7 +29,7 @@ extension PrivacyRequest: OptionallyValidatable {
 extension PrivacyRequest: Payload {
     typealias RequestType = PrivacyRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("showFirstName", true),
         ("showLastName", false),
         ("showBirth", false),
@@ -38,5 +38,5 @@ extension PrivacyRequest: Payload {
         ("showDescription", true)
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

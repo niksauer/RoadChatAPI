@@ -28,10 +28,10 @@ extension LoginRequest: OptionallyValidatable {
 extension LoginRequest: Payload {
     typealias RequestType = LoginRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("user", "inik"),
         ("password", "safeharbour")
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

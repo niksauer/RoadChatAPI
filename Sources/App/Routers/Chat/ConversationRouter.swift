@@ -7,6 +7,7 @@
 
 import Foundation
 import Vapor
+import WebSocket
 
 class ConversationRouter: RouteCollection {
     func boot(router: Router) throws {
@@ -21,6 +22,9 @@ class ConversationRouter: RouteCollection {
         
         authenticatedConversation.get(use: conversationController.get)
         authenticatedConversation.delete(use: conversationController.delete)
+        
+        // /chat/Conversation.parameter/live
+        authenticatedConversation.websocket("live", onUpgrade: conversationController.liveChat)
         
         // /chat/Conversation.parameter/messages
         authenticatedConversation.group("messages", use: { group in
