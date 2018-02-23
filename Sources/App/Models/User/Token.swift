@@ -40,11 +40,11 @@ extension Token: SQLiteModel, Migration {
 extension Token: BearerAuthenticatable, Authentication.Token {
     typealias UserType = User
     
-    static var userIDKey: ReferenceWritableKeyPath<Token, Int> {
+    static var userIDKey: WritableKeyPath<Token, Int> {
         return \Token.userID
     }
     
-    static var tokenKey: ReferenceWritableKeyPath<Token, String> {
+    static var tokenKey: WritableKeyPath<Token, String> {
         return \Token.token
     }
 }
