@@ -32,7 +32,7 @@ class UserRouter: RouteCollection {
         authenticatedUser.delete(use: userController.delete)
 
         // /user/User.parameter/settings
-        authenticatedUser.group("settings", use: { group in
+        authenticatedUser.group("settings", configure: { group in
             group.get(use: userController.getSettings)
             group.put(use: userController.updateSettings)
             

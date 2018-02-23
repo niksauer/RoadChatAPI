@@ -27,13 +27,13 @@ class ConversationRouter: RouteCollection {
         authenticatedConversation.websocket("live", onUpgrade: conversationController.liveChat)
         
         // /chat/Conversation.parameter/messages
-        authenticatedConversation.group("messages", use: { group in
+        authenticatedConversation.group("messages", configure: { group in
             group.get(use: conversationController.getMessages)
             group.post(use: conversationController.createMessage)
         })
         
         // /chat/Conversation.parameter/participants
-        authenticatedConversation.group("participants", use: { group in
+        authenticatedConversation.group("participants", configure: { group in
             group.get(use: conversationController.getParticipants)
         })
         
