@@ -1,4 +1,3 @@
-import Foundation
 import Vapor
 import FluentSQLite
 import Authentication
@@ -18,6 +17,13 @@ public func configure(
     // Register routes to the router
     let router = EngineRouter.default()
     services.register(router, as: Router.self)
+    
+    // Register middleware
+    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
+//    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
+    middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
+//    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    services.register(middlewares)
     
     // Configure a SQLite database
     var databases = DatabaseConfig()
