@@ -15,7 +15,7 @@
         "repositoryURL": "https://github.com/niksauer/auth",
         "state": {
           "branch": "beta",
-          "revision": "7c46a95366d77159629f5fd64593268c8b5dbd94",
+          "revision": "8cb31363c94c83fb9b4f97b6e93e4e7db9a5ce07",
           "version": null
         }
       },
@@ -66,20 +66,29 @@
       },
       {
         "package": "Fluent",
-        "repositoryURL": "https://github.com/vapor/fluent",
+        "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "7e5b7f69b88c018fe7b07293e3fc284cbb9060be",
-          "version": null
+          "revision": "d584c55eadbfe14cda60ccf74e6f5a81401f71ee",
+          "version": "3.0.0-rc.1"
+        }
+      },
+      {
+        "package": "FluentSQLite",
+        "repositoryURL": "https://github.com/vapor/fluent-sqlite",
+        "state": {
+          "branch": null,
+          "revision": "a2d70d95b660631d591a7aa1ed1a65c91f67acf3",
+          "version": "3.0.0-rc.1"
         }
       },
       {
         "package": "GeoSwift",
-        "repositoryURL": "https://github.com/niksauer/GeoSwift",
+        "repositoryURL": "https://github.com/petrpavlik/GeoSwift",
         "state": {
-          "branch": "master",
-          "revision": "525b007a521219abc4351cbd96432df93caa5255",
-          "version": null
+          "branch": null,
+          "revision": "599673cc91cb569572975c28f224bb9b88e77cdb",
+          "version": "1.0.4"
         }
       },
       {
@@ -106,6 +115,15 @@
         "state": {
           "branch": null,
           "revision": "738f3ebf3ebb8ea886d5dd8588dd46a54f66af1c",
+          "version": "3.0.0-rc.1"
+        }
+      },
+      {
+        "package": "SQLite",
+        "repositoryURL": "https://github.com/vapor/sqlite.git",
+        "state": {
+          "branch": null,
+          "revision": "951e4f128d15a8a49e009fcf7a49f8e66e189eb7",
           "version": "3.0.0-rc.1"
         }
       },

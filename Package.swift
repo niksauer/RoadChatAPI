@@ -4,10 +4,10 @@ import PackageDescription
 let package = Package(
     name: "RoadChatAPI",
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor", .exact("3.0.0-rc.1")),
-        .package(url: "https://github.com/vapor/fluent", .revision("7e5b7f69b88c018fe7b07293e3fc284cbb9060be")),
+        .package(url: "https://github.com/vapor/vapor", from: "3.0.0-rc"),
+        .package(url: "https://github.com/vapor/fluent-sqlite", from: "3.0.0-rc"),
         .package(url: "https://github.com/niksauer/auth", .branch("beta")),
-        .package(url: "https://github.com/niksauer/GeoSwift", .branch("master")),
+        .package(url: "https://github.com/petrpavlik/GeoSwift", .exact("1.0.4")),
     ],
     targets: [
         .target(name: "App", dependencies: ["Vapor", "FluentSQLite", "Authentication", "GeoSwift"]),

@@ -15,7 +15,7 @@ class ConversationRouter: RouteCollection {
         
         // /chat
         router.grouped(try User.tokenAuthMiddleware()).post(use: conversationController.create)
-        
+
         // /chat/Conversation.parameter
         let conversation = router.grouped(Conversation.parameter)
         let authenticatedConversation = conversation.grouped(try User.tokenAuthMiddleware())

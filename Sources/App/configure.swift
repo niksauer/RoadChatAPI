@@ -15,6 +15,10 @@ public func configure(
     try services.register(FluentSQLiteProvider())
     try services.register(AuthenticationProvider())
 
+    // Register routes to the router
+    let router = EngineRouter.default()
+    services.register(router, as: Router.self)
+    
     // Configure a SQLite database
     var databases = DatabaseConfig()
     try databases.add(database: SQLiteDatabase(storage: .memory), as: .sqlite)
