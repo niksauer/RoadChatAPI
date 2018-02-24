@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-final class JSendMiddleware: Middleware {
+final class JSendMiddleware: Middleware, Service {
     func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
         do {
             return try next.respond(to: request).flatMap(to: Response.self) { response in

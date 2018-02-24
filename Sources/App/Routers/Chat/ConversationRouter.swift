@@ -11,14 +11,15 @@ import WebSocket
 
 class ConversationRouter: RouteCollection {
     func boot(router: Router) throws {
+        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
         let conversationController = ConversationController()
         
         // /chat
-        router.grouped(try User.tokenAuthMiddleware()).post(use: conversationController.create)
+        router.grouped(authMiddleware).post(use: conversationController.create)
         
         // /chat/Conversation.parameter
         let conversation = router.grouped(Conversation.parameter)
-        let authenticatedConversation = conversation.grouped(try User.tokenAuthMiddleware())
+        let authenticatedConversation = conversation.grouped(authMiddleware)
         
         authenticatedConversation.get(use: conversationController.get)
         authenticatedConversation.delete(use: conversationController.delete)

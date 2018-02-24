@@ -14,7 +14,21 @@ public func configure(
     // Register providers first
     try services.register(FluentSQLiteProvider())
     try services.register(AuthenticationProvider())
+    services.register(JSendMiddleware())
 
+    // Register routes to the router
+    let router = EngineRouter.default()
+    try routes(router)
+    services.register(router, as: Router.self)
+    
+    // Register middleware
+    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
+//    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
+    middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
+//    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    middlewares.use(JSendMiddleware.self)
+    services.register(middlewares)
+    
     // Configure a SQLite database
     var databases = DatabaseConfig()
     try databases.add(database: SQLiteDatabase(storage: .memory), as: .sqlite)
