@@ -14,8 +14,8 @@
         "package": "Auth",
         "repositoryURL": "https://github.com/niksauer/auth",
         "state": {
-          "branch": "beta",
-          "revision": "8cb31363c94c83fb9b4f97b6e93e4e7db9a5ce07",
+          "branch": "vaporRC",
+          "revision": "7d800d71953b4975fc6aaa754c9d051fd258a93c",
           "version": null
         }
       },

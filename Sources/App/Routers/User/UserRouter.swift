@@ -10,6 +10,7 @@ import Vapor
 
 class UserRouter: RouteCollection {
     func boot(router: Router) throws {
+        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
         let userController = UserController()
         let loginController = LoginController()
         let conversationController = ConversationController()
@@ -21,11 +22,11 @@ class UserRouter: RouteCollection {
         router.post("login", use: loginController.login)
         
         // /user/logout
-        router.grouped(try User.tokenAuthMiddleware()).get("logout", use: loginController.logout)
+        router.grouped(authMiddleware).get("logout", use: loginController.logout)
         
         // /user/User.parameter
         let user = router.grouped(User.parameter)
-        let authenticatedUser = user.grouped(try User.tokenAuthMiddleware())
+        let authenticatedUser = user.grouped(authMiddleware)
         
         user.get(use: userController.get)
         authenticatedUser.put(use: userController.update)
