@@ -25,7 +25,7 @@ class ConversationRouter: RouteCollection {
         authenticatedConversation.delete(use: conversationController.delete)
         
         // /chat/Conversation.parameter/live
-        authenticatedConversation.websocket("live", onUpgrade: conversationController.liveChat)
+        // see WebsocketRouter.swift
         
         // /chat/Conversation.parameter/messages
         authenticatedConversation.group("messages", use: { group in

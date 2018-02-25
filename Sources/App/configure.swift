@@ -26,7 +26,6 @@ public func configure(
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
-    middlewares.use(JSendMiddleware.self)
     services.register(middlewares)
     
     // Configure a SQLite database
