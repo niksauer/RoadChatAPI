@@ -81,7 +81,7 @@ extension User {
     }
 }
 
-extension User: SQLiteModel, Migration, Owner {
+extension User: SQLiteModel, Migration, Owner, KarmaDonator {
     static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }

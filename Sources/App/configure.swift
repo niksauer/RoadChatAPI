@@ -43,11 +43,11 @@ public func configure(
     migrations.add(model: Location.self, database: .sqlite)
     
     migrations.add(model: TrafficMessage.self, database: .sqlite)
-    migrations.add(model: TrafficKarmaDonation.self, database: .sqlite)
+    migrations.add(model: TrafficMessageKarmaDonation.self, database: .sqlite)
     migrations.add(model: Validation.self, database: .sqlite)
     
     migrations.add(model: CommunityMessage.self, database: .sqlite)
-    migrations.add(model: CommunityKarmaDonation.self, database: .sqlite)
+    migrations.add(model: CommunityMessageKarmaDonation.self, database: .sqlite)
     
     migrations.add(model: Conversation.self, database: .sqlite)
     migrations.add(model: DirectMessage.self, database: .sqlite)

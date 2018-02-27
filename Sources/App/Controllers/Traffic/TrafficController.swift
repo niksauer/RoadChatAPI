@@ -47,11 +47,9 @@ final class TrafficController {
             }
         }
         
-        return requestLocation.create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { location in
-            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: TrafficMessage.PublicTrafficMessage.self) { message in
-                return message.interactions.attach(creator, on: req).map(to: TrafficMessage.PublicTrafficMessage.self) { interaction in
-                    interaction.karma = KarmaType.upvote.rawValue
-                    _ = interaction.save(on: req)
+        return requestLocation.create(on: req).flatMap(to: Result.self) { location in
+            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                return try creator.donate(.upvote, to: message, on: req).map(to: Result.self) { _ in
                     return try message.publicTrafficMessage(on: req)
                 }
             }
@@ -76,14 +74,14 @@ final class TrafficController {
     /// Upvotes a parameterized `TrafficMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try message.donate(.upvote, on: req)
+            return try req.user().donate(.upvote, to: message, on: req)
         }
     }
 
     /// Downvotes a parameterized `TrafficMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try message.donate(.downvote, on: req)
+            return try req.user().donate(.downvote, to: message, on: req)
         }
     }
     

@@ -47,24 +47,3 @@ extension Validation: ModifiablePivot {
         try self.init(userID: left.requireID(), messageID: right.requireID())
     }
 }
-
-extension Request {
-    /// Checks validation of a `TrafficMessage` according to the supplied `Token`.
-    func checkValidation(of trafficMessage: TrafficMessage) throws {
-        guard try trafficMessage.validations.isAttached(try self.user(), on: self).await(on: self) else {
-            // user does not validate traffic message
-            throw Abort(.unauthorized)
-        }
-    }
-    
-    /// Returns a `Validation` of `TrafficMessage` according to the supplied `Token`.
-    func getValidation(of trafficMessage: TrafficMessage) throws -> Future<Validation> {
-        return Validation.query(on: self).filter(try \Validation.userID == self.user().requireID()).filter(try \Validation.messageID == trafficMessage.requireID()).first().map(to: Validation.self) { validation in
-            guard let validation = validation else {
-                // user does not validate traffic message
-                throw Abort(.unauthorized)
-            }
-            return validation
-        }
-    }
-}
