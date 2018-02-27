@@ -16,11 +16,11 @@ enum KarmaType: Int {
 }
 
 protocol KarmaDonation: SQLiteModel, Migration, ModifiablePivot {
-    var karmableID: Int { get }
+    var resourceID: Int { get }
     var donatorID: Int { get }
     var karma: Int { get set }
-    
-    func setKarmaType(_ type: KarmaType)
+
+    init(resourceID: Int, donatorID: Int)
 }
 
 extension KarmaDonation {
@@ -32,30 +32,67 @@ extension KarmaDonation {
         
         return karma
     }
+    
+    mutating func setKarmaType(_ type: KarmaType) {
+        self.karma = type.rawValue
+    }
+}
+
+protocol KarmaDonator: SQLiteModel, Migration { }
+
+extension KarmaDonator {
+    func getDonation<T: Karmable>(for resource: T, on req: Request) throws -> Future<T.Donation?> {
+        return T.Donation.query(on: req).filter(try \T.Donation.donatorID == self.requireID()).first()
+    }
+    
+    func donate<T: Karmable>(_ karma: KarmaType, to resource: T, on req: Request) throws -> Future<HTTPStatus> {
+        return try self.getDonation(for: resource, on: req).flatMap(to: HTTPStatus.self) { donation in
+            guard var donation = donation else {
+                var donation = try T.Donation(resourceID: resource.requireID(), donatorID: self.requireID())
+                donation.karma = karma.rawValue
+                
+                return donation.save(on: req).transform(to: .ok)
+            }
+            
+            let currentKarma = try donation.getKarmaType()
+            
+            if karma == .upvote {
+                switch currentKarma {
+                case .upvote:
+                    donation.karma = KarmaType.neutral.rawValue
+                case .neutral:
+                    donation.karma = KarmaType.upvote.rawValue
+                case .downvote:
+                    donation.karma = KarmaType.upvote.rawValue
+                }
+            } else {
+                switch currentKarma {
+                case .upvote:
+                    donation.karma = KarmaType.downvote.rawValue
+                case .neutral:
+                    donation.karma = KarmaType.downvote.rawValue
+                case .downvote:
+                    donation.karma = KarmaType.neutral.rawValue
+                }
+            }
+
+            return donation.save(on: req).transform(to: HTTPStatus.ok)
+        }
+    }
 }
 
 protocol Karmable: SQLiteModel, Migration {
-    associatedtype Donator: SQLiteModel, Migration
+    associatedtype Donator: KarmaDonator
     associatedtype Donation: KarmaDonation
-    var interactions: Siblings<Self, Donator, Donation> { get }
-    
-    func donate(_ karma: KarmaType, on req: Request) throws -> Future<HTTPStatus>
+    var donations: Siblings<Self, Donator, Donation> { get }
 }
 
 extension Karmable {
     func getKarmaLevel(on req: Request) throws -> Int {
-        let upvotes = try Int(Donation.query(on: req).filter(try \Donation.karmableID == self.requireID()).filter(\Donation.karma == 1).count().await(on: req))
-        let downvotes = try Int(Donation.query(on: req).filter(try \Donation.karmableID == self.requireID()).filter(\Donation.karma == -1).count().await(on: req))
+        let upvotes = try Int(Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(\Donation.karma == 1).count().await(on: req))
+        let downvotes = try Int(Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(\Donation.karma == -1).count().await(on: req))
+        
         return (upvotes-downvotes)
 //        return try Int(Donation.query(on: req).filter(try \Donation.karmableID == self.requireID()).sum(\Donation.karma).await(on: req))
     }
 }
-
-extension Request {
-    func getInteraction<T: Karmable>(with resource: T) throws -> Future<T.Donation?> {
-        return T.Donation.query(on: self).filter(try \T.Donation.donatorID == self.user().requireID()).first()
-    }
-}
-
-
-

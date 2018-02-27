@@ -29,9 +29,7 @@ final class CommunityController {
         
         return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
             return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-                return message.interactions.attach(creator, on: req).map(to: Result.self) { interaction in
-                    interaction.karma = KarmaType.upvote.rawValue
-                    _ = interaction.save(on: req)
+                return try creator.donate(.upvote, to: message, on: req).map(to: Result.self) { _ in
                     return try message.publicCommunityMessage(on: req)
                 }
             }
@@ -56,14 +54,14 @@ final class CommunityController {
     /// Upvotes a parameterized `CommunityMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try message.donate(.upvote, on: req)
+            return try req.user().donate(.upvote, to: message, on: req)
         }
     }
     
     /// Downvotes a parameterized `CommunityMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try message.donate(.downvote, on: req)
+            return try req.user().donate(.downvote, to: message, on: req)
         }
     }
 

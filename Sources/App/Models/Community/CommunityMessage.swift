@@ -85,41 +85,8 @@ extension CommunityMessage: Parameter {
 }
 
 extension CommunityMessage: Karmable {
-    var interactions: Siblings<CommunityMessage, User, CommunityKarmaDonation> {
+    var donations: Siblings<CommunityMessage, User, CommunityMessageKarmaDonation> {
         return siblings()
-    }
-    
-    func donate(_ karma: KarmaType, on req: Request) throws -> Future<HTTPStatus> {
-        return try req.getInteraction(with: self).flatMap(to: HTTPStatus.self) { interaction in
-            guard let interaction = interaction else {
-                return self.interactions.attach(try req.user(), on: req).flatMap(to: HTTPStatus.self) { newInteraction in
-                    newInteraction.setKarmaType(karma)
-                    return newInteraction.save(on: req).transform(to: .ok)
-                }
-            }
-            
-            if karma == .upvote {
-                switch try interaction.getKarmaType() {
-                case .upvote:
-                    interaction.karma = KarmaType.neutral.rawValue
-                case .neutral:
-                    interaction.karma = KarmaType.upvote.rawValue
-                case .downvote:
-                    interaction.karma = KarmaType.upvote.rawValue
-                }
-            } else {
-                switch try interaction.getKarmaType() {
-                case .upvote:
-                    interaction.karma = KarmaType.downvote.rawValue
-                case .neutral:
-                    interaction.karma = KarmaType.downvote.rawValue
-                case .downvote:
-                    interaction.karma = KarmaType.neutral.rawValue
-                }
-            }
-            
-            return interaction.save(on: req).transform(to: HTTPStatus.ok)
-        }
     }
 }
 
