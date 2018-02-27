@@ -6,7 +6,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/vapor/vapor", from: "3.0.0-rc"),
         .package(url: "https://github.com/vapor/fluent-sqlite", from: "3.0.0-rc"),
-        .package(url: "https://github.com/niksauer/auth", .branch("vaporRC")),
+        .package(url: "https://github.com/vapor/auth", from: "2.0.0-rc.1"),
         .package(url: "https://github.com/petrpavlik/GeoSwift", .exact("1.0.4")),
     ],
     targets: [

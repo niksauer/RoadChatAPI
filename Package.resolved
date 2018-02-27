@@ -12,11 +12,11 @@
       },
       {
         "package": "Auth",
-        "repositoryURL": "https://github.com/niksauer/auth",
+        "repositoryURL": "https://github.com/vapor/auth",
         "state": {
-          "branch": "vaporRC",
-          "revision": "7d800d71953b4975fc6aaa754c9d051fd258a93c",
-          "version": null
+          "branch": null,
+          "revision": "145d6ca2790e679279defe34e25006f63c782024",
+          "version": "2.0.0-rc.1"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/vapor/template-kit.git",
         "state": {
           "branch": null,
-          "revision": "4d2f61c26011e45905deec5a718179d144f5bb6f",
-          "version": "1.0.0-rc.1"
+          "revision": "cda3174c5e029526a5b11b19fcfd83bd65b6876a",
+          "version": "1.0.0-rc.1.1"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/vapor/vapor",
         "state": {
           "branch": null,
-          "revision": "251e28ebd6615af47921f8ca23d0a78ca80d02fc",
-          "version": "3.0.0-rc.1"
+          "revision": "d8254ba464b211ca6d465703f7f5d37eb0c95b65",
+          "version": "3.0.0-rc.1.1"
         }
       }
     ]
