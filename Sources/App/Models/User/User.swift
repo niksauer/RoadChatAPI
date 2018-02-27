@@ -132,7 +132,6 @@ extension Request {
             return nil
         }
     }
-    
 }
 
 extension User {

@@ -212,6 +212,15 @@ final class UserController {
         return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }
     
+//    func updateLocation(_ req: Request) throws -> Future<HTTPStatus> {
+//        let user = try req.parameter(Resource.self).await(on: req)
+//        try req.user().checkOwnership(for: user, on: req)
+//        
+//        let locationRequest = try LocationRequest.extract(from: req)
+//        
+//        
+//    }
+    
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in

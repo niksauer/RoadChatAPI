@@ -137,4 +137,14 @@ extension TrafficMessage {
     func getValidationLevel(on req: Request) throws -> Int {
         return try Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count().await(on: req)
     }
+    
+    func getLocation(on req: Request) throws -> Future<Location> {
+        return Location.query(on: req).filter(\Location.id == self.locationID).first().map(to: Location.self) { location in
+            guard let location = location else {
+                throw Abort(.internalServerError)
+            }
+            
+            return location
+        }
+    }
 }

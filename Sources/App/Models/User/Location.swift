@@ -11,7 +11,6 @@ import FluentSQLite
 
 final class Location: Content {
     var id: Int?
-    var userID: User.ID
     var latitude: Double
     var longitude: Double
     var altitude: Double
@@ -21,8 +20,7 @@ final class Location: Content {
     var speed: Double
     var timestamp: Date
     
-    init(userID: User.ID, latitude: Double, longitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double, course: Double, speed: Double, timestamp: Date) {
-        self.userID = userID
+    init(latitude: Double, longitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double, course: Double, speed: Double, timestamp: Date) {
         self.latitude = latitude
         self.longitude = longitude
         self.altitude = altitude
@@ -33,8 +31,8 @@ final class Location: Content {
         self.timestamp = timestamp
     }
     
-    convenience init(userID: User.ID, trafficMessageRequest: TrafficMessageRequest) {
-        self.init(userID: userID, latitude: trafficMessageRequest.latitude, longitude: trafficMessageRequest.longitude, altitude: trafficMessageRequest.altitude, horizontalAccuracy: trafficMessageRequest.horizontalAccuracy, verticalAccuracy: trafficMessageRequest.verticalAccuracy, course: trafficMessageRequest.course, speed: trafficMessageRequest.speed, timestamp: trafficMessageRequest.time)
+    convenience init(trafficMessageRequest: TrafficMessageRequest) {
+        self.init(latitude: trafficMessageRequest.latitude, longitude: trafficMessageRequest.longitude, altitude: trafficMessageRequest.altitude, horizontalAccuracy: trafficMessageRequest.horizontalAccuracy, verticalAccuracy: trafficMessageRequest.verticalAccuracy, course: trafficMessageRequest.course, speed: trafficMessageRequest.speed, timestamp: trafficMessageRequest.time)
     }
     
 }
@@ -42,10 +40,6 @@ final class Location: Content {
 extension Location: SQLiteModel, Migration {
     static var idKey: WritableKeyPath<Location, Int?> {
         return \Location.id
-    }
-    
-    var user: Parent<Location, User> {
-        return parent(\Location.userID)
     }
 }
 
