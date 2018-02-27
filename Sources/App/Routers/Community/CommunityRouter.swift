@@ -10,17 +10,18 @@ import Vapor
 
 class CommunityRouter: RouteCollection {
     func boot(router: Router) throws {
+        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
         let communityController = CommunityController()
 
         // /community/board
         let communityMessageBoard = router.grouped("board")
     
         communityMessageBoard.get(use: communityController.index)
-        communityMessageBoard.grouped(try User.tokenAuthMiddleware()).post(use: communityController.create)
+        communityMessageBoard.grouped(authMiddleware).post(use: communityController.create)
         
         // /community/message/communityMessage.parameter
         let communityMessage = router.grouped("message").grouped(CommunityMessage.parameter)
-        let authenticatedCommunityMessage = communityMessage.grouped(try User.tokenAuthMiddleware())
+        let authenticatedCommunityMessage = communityMessage.grouped(authMiddleware)
         
         communityMessage.get(use: communityController.get)
         authenticatedCommunityMessage.delete(use: communityController.delete)

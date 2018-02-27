@@ -1,4 +1,3 @@
-import Foundation
 import Vapor
 import FluentMySQL
 import Authentication
@@ -15,6 +14,7 @@ public func configure(
     // Register providers first
     try services.register(FluentMySQLProvider())
     try services.register(AuthenticationProvider())
+    services.register(JSendMiddleware())
 
     // Configure a MySQL database
     var databases = DatabaseConfig()
