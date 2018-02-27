@@ -25,8 +25,8 @@ final class Settings: Content {
         self.trafficRadius = trafficRadius
     }
     
-    convenience init(userID: User.ID, settingsRequest: SettingsRequest) {
-        self.init(userID: userID, communityRadius: settingsRequest.communityRadius, trafficRadius: settingsRequest.trafficRadius)
+    convenience init(userID: User.ID, settingsRequest request: SettingsRequest) {
+        self.init(userID: userID, communityRadius: request.communityRadius, trafficRadius: request.trafficRadius)
     }
 
 }
