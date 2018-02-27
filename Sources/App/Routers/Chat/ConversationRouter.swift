@@ -18,7 +18,7 @@ class ConversationRouter: RouteCollection {
         router.grouped(authMiddleware).post(use: conversationController.create)
 
         // /chat/nearby
-//        router.grouped(authMiddleware).get("nearby", use: conversationController.getNearbyUsers)
+        router.grouped(authMiddleware).get("nearby", use: conversationController.getNearbyUsers)
         
         // /chat/Conversation.parameter
         let conversation = router.grouped(Conversation.parameter)

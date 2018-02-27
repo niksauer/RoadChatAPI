@@ -53,7 +53,7 @@ class UserRouter: RouteCollection {
         // /user/User.parameter/location
         authenticatedUser.group("location", configure: { group in
             group.get(use: userController.getLocation)
-            group.post(use: userController.createOrUpdateLocation)
+            group.put(use: userController.createOrUpdateLocation)
         })
         
         // /user/User.parameter/trafficMessages
