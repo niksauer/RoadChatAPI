@@ -16,7 +16,7 @@ class ConversationRouter: RouteCollection {
         
         // /chat
         router.grouped(authMiddleware).post(use: conversationController.create)
-   
+
         // /chat/Conversation.parameter
         let conversation = router.grouped(Conversation.parameter)
         let authenticatedConversation = conversation.grouped(authMiddleware)
@@ -25,7 +25,7 @@ class ConversationRouter: RouteCollection {
         authenticatedConversation.delete(use: conversationController.delete)
         
         // /chat/Conversation.parameter/live
-        authenticatedConversation.websocket("live", onUpgrade: conversationController.liveChat)
+        // see WebsocketRouter.swift
         
         // /chat/Conversation.parameter/messages
         authenticatedConversation.group("messages", configure: { group in
