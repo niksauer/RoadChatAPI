@@ -12,6 +12,7 @@ import FluentSQLite
 final class Privacy: Content {
     var id: Int?
     var userID: User.ID
+    var shareLocation = false
     var showFirstName = true
     var showLastName = false
     var showBirth = false
@@ -23,8 +24,9 @@ final class Privacy: Content {
         self.userID = userID
     }
     
-    init(userID: User.ID, showFirstName: Bool, showLastName: Bool, showBirth: Bool, showSex: Bool, showAddress: Bool, showProfession: Bool) {
+    init(userID: User.ID, shareLocation: Bool, showFirstName: Bool, showLastName: Bool, showBirth: Bool, showSex: Bool, showAddress: Bool, showProfession: Bool) {
         self.userID = userID
+        self.shareLocation = shareLocation
         self.showFirstName = showFirstName
         self.showLastName = showLastName
         self.showBirth = showBirth
@@ -33,8 +35,8 @@ final class Privacy: Content {
         self.showDescription = showProfession
     }
     
-    convenience init(userID: User.ID, PrivacyRequest: PrivacyRequest) {
-        self.init(userID: userID, showFirstName: PrivacyRequest.showFirstName, showLastName: PrivacyRequest.showLastName, showBirth: PrivacyRequest.showBirth, showSex: PrivacyRequest.showSex, showAddress: PrivacyRequest.showAddress, showProfession: PrivacyRequest.showDescription)
+    convenience init(userID: User.ID, privacyRequest request: PrivacyRequest) {
+        self.init(userID: userID, shareLocation: request.shareLocation, showFirstName: request.showFirstName, showLastName: request.showLastName, showBirth: request.showBirth, showSex: request.showSex, showAddress: request.showAddress, showProfession: request.showDescription)
     }
 }
 
@@ -44,6 +46,7 @@ extension Privacy {
     }
     
     struct PublicPrivacy: Content {
+        let shareLocation: Bool
         let showFirstName: Bool
         let showLastName: Bool
         let showBirth: Bool
@@ -52,6 +55,7 @@ extension Privacy {
         let showDescription: Bool
         
         init(privacy: Privacy) {
+            self.shareLocation = privacy.shareLocation
             self.showFirstName = privacy.showFirstName
             self.showLastName = privacy.showLastName
             self.showBirth = privacy.showBirth

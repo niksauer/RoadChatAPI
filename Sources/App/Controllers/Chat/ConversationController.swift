@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
+import GeoSwift
 import WebSocket
 
 /// Controls basic CRUD operations on `Conversation`s.
@@ -35,6 +36,40 @@ final class ConversationController {
         }
     }
 
+    /// Returns all `User`s which are within 500m distance of a tokenized `User`.
+    func getNearbyUsers(_ req: Request) throws -> Future<[User.PublicUser]> {
+        let requestor = try req.user()
+        
+        guard let requestorLocation = try requestor.getLocation(on: req).await(on: req) else {
+            throw ConversationFail.noAssociatedLocation
+        }
+        
+        let requestorGeoLocation = try GeoCoordinate2D(latitude: requestorLocation.latitude, longitude: requestorLocation.longitude)
+        
+        return User.query(on: req).filter(try \User.id != requestor.requireID()).all().map(to: [User.PublicUser].self) { users in
+            let maxDistance = 500.0
+            var nearbyUsers = [User.PublicUser]()
+            
+            for user in users {
+                let privacy = try user.getPrivacy(on: req).await(on: req)
+                
+                guard privacy.shareLocation, let location = try user.getLocation(on: req).await(on: req) else {
+                    continue
+                }
+                
+                let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                
+                guard requestorGeoLocation.distance(from: geoLocation) <= maxDistance else {
+                    continue
+                }
+                
+                nearbyUsers.append(try user.publicUser(location: location))
+            }
+            
+            return nearbyUsers
+        }
+    }
+    
     /// Saves a new `Conversation` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         let conversationRequest = try ConversationRequest.extract(from: req)
@@ -80,6 +115,7 @@ final class ConversationController {
         }
     }
     
+    /// Returns a parameterized `Conversation` including the newest `DirectMessage` as an excerpt.
     func get(_ req: Request) throws -> Future<Result> {
         let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)

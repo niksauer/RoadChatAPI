@@ -36,8 +36,8 @@ final class Profile: Content {
         self.country = country
     }
     
-    convenience init(userID: User.ID, profileRequest: ProfileRequest) {
-        self.init(userID: userID, firstName: profileRequest.firstName, lastName: profileRequest.lastName, birth: profileRequest.birth, sex: profileRequest.sex, description: profileRequest.description, streetName: profileRequest.streetName, streetNumber: profileRequest.streetNumber, postalCode: profileRequest.postalCode, country: profileRequest.country)
+    convenience init(userID: User.ID, profileRequest request: ProfileRequest) {
+        self.init(userID: userID, firstName: request.firstName, lastName: request.lastName, birth: request.birth, sex: request.sex, description: request.description, streetName: request.streetName, streetNumber: request.streetNumber, postalCode: request.postalCode, country: request.country)
     }
 }
 

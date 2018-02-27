@@ -10,6 +10,7 @@ import Vapor
 import Validation
 
 struct PrivacyRequest: Codable {
+    let shareLocation: Bool
     let showFirstName: Bool
     let showLastName: Bool
     let showBirth: Bool
@@ -30,6 +31,7 @@ extension PrivacyRequest: Payload {
     typealias RequestType = PrivacyRequest
     
     static var requiredParameters: [Payload.Parameter] = [
+        ("shareLocation", false),
         ("showFirstName", true),
         ("showLastName", false),
         ("showBirth", false),

@@ -212,6 +212,50 @@ final class UserController {
         return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }
     
+    /// Returns the `Location` for a parameterized `User`.
+    func getLocation(_ req: Request) throws -> Future<Location> {
+        let user = try req.parameter(Resource.self).await(on: req)
+        try req.user().checkOwnership(for: user, on: req)
+        
+        return try user.getLocation(on: req).map(to: Location.self) { location in
+            guard let location = location else {
+                // no location associated to user
+                throw Abort(.notFound)
+            }
+            
+            return location
+        }
+    }
+    
+    /// Creates or updates the `Location` for a parameterized `User`.
+    func createOrUpdateLocation(_ req: Request) throws -> Future<HTTPStatus> {
+        let user = try req.parameter(Resource.self).await(on: req)
+        try req.user().checkOwnership(for: user, on: req)
+        
+        let locationRequest = try LocationRequest.extract(from: req)
+        
+        return try user.getLocation(on: req).flatMap(to: HTTPStatus.self) { existingLocation in
+            guard let location = existingLocation else {
+                let newLocation = Location(locationRequest: locationRequest)
+                return newLocation.create(on: req).flatMap(to: HTTPStatus.self) { location in
+                    user.locationID = try location.requireID()
+                    return user.save(on: req).transform(to: HTTPStatus.ok)
+                }
+            }
+            
+            location.latitude = locationRequest.latitude
+            location.longitude = locationRequest.longitude
+            location.altitude = locationRequest.altitude
+            location.horizontalAccuracy = locationRequest.horizontalAccuracy
+            location.verticalAccuracy = locationRequest.verticalAccuracy
+            location.course = locationRequest.course
+            location.speed = locationRequest.speed
+            location.timestamp = locationRequest.time
+            
+            return location.update(on: req).transform(to: .ok)
+        }
+    }
+    
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in

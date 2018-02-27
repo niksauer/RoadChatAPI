@@ -12,6 +12,7 @@ import Authentication
 
 final class User: Content {
     var id: Int?
+    var locationID: Location.ID?
     var email: String
     var username: String
     var password: String
@@ -23,8 +24,8 @@ final class User: Content {
         self.password = password
     }
 
-    convenience init(registerRequest: RegisterRequest) {
-        self.init(email: registerRequest.email, username: registerRequest.username, password: registerRequest.password)
+    convenience init(registerRequest request: RegisterRequest) {
+        self.init(email: request.email, username: request.username, password: request.password)
     }
 }
 
@@ -33,11 +34,24 @@ extension User {
         return try PublicUser(user: self, isOwner: isOwner)
     }
     
+    func publicUser(location: Location) throws -> PublicUser {
+        return try PublicUser(user: self, location: location)
+    }
+    
     struct PublicUser: Content {
         let id: Int
         var email: String?
         let username: String
         let registry: Date
+        
+        var timestamp: Date?
+        var latitude: Double?
+        var longitude: Double?
+        var altitude: Double?
+        var horizontalAccuracy: Double?
+        var verticalAccuracy: Double?
+        var course: Double?
+        var speed: Double?
         
         init(user: User, isOwner: Bool) throws {
             self.id = try user.requireID()
@@ -48,6 +62,21 @@ extension User {
             
             self.username = user.username
             self.registry = user.registry
+        }
+        
+        init(user: User, location: Location) throws {
+            self.id = try user.requireID()
+            self.username = user.username
+            self.registry = user.registry
+            
+            self.timestamp = location.timestamp
+            self.latitude = location.latitude
+            self.longitude = location.longitude
+            self.altitude = location.altitude
+            self.horizontalAccuracy = location.horizontalAccuracy
+            self.verticalAccuracy = location.verticalAccuracy
+            self.course = location.course
+            self.speed = location.speed
         }
     }
 }
@@ -132,7 +161,6 @@ extension Request {
             return nil
         }
     }
-    
 }
 
 extension User {
@@ -176,6 +204,10 @@ extension User {
     
     func getConversations(on req: Request) throws -> Future<[Conversation]> {
         return try conversations.query(on: req).all()
+    }
+    
+    func getLocation(on req: Request) throws -> Future<Location?> {
+        return Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
 }
 

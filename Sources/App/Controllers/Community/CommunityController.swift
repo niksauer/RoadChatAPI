@@ -27,11 +27,13 @@ final class CommunityController {
         let communityMessageRequest = try CommunityMessageRequest.extract(from: req)
         let creator = try req.user()
         
-        return CommunityMessage(senderID: try creator.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-            return message.interactions.attach(creator, on: req).map(to: Result.self) { interaction in
-                interaction.karma = KarmaType.upvote.rawValue
-                _ = interaction.save(on: req)
-                return try message.publicCommunityMessage(on: req)
+        return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
+            return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                return message.interactions.attach(creator, on: req).map(to: Result.self) { interaction in
+                    interaction.karma = KarmaType.upvote.rawValue
+                    _ = interaction.save(on: req)
+                    return try message.publicCommunityMessage(on: req)
+                }
             }
         }
     }

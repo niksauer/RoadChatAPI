@@ -28,7 +28,7 @@ final class TrafficController {
         let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
         let creator = try req.user()
         
-        let requestLocation = Location(userID: try creator.requireID(), trafficMessageRequest: trafficMessageRequest)
+        let requestLocation = Location(trafficMessageRequest: trafficMessageRequest)
         let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
         
         guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
@@ -38,10 +38,7 @@ final class TrafficController {
         let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
     
         for message in recentMessages {
-            guard let location = try Location.query(on: req).filter(\Location.id == message.locationID).first().await(on: req) else {
-                continue
-            }
-            
+            let location = try message.getLocation(on: req).await(on: req)
             let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
             
             if geoLocation.distance(from: requestGeoLocation) < 500 && validateCourse(course: location.course, requestCourse: requestLocation.course) == true {

@@ -27,8 +27,8 @@ final class Car: Content {
         self.color = color
     }
     
-    convenience init(userID: User.ID, carRequest: CarRequest) {
-        self.init(userID: userID, manufacturer: carRequest.manufacturer, model: carRequest.model, production: carRequest.production, performance: carRequest.performance, color: carRequest.color)
+    convenience init(userID: User.ID, carRequest request: CarRequest) {
+        self.init(userID: userID, manufacturer: request.manufacturer, model: request.model, production: request.production, performance: request.performance, color: request.color)
     }
 }
 
