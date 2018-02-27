@@ -1,4 +1,3 @@
-import Foundation
 import Vapor
 import FluentSQLite
 import Authentication
