@@ -13,7 +13,6 @@ public func configure(
     // Register providers first
     try services.register(FluentSQLiteProvider())
     try services.register(AuthenticationProvider())
-    services.register(JSendMiddleware())
 
     // Register routes to the router
     let router = EngineRouter.default()
