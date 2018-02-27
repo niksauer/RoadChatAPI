@@ -11,6 +11,7 @@ import FluentSQLite
 
 final class Location: Content {
     var id: Int?
+    var timestamp: Date
     var latitude: Double
     var longitude: Double
     var altitude: Double
@@ -18,9 +19,9 @@ final class Location: Content {
     var verticalAccuracy: Double
     var course: Double
     var speed: Double
-    var timestamp: Date
     
-    init(latitude: Double, longitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double, course: Double, speed: Double, timestamp: Date) {
+    init(timestamp: Date, latitude: Double, longitude: Double, altitude: Double, horizontalAccuracy: Double, verticalAccuracy: Double, course: Double, speed: Double) {
+        self.timestamp = timestamp
         self.latitude = latitude
         self.longitude = longitude
         self.altitude = altitude
@@ -28,13 +29,19 @@ final class Location: Content {
         self.verticalAccuracy = verticalAccuracy
         self.course = course
         self.speed = speed
-        self.timestamp = timestamp
     }
     
-    convenience init(trafficMessageRequest: TrafficMessageRequest) {
-        self.init(latitude: trafficMessageRequest.latitude, longitude: trafficMessageRequest.longitude, altitude: trafficMessageRequest.altitude, horizontalAccuracy: trafficMessageRequest.horizontalAccuracy, verticalAccuracy: trafficMessageRequest.verticalAccuracy, course: trafficMessageRequest.course, speed: trafficMessageRequest.speed, timestamp: trafficMessageRequest.time)
+    convenience init(locationRequest request: LocationRequest) {
+        self.init(timestamp: request.time, latitude: request.latitude, longitude: request.longitude, altitude: request.altitude, horizontalAccuracy: request.horizontalAccuracy, verticalAccuracy: request.verticalAccuracy, course: request.course, speed: request.speed)
     }
     
+    convenience init(trafficMessageRequest request: TrafficMessageRequest) {
+        self.init(timestamp: request.time, latitude: request.latitude, longitude: request.longitude, altitude: request.altitude, horizontalAccuracy: request.horizontalAccuracy, verticalAccuracy: request.verticalAccuracy, course: request.course, speed: request.speed)
+    }
+    
+    convenience init(communityMessageRequest request: CommunityMessageRequest) {
+        self.init(timestamp: request.time, latitude: request.latitude, longitude: request.longitude, altitude: request.altitude, horizontalAccuracy: request.horizontalAccuracy, verticalAccuracy: request.verticalAccuracy, course: request.course, speed: request.speed)
+    }
 }
 
 extension Location: SQLiteModel, Migration {

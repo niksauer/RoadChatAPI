@@ -12,19 +12,19 @@ import FluentSQLite
 final class CommunityMessage: Content {
     var id: Int?
     var senderID: User.ID
+    var locationID: Location.ID
     var time: Date
-    var location: String
     var message: String
     
-    init(senderID: User.ID, time: Date, location: String, message: String) {
+    init(senderID: User.ID, locationID: Location.ID, time: Date, message: String) {
         self.senderID = senderID
+        self.locationID = locationID
         self.time = time
-        self.location = location
         self.message = message
     }
     
-    convenience init(senderID: User.ID, communityRequest: CommunityMessageRequest) {
-        self.init(senderID: senderID, time: communityRequest.time, location: communityRequest.location, message: communityRequest.message)
+    convenience init(senderID: User.ID, locationID: Location.ID, communityRequest: CommunityMessageRequest) {
+        self.init(senderID: senderID, locationID: locationID, time: communityRequest.time, message: communityRequest.message)
     }
 }
 
@@ -36,16 +36,16 @@ extension CommunityMessage {
     struct PublicCommunityMessage: Content {
         let id: Int
         let senderID: User.ID
+        let locationID: Location.ID
         let time: Date
-        let location: String
         let message: String
         let upvotes: Int
         
         init(communityMessage: CommunityMessage, upvotes: Int) throws {
             self.id = try communityMessage.requireID()
             self.senderID = communityMessage.senderID
+            self.locationID = communityMessage.locationID
             self.time = communityMessage.time
-            self.location = communityMessage.location
             self.message = communityMessage.message
             self.upvotes = upvotes
         }

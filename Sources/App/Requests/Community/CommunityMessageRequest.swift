@@ -11,14 +11,21 @@ import Validation
 
 struct CommunityMessageRequest: Codable {
     let time: Date
-    let location: String
     let message: String
+    
+    let latitude: Double
+    let longitude: Double
+    let altitude: Double
+    let horizontalAccuracy: Double
+    let verticalAccuracy: Double
+    let course: Double
+    let speed: Double
 }
 
 extension CommunityMessageRequest: Validatable {
     static var validations: Validations = [
-        key(\CommunityMessageRequest.location): IsAlphanumeric(),
         key(\CommunityMessageRequest.message): IsCount(0...280),
+        key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
     ]
 }
 
@@ -31,8 +38,15 @@ extension CommunityMessageRequest: Payload {
     
     static var requiredParameters: [Payload.Parameter] = [
         ("time", Date()),
-        ("location", "a22exF"),
         ("message", "Stau auf der A3"),
+        
+        ("latitude", 45.123),
+        ("longitude", 42.0),
+        ("altitude", 24.2),
+        ("horizontalAccuracy", 34.0),
+        ("verticalAccuracy", 34.0),
+        ("course", 0.0),
+        ("speed", 60.0),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

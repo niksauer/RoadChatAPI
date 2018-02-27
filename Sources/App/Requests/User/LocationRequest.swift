@@ -10,6 +10,7 @@ import Vapor
 import Validation
 
 struct LocationRequest: Codable {
+    let time: Date
     let latitude: Double
     let longitude: Double
     let altitude: Double
@@ -33,6 +34,7 @@ extension LocationRequest: Payload {
     typealias RequestType = LocationRequest
     
     static var requiredParameters: [Payload.Parameter] = [
+        ("time", Date()),
         ("latitude", 45.123),
         ("longitude", 42.0),
         ("altitude", 24.2),

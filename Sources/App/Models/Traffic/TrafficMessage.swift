@@ -15,18 +15,18 @@ final class TrafficMessage: Content {
     var locationID: Location.ID
     var type: String
     var time: Date
-    var note: String?
+    var message: String?
     
-    init(senderID: User.ID, locationID: Location.ID, type: String, time: Date, note: String?) {
+    init(senderID: User.ID, locationID: Location.ID, type: String, time: Date, message: String?) {
         self.senderID = senderID
         self.locationID = locationID
         self.type = type
         self.time = time
-        self.note = note
+        self.message = message
     }
     
     convenience init(senderID: User.ID, locationID: Location.ID, trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: senderID, locationID: locationID, type: trafficRequest.type, time: trafficRequest.time, note: trafficRequest.note)
+        self.init(senderID: senderID, locationID: locationID, type: trafficRequest.type, time: trafficRequest.time, message: trafficRequest.message)
     }
 }
 
@@ -41,7 +41,7 @@ extension TrafficMessage {
         var locationID: Location.ID
         var type: String
         var time: Date
-        var note: String?
+        var message: String?
         var validations: Int
         var upvotes: Int
         
@@ -51,7 +51,7 @@ extension TrafficMessage {
             self.locationID = trafficMessage.locationID
             self.type = trafficMessage.type
             self.time = trafficMessage.time
-            self.note = trafficMessage.note
+            self.message = trafficMessage.message
             self.upvotes = upvotes
             self.validations = validations
         }

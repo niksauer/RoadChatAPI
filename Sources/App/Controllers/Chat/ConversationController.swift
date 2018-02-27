@@ -35,6 +35,16 @@ final class ConversationController {
         }
     }
 
+    /// Returns all `User`s which are within a `User`s specified chatRadius.
+//    func getNearbyUsers(_ req: Request) throws -> Future<[User.PublicUser]> {
+//        let requestor = try req.user()
+//        let users = User.query(on: req).filter(try \User.id != requestor.requireID()).all()
+//        
+//        for user in users {
+//            guard let location =
+//        }
+//    }
+    
     /// Saves a new `Conversation` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         let conversationRequest = try ConversationRequest.extract(from: req)
@@ -80,6 +90,7 @@ final class ConversationController {
         }
     }
     
+    /// Returns a parameterized `Conversation` including the newest `DirectMessage` as an excerpt.
     func get(_ req: Request) throws -> Future<Result> {
         let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)

@@ -12,6 +12,7 @@ import Authentication
 
 final class User: Content {
     var id: Int?
+    var locationID: Location.ID?
     var email: String
     var username: String
     var password: String
@@ -175,6 +176,10 @@ extension User {
     
     func getConversations(on req: Request) throws -> Future<[Conversation]> {
         return try conversations.query(on: req).all()
+    }
+    
+    func getLocation(on req: Request) throws -> Future<Location?> {
+        return Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
 }
 
