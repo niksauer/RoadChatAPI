@@ -10,7 +10,7 @@ import Vapor
 
 class CarRouter: RouteCollection {
     func boot(router: Router) throws {
-        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
+        let authMiddleware = try User.tokenAuthMiddleware(database: .mysql)
         let carController = CarController()
         
         // /car/Car.parameter

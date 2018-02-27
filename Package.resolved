@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "c16a15d2d9c9a2617ef3f655825673e1a4f179e2",
-          "version": "3.0.0-beta.3.1"
+          "revision": "d584c55eadbfe14cda60ccf74e6f5a81401f71ee",
+          "version": "3.0.0-rc.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-mysql",
         "state": {
           "branch": null,
-          "revision": "31e00520adbd1a2d35d1cf6abc3e6ca37fd36f61",
-          "version": "3.0.0-beta.3.1.0"
+          "revision": "8fef47ef39d3e0e4ad496831eee146b05ee6a03a",
+          "version": "3.0.0-rc.1"
         }
       },
       {
@@ -92,21 +92,21 @@
         }
       },
       {
+        "package": "MySQL",
+        "repositoryURL": "https://github.com/vapor/mysql.git",
+        "state": {
+          "branch": null,
+          "revision": "b0c7a4503ec61c42e61d6261e659f5887c7c13b6",
+          "version": "3.0.0-rc.1"
+        }
+      },
+      {
         "package": "Routing",
         "repositoryURL": "https://github.com/vapor/routing.git",
         "state": {
           "branch": null,
           "revision": "8210d28691a11d0d27b7a0b32117d7fd81099916",
           "version": "3.0.0-rc.1"
-        }
-      },
-      {
-        "package": "MySQL",
-        "repositoryURL": "https://github.com/vapor/mysql.git",
-        "state": {
-          "branch": null,
-          "revision": "06257bc9bf8a4614bc427583923d26d7b3d8a91d",
-          "version": "3.0.0-beta.4"
         }
       },
       {
@@ -124,15 +124,6 @@
         "state": {
           "branch": null,
           "revision": "738f3ebf3ebb8ea886d5dd8588dd46a54f66af1c",
-          "version": "3.0.0-rc.1"
-        }
-      },
-      {
-        "package": "SQLite",
-        "repositoryURL": "https://github.com/vapor/sqlite.git",
-        "state": {
-          "branch": null,
-          "revision": "951e4f128d15a8a49e009fcf7a49f8e66e189eb7",
           "version": "3.0.0-rc.1"
         }
       },
