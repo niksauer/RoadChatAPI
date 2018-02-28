@@ -107,7 +107,7 @@ final class JSendMiddleware: Middleware, Service {
     private static func getJSONString(for json: JSON) -> String {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-            return String(data: jsonData, encoding: .utf8) ?? ""
+            return String(data: jsonData, encoding: .utf8)?.replacingOccurrences(of: "\\", with: "") ?? ""
         } catch {
             return ""
         }

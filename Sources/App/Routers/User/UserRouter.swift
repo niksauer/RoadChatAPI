@@ -13,14 +13,25 @@ class UserRouter: RouteCollection {
         let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
         let userController = UserController()
         let loginController = LoginController()
+        let facebookController = FacebookController()
         let conversationController = ConversationController()
         
         // /user
         router.post(use: userController.create)
         
         // /user/login
-        router.post("login", use: loginController.login)
-        
+        router.group("login", configure: { group in
+            group.post(use: loginController.login)
+            
+            // user/login/facebook
+            group.group("facebook", configure: { group in
+                group.get(use: facebookController.loginViaFacebook)
+                
+                // user/login/facebook/success
+                group.get("success", use: facebookController.verifyFacebookIdentity)
+            })
+        })
+    
         // /user/logout
         router.grouped(authMiddleware).get("logout", use: loginController.logout)
         
