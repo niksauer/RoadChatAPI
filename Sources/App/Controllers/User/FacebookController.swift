@@ -8,18 +8,6 @@
 import Foundation
 import Vapor
 
-import Async
-import Bits
-import HTTP
-import TCP
-import TLS
-
-#if os(Linux)
-import OpenSSL
-#else
-import AppleTLS
-#endif
-
 struct OAuthURL: Content {
     let url: String
 }
@@ -34,11 +22,13 @@ final class FacebookController {
     private enum Method: Hashable {
         case loginRequest
         case verifyIdentity
+        case inspectToken
     }
     
     private let urlForMethod: [Method: String] = [
         .loginRequest: "https://www.facebook.com/v2.12/dialog/oauth",
-        .verifyIdentity: "https://graph.facebook.com/v2.12/oauth/access_token"
+        .verifyIdentity: "https://graph.facebook.com/v2.12/oauth/access_token",
+        .inspectToken: "https://graph.facebook.com/debug_token"
     ]
 
     private func facebookURL(method: Method, parameters: [String: String]) -> URL {
@@ -76,7 +66,7 @@ final class FacebookController {
         }
         
         guard let code = parameters["code"], let state = parameters["state"] else {
-            throw Abort(.internalServerError)
+            throw Abort(.badRequest)
         }
         
         let url = facebookURL(method: .verifyIdentity, parameters: [
@@ -89,51 +79,46 @@ final class FacebookController {
         let uri = URI(rawValue: url.absoluteString)!
         let hostname = uri.hostname!
         
-//        let eventLoop = try DefaultEventLoop(label: "api.roadchat.facebook")
-//        let tcpSocket = try TCPSocket(isNonBlocking: true)
-//        let tcpClient = try TCPClient(socket: tcpSocket)
-//
-//        var settings = TLSClientSettings()
-//        settings.peerDomainName = hostname
-//
-//        #if os(macOS)
-//        let tlsClient = try AppleTLSClient(tcp: tcpClient, using: settings)
-//        #else
-//        let tlsClient = try OpenSSLClient(tcp: tcpClient, using: settings)
-//        #endif
-//
-//        try tlsClient.connect(hostname: hostname, port: 80)
-//
-//        let client = HTTPClient(stream: tlsClient.socket.stream(on: eventLoop), on: eventLoop)
-//        let request = HTTPRequest(method: .get, uri: uri, headers: [.host: hostname])
+        let client = try req.make(Client.self)
         
-        let client = try HTTPClient.tcp(hostname: hostname, port: 80, on: req, onError: { _ , error in })
-        let request = HTTPRequest(method: .get, uri: uri, headers: [.host: hostname])
-        
-        let responseData = try client.send(request).flatMap(to: Data.self) { res in
-            return res.body.makeData(max: 1_000_000)
+        let responseData = try client.get(uri, headers: [.host: hostname]).flatMap(to: Data.self) { response in
+            return response.http.body.makeData(max: 1_000_000)
         }.await(on: req)
         
-        guard let responseString = String(data: responseData, encoding: .utf8) else {
+        guard let jsonDictionary = try JSONSerialization.jsonObject(with: responseData, options: []) as? [String: Any] else {
             throw Abort(.internalServerError)
         }
-    
         
-//        guard let jsonDictionary = try? JSONSerialization.jsonObject(with: responseData, options: []) as? [String: Any] else {
-//            throw Abort(.internalServerError)
-//        }
+        guard let accessToken = jsonDictionary["access_token"] as? String, let duration = jsonDictionary["expires_in"] as? Int else {
+            throw Abort(.badRequest)
+        }
         
-//        print(responseString)
-        
-//        struct AccessToken: Codable {
-//            let access_token: String
-//            let token_type: String
-//            let expires_in: Int
-//        }
-//
-//        response.body.
-//        print(response.)
+        try inspectAccessToken(accessToken, on: req)
         
         return Future(.ok)
+    }
+    
+    func inspectAccessToken(_ token: String, on req: Request) throws {
+        let url = facebookURL(method: .inspectToken, parameters: [
+            "input_token": token,
+            "access_token": "\(FacebookDashboard.appID)|\(FacebookDashboard.appSecret)"
+        ])
+        
+        let uri = URI(rawValue: url.absoluteString)!
+        let hostname = uri.hostname!
+        
+        let client = try req.make(Client.self)
+        
+        let responseData = try client.get(uri, headers: [.host: hostname]).flatMap(to: Data.self) { response in
+            return response.http.body.makeData(max: 1_000_000)
+        }.await(on: req)
+        
+        guard let jsonDictionary = try JSONSerialization.jsonObject(with: responseData, options: []) as? [String: Any] else {
+            throw Abort(.internalServerError)
+        }
+        
+        guard let appID = jsonDictionary["app_id"] as? String, let isValid = jsonDictionary["is_valid"] as? Bool, appID == FacebookDashboard.appID, isValid else {
+            throw Abort(.unauthorized)
+        }
     }
 }
