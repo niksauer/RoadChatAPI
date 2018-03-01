@@ -21,15 +21,11 @@ extension Payload {
         var missingParameters = [Parameter]()
         
         for parameter in parameters {
-            do {
-                switch parameter.type {
-                case is [Any]:
-                    _ = try req.content.get([String].self, at: parameter.name).await(on: req)
-                default:
-                    _ = try req.content.get(String.self, at: parameter.name).await(on: req)
-                }
-            } catch {
-                missingParameters.append(parameter)
+            switch parameter.type {
+            case is [Any]:
+                req.content.get([String].self, at: parameter.name).catch({ _ in missingParameters.append(parameter) })
+            default:
+                req.content.get(String.self, at: parameter.name).catch({ _ in missingParameters.append(parameter) })
             }
         }
 
@@ -39,35 +35,28 @@ extension Payload {
     private static func checkParameterType(in req: Request, parameters: [Parameter]) throws {
         var invalidParameters = [String]()
         
+        func addInvalidParameter(_ parameter: Parameter, typeName: String) {
+            invalidParameters.append("\(parameter.name); expected: \(typeName)")
+        }
+        
+        
         for parameter in parameters {
-            var typeName = String()
-            
-            do {
-                switch parameter.type {
-                case is String:
-                    typeName = "String"
-                    _ = try req.content.get(String.self, at: parameter.name).await(on: req)
-                case is Int:
-                    typeName = "Int"
-                    _ = try req.content.get(Int.self, at: parameter.name).await(on: req)
-                case is Double:
-                    typeName = "Double"
-                    _ = try req.content.get(Double.self, at: parameter.name).await(on: req)
-                case is Date:
-                    typeName = "Date"
-                    _ = try req.content.get(Date.self, at: parameter.name).await(on: req)
-                case is Bool:
-                    typeName = "Bool"
-                    _ = try req.content.get(Bool.self, at: parameter.name).await(on: req)
-                case is [Int]:
-                    typeName = "Array<Int>"
-                    _ = try req.content.get([Int].self, at: parameter.name).await(on: req)
-                default:
-                    // unknown data type in request
-                    throw Abort(.badRequest)
-                }
-            } catch {
-                invalidParameters.append("\(parameter.name); expected: \(typeName)")
+            switch parameter.type {
+            case is String:
+                req.content.get(String.self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "String") })
+            case is Int:
+                req.content.get(Int.self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "Int") })
+            case is Double:
+                req.content.get(Double.self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "Double") })
+            case is Date:
+                req.content.get(Date.self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "Date") })
+            case is Bool:
+                req.content.get(Bool.self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "Bool") })
+            case is [Int]:
+                req.content.get([Int].self, at: parameter.name).catch({ _ in addInvalidParameter(parameter, typeName: "Array<Int>") })
+            default:
+                // unknown data type in request
+                throw Abort(.badRequest)
             }
         }
         
@@ -76,7 +65,7 @@ extension Payload {
         }
     }
     
-    static func extract(from req: Request) throws -> RequestType {
+    static func extract(from req: Request) throws -> Future<RequestType> {
         let missingParameters = findMissingParameters(in: req, required: requiredParameters)
         
         guard missingParameters.isEmpty else {
@@ -101,16 +90,17 @@ extension Payload {
         
         try checkParameterType(in: req, parameters: presentOptionalParameters)
         
-        let body = try req.content.decode(RequestType.self).await(on: req)
-        
-        do {
-            try body.validate()
-            try body.validateOptionals()
-        } catch {
-            throw RequestFail.mismatchedContraints(error)
+        return try req.content.decode(RequestType.self).map(to: RequestType.self) { body in
+            do {
+                try body.validate()
+                try body.validateOptionals()
+            } catch {
+                throw RequestFail.mismatchedContraints(error)
+            }
+            
+            return body
         }
         
-        return body
     }
 }
 

@@ -22,7 +22,7 @@ final class CarController {
         let car = try req.parameter(Car.self).await(on: req)
         try req.user().checkOwnership(for: car, on: req)
         
-        let updatedCar = try CarRequest.extract(from: req)
+        let updatedCar = try CarRequest.extract(from: req).await(on: req)
         
         car.manufacturer = updatedCar.manufacturer
         car.model = updatedCar.model

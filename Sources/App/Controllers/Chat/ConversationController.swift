@@ -37,7 +37,7 @@ final class ConversationController {
 
     /// Saves a new `Conversation` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let conversationRequest = try ConversationRequest.extract(from: req)
+        let conversationRequest = try ConversationRequest.extract(from: req).await(on: req)
         let creator = try req.user()
         
         var participants = [creator]
@@ -168,7 +168,7 @@ final class ConversationController {
         let conversation = try req.parameter(Resource.self).await(on: req)
         try req.user().checkParticipation(in: conversation, on: req)
         
-        let messageRequest = try DirectMessageRequest.extract(from: req)
+        let messageRequest = try DirectMessageRequest.extract(from: req).await(on: req)
         
         return try DirectMessage(senderID: req.user().requireID(), conversationID: conversation.requireID(), messageRequest: messageRequest).create(on: req).transform(to: .ok)
     }

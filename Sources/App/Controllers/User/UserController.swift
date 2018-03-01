@@ -18,7 +18,7 @@ final class UserController {
     
     /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let registerRequest = try RegisterRequest.extract(from: req)
+        let registerRequest = try RegisterRequest.extract(from: req).await(on: req)
         
         return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
             guard existingUser == nil else {
@@ -65,7 +65,7 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
 
-        let updatedUser = try RegisterRequest.extract(from: req)
+        let updatedUser = try RegisterRequest.extract(from: req).await(on: req)
         
         let hasher = try req.make(BCryptHasher.self)
         let hashedPassword = try hasher.make(updatedUser.password)
@@ -108,7 +108,7 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        let updatedSettings = try SettingsRequest.extract(from: req)
+        let updatedSettings = try SettingsRequest.extract(from: req).await(on: req)
         
         return try user.getSettings(on: req).flatMap(to: HTTPStatus.self) { settings in
             settings.communityRadius = updatedSettings.communityRadius
@@ -133,7 +133,7 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        let updatedPrivacy = try PrivacyRequest.extract(from: req)
+        let updatedPrivacy = try PrivacyRequest.extract(from: req).await(on: req)
         
         return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
             privacy.showFirstName = updatedPrivacy.showFirstName
@@ -173,7 +173,7 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        let profileRequest = try ProfileRequest.extract(from: req)
+        let profileRequest = try ProfileRequest.extract(from: req).await(on: req)
         
         return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
             guard let profile = existingProfile else {
@@ -207,7 +207,7 @@ final class UserController {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        let carRequest = try CarRequest.extract(from: req)
+        let carRequest = try CarRequest.extract(from: req).await(on: req)
         
         return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
     }

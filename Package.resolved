@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/vapor/async.git",
         "state": {
           "branch": null,
-          "revision": "887ddb41af15a39c3e47b9e0b207aa8efd8bafc3",
-          "version": "1.0.0-rc.1"
+          "revision": "76ed7841b32dcc47168e8d9040ba03c024224d0c",
+          "version": "1.0.0-rc.1.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "086a41eeeb2c97e53002950ae3b65b365759b66b",
-          "version": "3.0.0-rc.1"
+          "revision": "0dd54c6e369f575a13f2c9964609b6c7d2dab909",
+          "version": "3.0.0-rc.1.0.1"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/crypto.git",
         "state": {
           "branch": null,
-          "revision": "9a708a33ec21f5d1eea858c10cf7e9b8306a0b30",
-          "version": "3.0.0-rc.1"
+          "revision": "e5dbff5eac700fe925f95a4e6eee5424f609d0d6",
+          "version": "3.0.0-rc.1.1.1"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/vapor/engine.git",
         "state": {
           "branch": null,
-          "revision": "cfe3ffc04b0316564a40ad8e5dfb9a355d936c25",
-          "version": "3.0.0-rc.1"
+          "revision": "e12531d2b37895d21cd8b8d13ad930fa85217e9e",
+          "version": "3.0.0-rc.1.0.1"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "d584c55eadbfe14cda60ccf74e6f5a81401f71ee",
-          "version": "3.0.0-rc.1"
+          "revision": "cffc5f4da1adab41bb4c21205e469e255327441e",
+          "version": "3.0.0-rc.1.0.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-mysql",
         "state": {
           "branch": null,
-          "revision": "8fef47ef39d3e0e4ad496831eee146b05ee6a03a",
-          "version": "3.0.0-rc.1"
+          "revision": "25d442980a32bbc58ae00702c3af01fdaac403a3",
+          "version": "3.0.0-rc.1.1"
         }
       },
       {
@@ -96,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/mysql.git",
         "state": {
           "branch": null,
-          "revision": "b0c7a4503ec61c42e61d6261e659f5887c7c13b6",
-          "version": "3.0.0-rc.1"
+          "revision": "ec23247869c0805506982aaa740e362286986b40",
+          "version": "3.0.0-rc.1.1"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/vapor/tls.git",
         "state": {
           "branch": null,
-          "revision": "648e653758ad29f7087c95a91bc0d183712b94ab",
-          "version": "3.0.0-rc.1"
+          "revision": "cfd8cc0f06841ee15469c5fc98131e47511f8e94",
+          "version": "3.0.0-rc.1.0.1"
         }
       },
       {
