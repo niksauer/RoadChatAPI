@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
+import RoadChatKit
 
 /// Controls basic CRUD operations on `CommunityMessage`s.
 final class CommunityController {

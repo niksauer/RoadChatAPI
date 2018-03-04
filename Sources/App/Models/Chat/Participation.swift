@@ -8,70 +8,36 @@
 import Foundation
 import Vapor
 import FluentSQLite
-
-enum ApprovalStatus: String {
-    case requested
-    case accepted
-    case denied
-}
-
-final class Participation: Content {
-    var id: Int?
-    var userID: User.ID
-    var conversationID: Conversation.ID
-    var approvalStatus: String = ApprovalStatus.requested.rawValue
-    var joining: Date = Date()
-    
-    init(userID: User.ID, conversationID: Conversation.ID) {
-        self.userID = userID
-        self.conversationID = conversationID
-    }
-}
-
-extension Participation {
-    func publicParticipant() -> PublicParticipant {
-        return PublicParticipant(participant: self)
-    }
-    
-    struct PublicParticipant: Content {
-        let userID: User.ID
-        let approvalStatus: String
-        let joining: Date
-        
-        init(participant: Participation) {
-            self.userID = participant.userID
-            self.approvalStatus = participant.approvalStatus
-            self.joining = participant.joining
-        }
-    }
-}
+import RoadChatKit
 
 extension Participation: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<Participation, Int?> {
+    public static var idKey: WritableKeyPath<Participation, Int?> {
         return \Participation.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "Participation"
     }
 }
 
 extension Participation: ModifiablePivot {
-    typealias Left = User
-    typealias Right = Conversation
+    public typealias Left = User
+    public typealias Right = Conversation
     
-    static var leftIDKey: WritableKeyPath<Participation, Int> {
+    public static var leftIDKey: WritableKeyPath<Participation, Int> {
         return \Participation.userID
     }
     
-    static var rightIDKey: WritableKeyPath<Participation, Int> {
+    public static var rightIDKey: WritableKeyPath<Participation, Int> {
         return \Participation.conversationID
     }
     
-    convenience init(_ left: Left, _ right: Right) throws {
+    public convenience init(_ left: Left, _ right: Right) throws {
         try self.init(userID: left.requireID(), conversationID: right.requireID())
     }
 }
+
+extension Participation.PublicParticipant: Content {}
 
 extension User {
     /// Checks participation of the `User` in a `Conversaton`.

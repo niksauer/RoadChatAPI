@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import Fluent
 import Crypto
+import RoadChatKit
 
 /// Controls basic CRUD operations on `User`s.
 final class UserController {
@@ -141,7 +142,7 @@ final class UserController {
             privacy.showBirth = updatedPrivacy.showBirth
             privacy.showSex = updatedPrivacy.showSex
             privacy.showAddress = updatedPrivacy.showAddress
-            privacy.showDescription = updatedPrivacy.showDescription
+            privacy.showBiography = updatedPrivacy.showBiography
             
             return privacy.update(on: req).transform(to: .ok)
         }
@@ -185,7 +186,7 @@ final class UserController {
             profile.lastName = profileRequest.lastName
             profile.birth = profileRequest.birth
             profile.sex = profileRequest.sex
-            profile.description = profileRequest.description
+            profile.biography = profileRequest.biography
             profile.streetName = profileRequest.streetName
             profile.streetNumber = profileRequest.streetNumber
             profile.postalCode = profileRequest.postalCode
@@ -196,34 +197,38 @@ final class UserController {
     }
     
     /// Returns all `Cars`s associated to a parameterized `User`.
-    func getCars(_ req: Request) throws -> Future<[Car]> {
-        return try req.parameter(Resource.self).flatMap(to: [Car].self) { user in
-            return try user.getCars(on: req)
+    func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
+        return try req.parameter(Resource.self).flatMap(to: [Car.PublicCar].self) { user in
+            return try user.getCars(on: req).map(to: [Car.PublicCar].self) { cars in
+                return try cars.map({ try $0.publicCar() })
+            }
         }
     }
     
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
-    func createCar(_ req: Request) throws -> Future<Car> {
+    func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
         let carRequest = try CarRequest.extract(from: req)
         
-        return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req)
+        return Car(userID: try user.requireID(), carRequest: carRequest).create(on: req).map(to: Car.PublicCar.self) { car in
+            return try car.publicCar()
+        }
     }
     
     /// Returns the `Location` for a parameterized `User`.
-    func getLocation(_ req: Request) throws -> Future<Location> {
+    func getLocation(_ req: Request) throws -> Future<Location.PublicLocation> {
         let user = try req.parameter(Resource.self).await(on: req)
         try req.user().checkOwnership(for: user, on: req)
         
-        return try user.getLocation(on: req).map(to: Location.self) { location in
+        return try user.getLocation(on: req).map(to: Location.PublicLocation.self) { location in
             guard let location = location else {
                 // no location associated to user
                 throw Abort(.notFound)
             }
             
-            return location
+            return location.publicLocation()
         }
     }
     

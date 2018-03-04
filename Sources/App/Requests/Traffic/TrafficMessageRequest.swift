@@ -8,23 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct TrafficMessageRequest: Codable {
-    let type: String
-    let time: Date
-    let message: String?
-    
-    let latitude: Double
-    let longitude: Double
-    let altitude: Double
-    let horizontalAccuracy: Double
-    let verticalAccuracy: Double
-    let course: Double
-    let speed: Double
-}
+import RoadChatKit
 
 extension TrafficMessageRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\TrafficMessageRequest.type): IsTrafficType(),
         key(\TrafficMessageRequest.course): IsCount(0.0...360.0)
     ]

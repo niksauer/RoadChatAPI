@@ -8,19 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct PrivacyRequest: Codable {
-    let shareLocation: Bool
-    let showFirstName: Bool
-    let showLastName: Bool
-    let showBirth: Bool
-    let showSex: Bool
-    let showAddress: Bool
-    let showDescription: Bool
-}
+import RoadChatKit
 
 extension PrivacyRequest: Validatable {
-    static var validations: Validations = [:]
+    public static var validations: Validations = [:]
 }
 
 extension PrivacyRequest: OptionallyValidatable {
@@ -37,7 +28,7 @@ extension PrivacyRequest: Payload {
         ("showBirth", false),
         ("showSex", true),
         ("showAddress", false),
-        ("showDescription", true)
+        ("showBiography", true)
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import Fluent
 import GeoSwift
+import RoadChatKit
 
 /// Controls basic CRUD operations on `TrafficMessage`s.
 final class TrafficController {

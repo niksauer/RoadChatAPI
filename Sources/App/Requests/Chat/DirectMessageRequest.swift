@@ -8,14 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct DirectMessageRequest: Codable {
-    let time: Date
-    let message: String
-}
+import RoadChatKit
 
 extension DirectMessageRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\DirectMessageRequest.message): IsCount(1...1000),
     ]
 }

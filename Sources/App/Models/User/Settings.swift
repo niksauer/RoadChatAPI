@@ -8,47 +8,10 @@
 import Foundation
 import Vapor
 import FluentSQLite
-
-final class Settings: Content {
-    var id: Int?
-    var userID: User.ID
-    var communityRadius: Int = 10
-    var trafficRadius: Int = 5
-    
-    init(userID: User.ID) {
-        self.userID = userID
-    }
-    
-    init(userID: User.ID, communityRadius: Int, trafficRadius: Int) {
-        self.userID = userID
-        self.communityRadius = communityRadius
-        self.trafficRadius = trafficRadius
-    }
-    
-    convenience init(userID: User.ID, settingsRequest request: SettingsRequest) {
-        self.init(userID: userID, communityRadius: request.communityRadius, trafficRadius: request.trafficRadius)
-    }
-
-}
-
-extension Settings {
-    func publicSettings() -> PublicSettings {
-        return PublicSettings(settings: self)
-    }
-    
-    struct PublicSettings: Content {
-        let communityRadius: Int
-        let trafficRadius: Int
-        
-        init(settings: Settings) {
-            self.communityRadius = settings.communityRadius
-            self.trafficRadius = settings.trafficRadius
-        }
-    }
-}
+import RoadChatKit
 
 extension Settings: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<Settings, Int?> {
+    public static var idKey: WritableKeyPath<Settings, Int?> {
         return \Settings.id
     }
     
@@ -56,3 +19,5 @@ extension Settings: SQLiteModel, Migration {
         return parent(\Settings.userID)
     }
 }
+
+extension Settings.PublicSettings: Content {}

@@ -8,13 +8,16 @@
 import Foundation
 import Vapor
 import Fluent
+import RoadChatKit
 
 /// Controls basic CRUD operations on `Car`s.
 final class CarController {
     
     /// Returns a parameterized `Car`.
-    func get(_ req: Request) throws -> Future<Car> {
-        return try req.parameter(Car.self)
+    func get(_ req: Request) throws -> Future<Car.PublicCar> {
+        return try req.parameter(Car.self).map(to: Car.PublicCar.self) { car in
+            return try car.publicCar()
+        }
     }
     
     /// Updates a parameterized `Car`.

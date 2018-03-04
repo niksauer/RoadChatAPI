@@ -10,6 +10,7 @@ import Vapor
 import Fluent
 import GeoSwift
 import WebSocket
+import RoadChatKit
 
 /// Controls basic CRUD operations on `Conversation`s.
 final class ConversationController {

@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import WebSocket
+import RoadChatKit
 
 class WebsocketRouter: RouteCollection {
     func boot(router: Router) throws {
