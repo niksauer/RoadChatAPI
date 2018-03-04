@@ -10,7 +10,7 @@ import Vapor
 import FluentSQLite
 import RoadChatKit
 
-final class Validation: Content {
+final class Validation: Codable {
     var id: Int?
     var userID: User.ID
     var messageID: TrafficMessage.ID
@@ -18,7 +18,6 @@ final class Validation: Content {
     init(userID: User.ID, messageID: TrafficMessage.ID) {
         self.userID = userID
         self.messageID = messageID
-
     }
 }
 

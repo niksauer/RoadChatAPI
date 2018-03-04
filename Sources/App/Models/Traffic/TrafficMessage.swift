@@ -10,57 +10,8 @@ import Vapor
 import FluentSQLite
 import RoadChatKit
 
-final class TrafficMessage: Content {
-    var id: Int?
-    var senderID: User.ID
-    var locationID: Location.ID
-    var type: String
-    var time: Date
-    var message: String?
-    
-    init(senderID: User.ID, locationID: Location.ID, type: String, time: Date, message: String?) {
-        self.senderID = senderID
-        self.locationID = locationID
-        self.type = type
-        self.time = time
-        self.message = message
-    }
-    
-    convenience init(senderID: User.ID, locationID: Location.ID, trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: senderID, locationID: locationID, type: trafficRequest.type, time: trafficRequest.time, message: trafficRequest.message)
-    }
-}
-
-extension TrafficMessage {
-    func publicTrafficMessage(on req: Request) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: self.getKarmaLevel(on: req), validations: self.getValidationLevel(on: req))
-    }
-    
-    struct PublicTrafficMessage: Content {
-        var id: Int
-        var senderID: User.ID
-        var locationID: Location.ID
-        var type: String
-        var time: Date
-        var message: String?
-        var validations: Int
-        var upvotes: Int
-        
-        init(trafficMessage: TrafficMessage, upvotes: Int, validations: Int) throws {
-            self.id = try trafficMessage.requireID()
-            self.senderID = trafficMessage.senderID
-            self.locationID = trafficMessage.locationID
-            self.type = trafficMessage.type
-            self.time = trafficMessage.time
-            self.message = trafficMessage.message
-            self.upvotes = upvotes
-            self.validations = validations
-        }
-    }
-}
-
 extension TrafficMessage: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<TrafficMessage, Int?> {
+    public static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
     }
     
@@ -76,7 +27,7 @@ extension TrafficMessage: Ownable {
 }
 
 extension TrafficMessage: Parameter {
-    static func make(for parameter: String, using container: Container) throws -> Future<TrafficMessage> {
+    public static func make(for parameter: String, using container: Container) throws -> Future<TrafficMessage> {
         guard let id = Int(parameter) else {
             // id must be integer
             throw Abort(.badRequest)
@@ -115,4 +66,10 @@ extension TrafficMessage {
             return location
         }
     }
+    
+    func publicTrafficMessage(on req: Request) throws -> PublicTrafficMessage {
+        return try PublicTrafficMessage(trafficMessage: self, upvotes: self.getKarmaLevel(on: req), validations: self.getValidationLevel(on: req))
+    }
 }
+
+extension TrafficMessage.PublicTrafficMessage: Content {}
