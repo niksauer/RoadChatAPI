@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
 final class DirectMessage: Content {
     var id: Int?

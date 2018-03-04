@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
 final class CommunityMessageKarmaDonation: Content {
     var id: Int?

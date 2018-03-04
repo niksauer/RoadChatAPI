@@ -8,22 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct CommunityMessageRequest: Codable {
-    let time: Date
-    let message: String
-    
-    let latitude: Double
-    let longitude: Double
-    let altitude: Double
-    let horizontalAccuracy: Double
-    let verticalAccuracy: Double
-    let course: Double
-    let speed: Double
-}
+import RoadChatKit
 
 extension CommunityMessageRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\CommunityMessageRequest.message): IsCount(0...280),
         key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
     ]

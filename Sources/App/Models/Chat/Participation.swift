@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
 enum ApprovalStatus: String {
     case requested

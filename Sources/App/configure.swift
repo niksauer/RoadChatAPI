@@ -1,6 +1,7 @@
 import Vapor
 import FluentSQLite
 import Authentication
+import RoadChatKit
 
 /// Called before your application initializes.
 ///
@@ -35,7 +36,7 @@ public func configure(
     var migrations = MigrationConfig()
     
     migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: Token.self, database: .sqlite)
+    migrations.add(model: BearerToken.self, database: .sqlite)
     migrations.add(model: Settings.self, database: .sqlite)
     migrations.add(model: Privacy.self, database: .sqlite)
     migrations.add(model: Profile.self, database: .sqlite)
