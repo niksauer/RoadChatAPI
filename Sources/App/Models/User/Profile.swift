@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
 final class Profile: Content {
     var id: Int?
@@ -16,20 +17,20 @@ final class Profile: Content {
     var lastName: String
     var birth: Date
     var sex: String?
-    var description: String?
+    var biography: String?
     var streetName: String?
     var streetNumber: Int?
     var postalCode: Int?
     var country: String?
     
     
-    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: String?, description: String?, streetName: String?, streetNumber: Int?, postalCode: Int?, country: String?) {
+    init(userID: User.ID, firstName: String, lastName: String, birth: Date, sex: String?, biography: String?, streetName: String?, streetNumber: Int?, postalCode: Int?, country: String?) {
         self.userID = userID
         self.firstName = firstName
         self.lastName = lastName
         self.birth = birth
         self.sex = sex
-        self.description = description
+        self.biography = biography
         self.streetName = streetName
         self.streetNumber = streetNumber
         self.postalCode = postalCode
@@ -37,7 +38,7 @@ final class Profile: Content {
     }
     
     convenience init(userID: User.ID, profileRequest request: ProfileRequest) {
-        self.init(userID: userID, firstName: request.firstName, lastName: request.lastName, birth: request.birth, sex: request.sex, description: request.description, streetName: request.streetName, streetNumber: request.streetNumber, postalCode: request.postalCode, country: request.country)
+        self.init(userID: userID, firstName: request.firstName, lastName: request.lastName, birth: request.birth, sex: request.sex, biography: request.biography, streetName: request.streetName, streetNumber: request.streetNumber, postalCode: request.postalCode, country: request.country)
     }
 }
 
@@ -51,7 +52,7 @@ extension Profile {
         var lastName: String?
         var birth: Date?
         var sex: String?
-        var description: String?
+        var biography: String?
         var streetName: String?
         var streetNumber: Int?
         var postalCode: Int?
@@ -63,7 +64,7 @@ extension Profile {
                 self.lastName = profile.lastName
                 self.birth = profile.birth
                 self.sex = profile.sex
-                self.description = profile.description
+                self.biography = profile.biography
                 self.streetName = profile.streetName
                 self.streetNumber = profile.streetNumber
                 self.postalCode = profile.postalCode
@@ -87,7 +88,7 @@ extension Profile {
                     self.sex = profile.sex
                 }
                 
-                self.description = profile.description
+                self.biography = profile.biography
                 
                 if privacy.showAddress {
                     self.streetName = profile.streetName

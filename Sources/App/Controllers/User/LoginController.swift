@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import Fluent
 import Crypto
+import RoadChatKit
 
 /// Controls token-based authentication.
 final class LoginController {

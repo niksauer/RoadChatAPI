@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import Fluent
 import Crypto
+import RoadChatKit
 
 /// Controls basic CRUD operations on `User`s.
 final class UserController {
@@ -141,7 +142,7 @@ final class UserController {
             privacy.showBirth = updatedPrivacy.showBirth
             privacy.showSex = updatedPrivacy.showSex
             privacy.showAddress = updatedPrivacy.showAddress
-            privacy.showDescription = updatedPrivacy.showDescription
+            privacy.showBiography = updatedPrivacy.showBiography
             
             return privacy.update(on: req).transform(to: .ok)
         }
@@ -185,7 +186,7 @@ final class UserController {
             profile.lastName = profileRequest.lastName
             profile.birth = profileRequest.birth
             profile.sex = profileRequest.sex
-            profile.description = profileRequest.description
+            profile.biography = profileRequest.biography
             profile.streetName = profileRequest.streetName
             profile.streetNumber = profileRequest.streetNumber
             profile.postalCode = profileRequest.postalCode

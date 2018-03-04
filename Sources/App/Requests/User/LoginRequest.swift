@@ -8,14 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct LoginRequest: Codable {
-    let user: String
-    let password: String
-}
+import RoadChatKit
 
 extension LoginRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\LoginRequest.user): IsASCII(),
         key(\LoginRequest.password): IsCount(8...) && IsASCII()
     ]

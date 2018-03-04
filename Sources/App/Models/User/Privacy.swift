@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
 final class Privacy: Content {
     var id: Int?
@@ -18,13 +19,13 @@ final class Privacy: Content {
     var showBirth = false
     var showSex = true
     var showAddress = false
-    var showDescription = true
+    var showBiography = true
     
     init(userID: User.ID) {
         self.userID = userID
     }
     
-    init(userID: User.ID, shareLocation: Bool, showFirstName: Bool, showLastName: Bool, showBirth: Bool, showSex: Bool, showAddress: Bool, showProfession: Bool) {
+    init(userID: User.ID, shareLocation: Bool, showFirstName: Bool, showLastName: Bool, showBirth: Bool, showSex: Bool, showAddress: Bool, showBiography: Bool) {
         self.userID = userID
         self.shareLocation = shareLocation
         self.showFirstName = showFirstName
@@ -32,11 +33,11 @@ final class Privacy: Content {
         self.showBirth = showBirth
         self.showSex = showSex
         self.showAddress = showAddress
-        self.showDescription = showProfession
+        self.showBiography = showBiography
     }
     
     convenience init(userID: User.ID, privacyRequest request: PrivacyRequest) {
-        self.init(userID: userID, shareLocation: request.shareLocation, showFirstName: request.showFirstName, showLastName: request.showLastName, showBirth: request.showBirth, showSex: request.showSex, showAddress: request.showAddress, showProfession: request.showDescription)
+        self.init(userID: userID, shareLocation: request.shareLocation, showFirstName: request.showFirstName, showLastName: request.showLastName, showBirth: request.showBirth, showSex: request.showSex, showAddress: request.showAddress, showBiography: request.showBiography)
     }
 }
 
@@ -52,7 +53,7 @@ extension Privacy {
         let showBirth: Bool
         let showSex: Bool
         let showAddress: Bool
-        let showDescription: Bool
+        let showBiography: Bool
         
         init(privacy: Privacy) {
             self.shareLocation = privacy.shareLocation
@@ -61,7 +62,7 @@ extension Privacy {
             self.showBirth = privacy.showBirth
             self.showSex = privacy.showSex
             self.showAddress = privacy.showAddress
-            self.showDescription = privacy.showDescription
+            self.showBiography = privacy.showBiography
         }
     }
 }

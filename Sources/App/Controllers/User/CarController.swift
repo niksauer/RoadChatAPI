@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
+import RoadChatKit
 
 /// Controls basic CRUD operations on `Car`s.
 final class CarController {
