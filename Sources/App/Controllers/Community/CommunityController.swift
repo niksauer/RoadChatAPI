@@ -25,7 +25,7 @@ final class CommunityController {
     
     /// Saves a new `CommunityMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let communityMessageRequest = try CommunityMessageRequest.extract(from: req)
+        let communityMessageRequest = try CommunityMessageRequest.extract(from: req).await(on: req)
         let creator = try req.user()
         
         return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in

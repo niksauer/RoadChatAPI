@@ -76,41 +76,41 @@ extension Payload {
         }
     }
     
-    static func extract(from req: Request) throws -> RequestType {
-        let missingParameters = findMissingParameters(in: req, required: requiredParameters)
+    static func extract(from req: Request) throws -> Future<RequestType> {
+//        let missingParameters = findMissingParameters(in: req, required: requiredParameters)
+//
+//        guard missingParameters.isEmpty else {
+//            throw RequestFail.missingParameters(missingParameters.map({ $0.name.makeBasicKey().stringValue }))
+//        }
+//
+//        try checkParameterType(in: req, parameters: requiredParameters)
+//
+//        let missingOptionalParameters = findMissingParameters(in: req, required: optionalParameters)
+//        var presentOptionalParameters = [Parameter]()
+//
+//        for parameter in optionalParameters {
+//            let parameterName = parameter.name.makeBasicKey().stringValue
+//
+//            if !missingOptionalParameters.contains(where: { missingParameter in
+//                let missingParameterName = missingParameter.name.makeBasicKey().stringValue
+//                return missingParameterName == parameterName
+//            }) {
+//                presentOptionalParameters.append(parameter)
+//            }
+//        }
+//
+//        try checkParameterType(in: req, parameters: presentOptionalParameters)
         
-        guard missingParameters.isEmpty else {
-            throw RequestFail.missingParameters(missingParameters.map({ $0.name.makeBasicKey().stringValue }))
-        }
-        
-        try checkParameterType(in: req, parameters: requiredParameters)
-        
-        let missingOptionalParameters = findMissingParameters(in: req, required: optionalParameters)
-        var presentOptionalParameters = [Parameter]()
-    
-        for parameter in optionalParameters {
-            let parameterName = parameter.name.makeBasicKey().stringValue
-            
-            if !missingOptionalParameters.contains(where: { missingParameter in
-                let missingParameterName = missingParameter.name.makeBasicKey().stringValue
-                return missingParameterName == parameterName
-            }) {
-                presentOptionalParameters.append(parameter)
+        return try req.content.decode(RequestType.self).map(to: RequestType.self) { request in
+            do {
+                try request.validate()
+                try request.validateOptionals()
+            } catch {
+                throw RequestFail.mismatchedContraints(error)
             }
+            
+            return request
         }
-        
-        try checkParameterType(in: req, parameters: presentOptionalParameters)
-        
-        let body = try req.content.decode(RequestType.self).await(on: req)
-        
-        do {
-            try body.validate()
-            try body.validateOptionals()
-        } catch {
-            throw RequestFail.mismatchedContraints(error)
-        }
-        
-        return body
     }
 }
 

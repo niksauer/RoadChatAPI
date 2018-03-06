@@ -26,7 +26,7 @@ final class TrafficController {
 
     /// Saves a new `TrafficMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let trafficMessageRequest = try TrafficMessageRequest.extract(from: req)
+        let trafficMessageRequest = try TrafficMessageRequest.extract(from: req).await(on: req)
         let creator = try req.user()
         
         let requestLocation = Location(trafficMessageRequest: trafficMessageRequest)

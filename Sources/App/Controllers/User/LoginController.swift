@@ -16,7 +16,7 @@ final class LoginController {
     
     /// Saves a new `Token` to the database.
     func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
-        let loginRequest = try LoginRequest.extract(from: req)
+        let loginRequest = try LoginRequest.extract(from: req).await(on: req)
     
         return User.query(on: req).group(.or) { builder in
             builder.filter(\User.email == loginRequest.user)
