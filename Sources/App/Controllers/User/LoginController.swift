@@ -16,26 +16,26 @@ final class LoginController {
     
     /// Saves a new `Token` to the database.
     func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
-        let loginRequest = try LoginRequest.extract(from: req).await(on: req)
-    
-        return User.query(on: req).group(.or) { builder in
-            builder.filter(\User.email == loginRequest.user)
-            builder.filter(\User.username == loginRequest.user)
-        }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
-            guard let user = existingUser else {
-                // user not found
-                throw Abort(.badRequest)
-            }
-            
-            let hasher = try req.make(BCryptHasher.self)
-            
-            guard try hasher.verify(message: loginRequest.password, matches: user.password) else {
-                // invalid password
-                throw Abort(.badRequest)
-            }
-            
-            return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: BearerToken.PublicBearerToken.self) { token in
-                return token.publicToken()
+        return try LoginRequest.extract(from: req).flatMap(to: BearerToken.PublicBearerToken.self) { loginRequest in
+            return User.query(on: req).group(.or) { builder in
+                builder.filter(\User.email == loginRequest.user)
+                builder.filter(\User.username == loginRequest.user)
+            }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
+                guard let user = existingUser else {
+                    // user not found
+                    throw Abort(.badRequest)
+                }
+                
+                let hasher = try req.make(BCryptHasher.self)
+                
+                guard try hasher.verify(message: loginRequest.password, matches: user.password) else {
+                    // invalid password
+                    throw Abort(.badRequest)
+                }
+                
+                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: BearerToken.PublicBearerToken.self) { token in
+                    return token.publicToken()
+                }
             }
         }
     }

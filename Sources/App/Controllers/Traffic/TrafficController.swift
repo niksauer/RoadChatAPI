@@ -20,38 +20,39 @@ final class TrafficController {
     /// Returns all `TrafficMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicTrafficMessage(on: req) })
+            return try messages.map({ try $0.publicTrafficMessage(on: req).await(on: req) })
         }
     }
 
     /// Saves a new `TrafficMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let trafficMessageRequest = try TrafficMessageRequest.extract(from: req).await(on: req)
-        let creator = try req.user()
-        
-        let requestLocation = Location(trafficMessageRequest: trafficMessageRequest)
-        let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
-        
-        guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
-            throw Abort(.internalServerError)
-        }
-        
-        let recentMessages = try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().await(on: req)
-    
-        for message in recentMessages {
-            let location = try message.getLocation(on: req).await(on: req)
-            let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+        return try TrafficMessageRequest.extract(from: req).flatMap(to: Result.self) { trafficMessageRequest in
+            let creator = try req.user()
             
-            if geoLocation.distance(from: requestGeoLocation) < 500 && validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
-                _ = message.validations.attach(creator, on: req)
-                return Future(try message.publicTrafficMessage(on: req))
+            let requestLocation = Location(trafficMessageRequest: trafficMessageRequest)
+            let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
+            
+            guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {
+                throw Abort(.internalServerError)
             }
-        }
-        
-        return requestLocation.create(on: req).flatMap(to: Result.self) { location in
-            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-                return try creator.donate(.upvote, to: message, on: req).map(to: Result.self) { _ in
-                    return try message.publicTrafficMessage(on: req)
+            
+            return TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
+                for message in recentMessages {
+                    let location = try message.getLocation(on: req).await(on: req)
+                    let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                    
+                    if geoLocation.distance(from: requestGeoLocation) < 500 && self.validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
+                        _ = message.validations.attach(creator, on: req)
+                        return try message.publicTrafficMessage(on: req)
+                    }
+                }
+                
+                return requestLocation.create(on: req).flatMap(to: Result.self) { location in
+                    return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                        return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
+                            return try message.publicTrafficMessage(on: req)
+                        }
+                    }
                 }
             }
         }
@@ -59,17 +60,17 @@ final class TrafficController {
     
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).map(to: Result.self) { message in
+        return try req.parameter(Resource.self).flatMap(to: Result.self) { message in
             return try message.publicTrafficMessage(on: req)
         }
     }
     
     /// Deletes a parameterized `TrafficMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let trafficMessage = try req.parameter(Resource.self).await(on: req)
-        try req.user().checkOwnership(for: trafficMessage, on: req)
-        
-        return trafficMessage.delete(on: req).transform(to: .ok)
+        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { trafficMessage in
+            try req.user().checkOwnership(for: trafficMessage, on: req)
+            return trafficMessage.delete(on: req).transform(to: .ok)
+        }
     }
     
     /// Upvotes a parameterized `TrafficMessage`.
