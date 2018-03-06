@@ -80,8 +80,19 @@ final class JSendMiddleware: Middleware, Service {
             
             return response
         } catch {
+            let result: JSON = [
+                "status": "error",
+                "message": "Error converting response to JSend success format."
+            ]
+            
+            do {
+                try response.content.encode(getJSONString(for: result))
+            } catch {
+                // handle error
+            }
+            
             response.http.status = .internalServerError
-            response.http.body = HTTPBody(string: "Error converting response to JSend success format.")
+    
             return response
         }
     }
