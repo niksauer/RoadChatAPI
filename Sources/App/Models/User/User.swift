@@ -82,15 +82,19 @@ extension Request {
         return try requireAuthenticated(User.self)
     }
     
-    func optionalUser() throws -> User? {
+    func optionalUser() throws -> Future<User?> {
         if let token = self.http.headers.bearerAuthorization?.token {
-            guard let storedToken = try BearerToken.query(on: self).filter(\BearerToken.token == token).first().await(on: self) else {
-                return nil
+            return BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
+                guard let storedToken = storedToken else {
+                    return Future(nil)
+                }
+                
+                return storedToken.authUser.get(on: self).map(to: User?.self) { user in
+                    return user
+                }
             }
-            
-            return try storedToken.authUser.get(on: self).await(on: self) as User
         } else {
-            return nil
+            return Future(nil)
         }
     }
 }

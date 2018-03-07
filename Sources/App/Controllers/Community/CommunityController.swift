@@ -19,19 +19,20 @@ final class CommunityController {
     /// Returns all `CommunityMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
         return CommunityMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicCommunityMessage(on: req) })
+            return try messages.map({ try $0.publicCommunityMessage(on: req).await(on: req) })
         }
     }
     
     /// Saves a new `CommunityMessage` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        let communityMessageRequest = try CommunityMessageRequest.extract(from: req)
-        let creator = try req.user()
-        
-        return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
-            return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-                return try creator.donate(.upvote, to: message, on: req).map(to: Result.self) { _ in
-                    return try message.publicCommunityMessage(on: req)
+        return try CommunityMessageRequest.extract(from: req).flatMap(to: Result.self) { communityMessageRequest in
+            let creator = try req.user()
+            
+            return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
+                return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                    return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
+                        return try message.publicCommunityMessage(on: req)
+                    }
                 }
             }
         }
@@ -39,17 +40,17 @@ final class CommunityController {
     
     /// Returns a parameterized `CommunityMessage`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).map(to: Result.self) { message in
+        return try req.parameter(Resource.self).flatMap(to: Result.self) { message in
             return try message.publicCommunityMessage(on: req)
         }
     }
     
     /// Deletes a parameterized `CommunityMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        let communityMessage = try req.parameter(Resource.self).await(on: req)
-        try req.user().checkOwnership(for: communityMessage, on: req)
-        
-        return communityMessage.delete(on: req).transform(to: .ok)
+        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { communityMessage in
+            try req.user().checkOwnership(for: communityMessage, on: req)
+            return communityMessage.delete(on: req).transform(to: .ok)
+        }
     }
     
     /// Upvotes a parameterized `CommunityMessage`.

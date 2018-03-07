@@ -49,8 +49,10 @@ extension CommunityMessage: Karmable {
 }
 
 extension CommunityMessage {
-    func publicCommunityMessage(on req: Request) throws -> PublicCommunityMessage {
-        return try PublicCommunityMessage(communityMessage: self, upvotes: self.getKarmaLevel(on: req))
+    func publicCommunityMessage(on req: Request) throws -> Future<PublicCommunityMessage> {
+        return try self.getKarmaLevel(on: req).map(to: PublicCommunityMessage.self) { karmaLevel in
+            return try PublicCommunityMessage(communityMessage: self, upvotes: karmaLevel)
+        }
     }
 }
 

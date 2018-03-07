@@ -42,9 +42,11 @@ extension Participation.PublicParticipant: Content {}
 extension User {
     /// Checks participation of the `User` in a `Conversaton`.
     func checkParticipation(in conversation: Conversation, on req: Request) throws {
-        guard try conversation.participations.isAttached(self, on: req).await(on: req) else {
-            // user does not participate in conversation
-            throw Abort(.unauthorized)
+        _ = conversation.participations.isAttached(self, on: req).map(to: Void.self) { isParticipating in
+            guard isParticipating else {
+                // user does not participate in conversation
+                throw Abort(.unauthorized)
+            }
         }
     }
     

@@ -53,8 +53,8 @@ extension TrafficMessage: Karmable {
 }
 
 extension TrafficMessage {
-    func getValidationLevel(on req: Request) throws -> Int {
-        return try Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count().await(on: req)
+    func getValidationLevel(on req: Request) throws -> Future<Int> {
+        return Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count()
     }
     
     func getLocation(on req: Request) throws -> Future<Location> {
@@ -67,8 +67,12 @@ extension TrafficMessage {
         }
     }
     
-    func publicTrafficMessage(on req: Request) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: self.getKarmaLevel(on: req), validations: self.getValidationLevel(on: req))
+    func publicTrafficMessage(on req: Request) throws -> Future<PublicTrafficMessage> {
+        return try self.getKarmaLevel(on: req).flatMap(to: PublicTrafficMessage.self) { karmaLevel in
+            return try self.getValidationLevel(on: req).map(to: PublicTrafficMessage.self) { validationLevel in
+                return try PublicTrafficMessage(trafficMessage: self, upvotes: karmaLevel, validations: validationLevel)
+            }
+        }
     }
 }
 
