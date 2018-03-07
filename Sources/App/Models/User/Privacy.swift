@@ -16,7 +16,7 @@ extension Privacy: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "privacy"
+        return "Privacy"
     }
     
     var user: Parent<Privacy, User> {

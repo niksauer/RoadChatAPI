@@ -17,7 +17,7 @@ extension User: MySQLModel, Migration, Owner, KarmaDonator {
     }
     
     public static var entity: String {
-        return "user"
+        return "User"
     }
     
     var settings: Children<User, Settings> {

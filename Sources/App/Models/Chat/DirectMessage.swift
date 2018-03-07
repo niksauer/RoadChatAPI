@@ -16,7 +16,7 @@ extension DirectMessage: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "directMessage"
+        return "DirectMessage"
     }
     
     var conversation: Parent<DirectMessage, Conversation> {

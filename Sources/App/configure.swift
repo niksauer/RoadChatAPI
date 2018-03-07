@@ -36,8 +36,7 @@ public func configure(
     var migrations = MigrationConfig()
 
     migrations.add(model: User.self, database: .mysql)
-
-    migrations.add(model: Token.self, database: .mysql)
+    migrations.add(model: BearerToken.self, database: .mysql)
     migrations.add(model: Settings.self, database: .mysql)
     migrations.add(model: Privacy.self, database: .mysql)
     migrations.add(model: Profile.self, database: .mysql)
@@ -46,7 +45,7 @@ public func configure(
     
     migrations.add(model: TrafficMessage.self, database: .mysql)
     migrations.add(model: TrafficMessageKarmaDonation.self, database: .mysql)
-    migrations.add(model: Validation.self, database: .mysql)
+    migrations.add(model: TrafficMessageValidation.self, database: .mysql)
     
     migrations.add(model: CommunityMessage.self, database: .mysql)
     migrations.add(model: CommunityMessageKarmaDonation.self, database: .mysql)

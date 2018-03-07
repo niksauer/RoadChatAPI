@@ -1,5 +1,5 @@
 //
-//  Validation.swift
+//  TrafficMessageValidation.swift
 //  App
 //
 //  Created by Phillip Rust on 21.02.18.
@@ -10,7 +10,7 @@ import Vapor
 import FluentMySQL
 import RoadChatKit
 
-final class Validation: Codable {
+final class TrafficMessageValidation: Codable {
     var id: Int?
     var userID: User.ID
     var messageID: TrafficMessage.ID
@@ -21,26 +21,26 @@ final class Validation: Codable {
     }
 }
 
-extension Validation: MySQLModel, Migration {
-    static var idKey: WritableKeyPath<Validation, Int?> {
-        return \Validation.id
+extension TrafficMessageValidation: MySQLModel, Migration {
+    static var idKey: WritableKeyPath<TrafficMessageValidation, Int?> {
+        return \TrafficMessageValidation.id
     }
     
     public static var entity: String {
-        return "trafficValidation"
+        return "TrafficMessageValidation"
     }
 }
 
-extension Validation: ModifiablePivot {
+extension TrafficMessageValidation: ModifiablePivot {
     typealias Left = User
     typealias Right = TrafficMessage
     
-    static var leftIDKey: WritableKeyPath<Validation, Int> {
-        return \Validation.userID
+    static var leftIDKey: WritableKeyPath<TrafficMessageValidation, Int> {
+        return \TrafficMessageValidation.userID
     }
     
-    static var rightIDKey: WritableKeyPath<Validation, Int> {
-        return \Validation.messageID
+    static var rightIDKey: WritableKeyPath<TrafficMessageValidation, Int> {
+        return \TrafficMessageValidation.messageID
     }
     
     convenience init(_ left: Left, _ right: Right) throws {

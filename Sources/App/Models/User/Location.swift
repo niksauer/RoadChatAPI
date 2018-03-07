@@ -16,7 +16,7 @@ extension Location: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "location"
+        return "Location"
     }
 }
 

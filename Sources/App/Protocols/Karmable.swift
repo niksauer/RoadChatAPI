@@ -32,10 +32,6 @@ extension KarmaDonation {
         
         return karma
     }
-    
-    mutating func setKarmaType(_ type: KarmaType) {
-        self.karma = type.rawValue
-    }
 }
 
 protocol KarmaDonator: MySQLModel, Migration { }

@@ -15,6 +15,10 @@ extension BearerToken: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<BearerToken, Int?> {
         return \BearerToken.id
     }
+    
+    public static var entity: String {
+        return "BearerToken"
+    }
 }
 
 extension BearerToken: BearerAuthenticatable, Authentication.Token {

@@ -16,7 +16,7 @@ extension CommunityMessage: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "communityMessage"
+        return "CommunityMessage"
     }
 }
 

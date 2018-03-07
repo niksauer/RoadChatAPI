@@ -14,13 +14,16 @@ import RoadChatKit
 /// Controls token-based authentication.
 final class LoginController {
     
+    typealias Resource = BearerToken
+    typealias Result = BearerToken.PublicBearerToken
+    
     /// Saves a new `Token` to the database.
-    func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
-        return try LoginRequest.extract(from: req).flatMap(to: BearerToken.PublicBearerToken.self) { loginRequest in
+    func login(_ req: Request) throws -> Future<Result> {
+        return try LoginRequest.extract(from: req).flatMap(to: Result.self) { loginRequest in
             return User.query(on: req).group(.or) { builder in
                 builder.filter(\User.email == loginRequest.user)
                 builder.filter(\User.username == loginRequest.user)
-            }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
+            }.first().flatMap(to: Result.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.badRequest)
@@ -33,7 +36,7 @@ final class LoginController {
                     throw Abort(.badRequest)
                 }
                 
-                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: BearerToken.PublicBearerToken.self) { token in
+                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: Result.self) { token in
                     return token.publicToken()
                 }
             }

@@ -16,7 +16,7 @@ extension Settings: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "settings"
+        return "Settings"
     }
     
     var user: Parent<Settings, User> {

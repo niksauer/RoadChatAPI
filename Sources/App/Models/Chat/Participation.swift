@@ -16,7 +16,7 @@ extension Participation: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "conversationParticipation"
+        return "ConversationParticipation"
     }
 }
 

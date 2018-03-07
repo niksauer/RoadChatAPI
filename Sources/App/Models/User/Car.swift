@@ -16,7 +16,7 @@ extension Car: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "car"
+        return "Car"
     }
 }
 

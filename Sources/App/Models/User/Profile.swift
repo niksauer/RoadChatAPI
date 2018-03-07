@@ -16,7 +16,7 @@ extension Profile: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "profile"
+        return "Profile"
     }
     
     var user: Parent<Profile, User> {

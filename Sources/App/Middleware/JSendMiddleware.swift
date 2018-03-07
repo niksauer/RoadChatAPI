@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 
 final class JSendMiddleware: Middleware, Service {
+    
     typealias JSON = [String: Any?]
     
     struct JSendResponse {
@@ -80,6 +81,7 @@ final class JSendMiddleware: Middleware, Service {
             
             return response
         } catch {
+            // HOW TO HANDLE ERROR APPROPRIATELY?
             let result: JSON = [
                 "status": "error",
                 "message": "Error converting response to JSend success format."
@@ -103,7 +105,7 @@ final class JSendMiddleware: Middleware, Service {
             "data": fail.message
         ]
     	
-	return JSendResponse(status: .badRequest, body: getJSONString(for: result))    
+        return JSendResponse(status: .badRequest, body: getJSONString(for: result))
     }
     
     static func error(_ error: Error) -> JSendResponse {
@@ -112,7 +114,7 @@ final class JSendMiddleware: Middleware, Service {
             "message": error.localizedDescription
         ]
         
-	return JSendResponse(status: .internalServerError, body: getJSONString(for: result))
+        return JSendResponse(status: .internalServerError, body: getJSONString(for: result))
     }
     
     private static func getJSONString(for json: JSON) -> String {
@@ -123,4 +125,5 @@ final class JSendMiddleware: Middleware, Service {
             return ""
         }
     }
+    
 }

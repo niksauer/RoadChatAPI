@@ -26,6 +26,10 @@ extension CommunityMessageKarmaDonation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<CommunityMessageKarmaDonation, Int?> {
         return \CommunityMessageKarmaDonation.id
     }
+    
+    public static var entity: String {
+        return "CommunityMessageKarmaDonation"
+    }
 }
 
 extension CommunityMessageKarmaDonation: ModifiablePivot {

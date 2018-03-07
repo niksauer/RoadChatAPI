@@ -13,6 +13,7 @@ import RoadChatKit
 
 /// Controls basic CRUD operations on `User`s.
 final class UserController {
+    
     typealias Resource = User
     typealias Result = User.PublicUser
     

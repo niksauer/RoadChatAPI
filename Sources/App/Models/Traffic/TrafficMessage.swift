@@ -16,10 +16,10 @@ extension TrafficMessage: MySQLModel, Migration {
     }
     
     public static var entity: String {
-        return "trafficMessage"
+        return "TrafficMessage"
     }
     
-    var validations: Siblings<TrafficMessage, User, Validation> {
+    var validations: Siblings<TrafficMessage, User, TrafficMessageValidation> {
         return siblings()
     }
 }
@@ -58,7 +58,7 @@ extension TrafficMessage: Karmable {
 
 extension TrafficMessage {
     func getValidationLevel(on req: Request) throws -> Future<Int> {
-        return Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count()
+        return TrafficMessageValidation.query(on: req).filter(try \TrafficMessageValidation.messageID == self.requireID()).count()
     }
     
     func getLocation(on req: Request) throws -> Future<Location> {
