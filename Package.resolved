@@ -92,6 +92,15 @@
         }
       },
       {
+        "package": "RoadChatKit",
+        "repositoryURL": "https://github.com/niksauer/RoadChatKit",
+        "state": {
+          "branch": "master",
+          "revision": "71b8528bafbb541c51f4bbfea95bed4cad4b4837",
+          "version": null
+        }
+      },
+      {
         "package": "Routing",
         "repositoryURL": "https://github.com/vapor/routing.git",
         "state": {

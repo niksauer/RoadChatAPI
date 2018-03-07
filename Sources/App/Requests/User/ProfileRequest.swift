@@ -8,21 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct ProfileRequest: Codable {
-    let firstName: String
-    let lastName: String
-    let birth: Date
-    let sex: String?
-    let description: String?
-    let streetName: String?
-    let streetNumber: Int?
-    let postalCode: Int?
-    let country: String?
-}
+import RoadChatKit
 
 extension ProfileRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\ProfileRequest.firstName): IsCount(1...50),
         key(\ProfileRequest.lastName): IsCount(1...50),
     ]
@@ -31,7 +20,7 @@ extension ProfileRequest: Validatable {
 extension ProfileRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [
         key(\ProfileRequest.sex): IsSex(),
-        key(\ProfileRequest.description): IsCount(0...280),
+        key(\ProfileRequest.biography): IsCount(0...280),
         key(\ProfileRequest.streetName): IsCount(0...50),
         key(\ProfileRequest.country): IsCount(0...50),
     ]
@@ -48,7 +37,7 @@ extension ProfileRequest: Payload {
     
     static var optionalParameters: [Payload.Parameter] = [
         ("sex", "male"),
-        ("description", "Dualer Student"),
+        ("biography", "Dualer Student"),
         ("streetName", "Ernststraße"),
         ("streetNumber", 12),
         ("postalCode", 63456),

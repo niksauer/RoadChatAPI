@@ -8,14 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct ConversationRequest: Codable {
-    let title: String
-    let participants: [Int]
-}
+import RoadChatKit
 
 extension ConversationRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\ConversationRequest.title): IsCount(1...50),
     ]
 }

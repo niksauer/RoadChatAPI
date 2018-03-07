@@ -8,8 +8,9 @@
 import Foundation
 import Vapor
 import FluentSQLite
+import RoadChatKit
 
-final class CommunityMessageKarmaDonation: Content {
+final class CommunityMessageKarmaDonation: Codable {
     var id: Int?
     var communityMessageID: CommunityMessage.ID
     var userID: User.ID

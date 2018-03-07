@@ -7,6 +7,7 @@
 
 import Foundation
 import Vapor
+import RoadChatKit
 
 class CommunityRouter: RouteCollection {
     func boot(router: Router) throws {

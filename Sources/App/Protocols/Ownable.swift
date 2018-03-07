@@ -21,25 +21,29 @@ protocol Ownable: SQLiteModel {
 extension Owner {
     /// Checks resource ownership for an `Ownable`.
     func checkOwnership<T: Ownable>(for resource: T, on req: Request) throws {
-        guard let owner = try resource.owner.query(on: req).first().await(on: req) else {
-            // no owner associated to resource
-            throw Abort(.internalServerError)
-        }
-        
-        guard owner.id == self.id else {
-            // unowned resource
-            throw Abort(.forbidden)
+        _ = resource.owner.query(on: req).first().map(to: Void.self) { owner in
+            guard let owner = owner else {
+                // no owner associated to resource
+                throw Abort(.internalServerError)
+            }
+            
+            guard owner.id == self.id else {
+                // unowned resource
+                throw Abort(.forbidden)
+            }
         }
     }
 }
 
 extension Request {
     func checkOptionalOwnership<T: Ownable>(for resource: T) throws {
-        guard let authenticatedUser = try self.optionalUser() else {
-            // no token supplied
-            throw Abort(.unauthorized)
-        }
-        
-        try authenticatedUser.checkOwnership(for: resource, on: self)
+        _ = try self.optionalUser().map(to: Void.self) { user in
+            guard let authenticatedUser = user else {
+                // no token supplied
+                throw Abort(.unauthorized)
+            }
+            
+            try authenticatedUser.checkOwnership(for: resource, on: self)
+        } 
     }
 }
