@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor/auth",
         "state": {
           "branch": null,
-          "revision": "145d6ca2790e679279defe34e25006f63c782024",
-          "version": "2.0.0-rc.1"
+          "revision": "0159803fc2cf2e38aeeb3ba4ba42358886923b1b",
+          "version": "2.0.0-rc.2"
         }
       },
       {
@@ -96,7 +96,7 @@
         "repositoryURL": "https://github.com/niksauer/RoadChatKit",
         "state": {
           "branch": "master",
-          "revision": "71b8528bafbb541c51f4bbfea95bed4cad4b4837",
+          "revision": "1ff9bed28452dbcbf0efef6017372901a29e0af3",
           "version": null
         }
       },

@@ -12,7 +12,7 @@ import RoadChatKit
 
 class WebsocketRouter: RouteCollection {
     func boot(router: Router) throws {
-        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
+        let authMiddleware = User.tokenAuthMiddleware(database: .sqlite)
         let conversationController = ConversationController()
         
         // /chat/Conversation.parameter/live
