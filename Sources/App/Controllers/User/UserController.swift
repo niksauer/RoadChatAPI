@@ -120,7 +120,7 @@ final class UserController {
                     return settings.update(on: req).transform(to: .ok)
                 }
             }
-        }
+        }  
     }
     
     /// Returns the `Privacy` for a parameterized `User`.
