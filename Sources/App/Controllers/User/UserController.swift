@@ -47,35 +47,6 @@ final class UserController {
                 }
             }
         }
-        
-//        let registerRequest = try RegisterRequest.extract(from: req).await(on: req)
-        
-//        return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
-//            guard existingUser == nil else {
-//                // email already registered
-//                throw RegisterFail.emailTaken
-//            }
-//
-//            return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
-//                guard existingUser == nil else {
-//                    // username taken
-//                    throw RegisterFail.usernameTaken
-//                }
-//
-//                let hasher = try req.make(BCryptHasher.self)
-//                let hashedPassword = try hasher.make(registerRequest.password)
-//
-//                let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
-//
-//                return newUser.create(on: req).map(to: Result.self) { user in
-//                    // further user setup
-//                    _ = Settings(userID: try user.requireID()).create(on: req)
-//                    _ = Privacy(userID: try user.requireID()).create(on: req)
-//
-//                    return try newUser.publicUser(isOwner: true)
-//                }
-//            }
-//        }
     }
     
     /// Returns a parameterized `User`.
