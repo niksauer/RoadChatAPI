@@ -39,11 +39,6 @@ extension Payload {
     private static func findInvalidParameters(in req: Request, expected parameters: [Parameter]) -> [Future<String>] {
         var invalidParameters = [Future<String>]()
         
-        func addInvalidParameter(_ parameter: Parameter, typeName: String) {
-            invalidParameters.append("\(parameter.name); expected: \(typeName)")
-        }
-        
-        
         for parameter in parameters {
             switch parameter.type {
             case is String:

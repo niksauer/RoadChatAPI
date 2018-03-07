@@ -11,11 +11,11 @@ import FluentMySQL
 import RoadChatKit
 
 extension Participation: MySQLModel, Migration {
-    static var idKey: WritableKeyPath<Participation, Int?> {
+    public static var idKey: WritableKeyPath<Participation, Int?> {
         return \Participation.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "conversationParticipation"
     }
 }

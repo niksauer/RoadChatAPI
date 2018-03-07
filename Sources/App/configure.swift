@@ -45,11 +45,11 @@ public func configure(
     migrations.add(model: Location.self, database: .mysql)
     
     migrations.add(model: TrafficMessage.self, database: .mysql)
-    migrations.add(model: TrafficKarmaDonation.self, database: .mysql)
+    migrations.add(model: TrafficMessageKarmaDonation.self, database: .mysql)
     migrations.add(model: Validation.self, database: .mysql)
     
     migrations.add(model: CommunityMessage.self, database: .mysql)
-    migrations.add(model: CommunityKarmaDonation.self, database: .mysql)
+    migrations.add(model: CommunityMessageKarmaDonation.self, database: .mysql)
     
     migrations.add(model: Conversation.self, database: .mysql)
     migrations.add(model: DirectMessage.self, database: .mysql)

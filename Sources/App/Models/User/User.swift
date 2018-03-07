@@ -11,12 +11,12 @@ import FluentMySQL
 import Authentication
 import RoadChatKit
 
-extension User: SQLiteModel, Migration, Owner, KarmaDonator {
+extension User: MySQLModel, Migration, Owner, KarmaDonator {
     public static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "user"
     }
     

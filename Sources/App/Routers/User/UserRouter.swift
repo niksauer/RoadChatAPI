@@ -11,7 +11,7 @@ import RoadChatKit
 
 class UserRouter: RouteCollection {
     func boot(router: Router) throws {
-        let authMiddleware = try User.tokenAuthMiddleware(database: .mysql)
+        let authMiddleware = User.tokenAuthMiddleware(database: .mysql)
         let userController = UserController()
         let loginController = LoginController()
         let conversationController = ConversationController()

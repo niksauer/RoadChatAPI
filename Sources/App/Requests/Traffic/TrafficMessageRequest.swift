@@ -19,7 +19,7 @@ extension TrafficMessageRequest: Validatable {
 
 extension TrafficMessageRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\TrafficMessageRequest.note): IsCount(0...255)
+        key(\TrafficMessageRequest.message): IsCount(0...255)
     ]
 }
 

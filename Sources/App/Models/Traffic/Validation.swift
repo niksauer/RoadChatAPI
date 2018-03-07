@@ -26,7 +26,7 @@ extension Validation: MySQLModel, Migration {
         return \Validation.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "trafficValidation"
     }
 }

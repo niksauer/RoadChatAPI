@@ -13,7 +13,6 @@ import RoadChatKit
 
 /// Controls basic CRUD operations on `User`s.
 final class UserController {
-    
     typealias Resource = User
     typealias Result = User.PublicUser
     
@@ -120,7 +119,7 @@ final class UserController {
                     return settings.update(on: req).transform(to: .ok)
                 }
             }
-        }  
+        }
     }
     
     /// Returns the `Privacy` for a parameterized `User`.
@@ -139,7 +138,7 @@ final class UserController {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
-	    return try PrivacyRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedPrivacy in
+            return try PrivacyRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedPrivacy in
                 return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
                     privacy.showFirstName = updatedPrivacy.showFirstName
                     privacy.showLastName = updatedPrivacy.showLastName
@@ -162,7 +161,7 @@ final class UserController {
                     // no profile associated to user
                     throw Abort(.notFound)
                 }
-            
+                
                 return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
                     do {
                         try req.checkOptionalOwnership(for: user)
@@ -179,6 +178,8 @@ final class UserController {
     func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
+            
+            return try ProfileRequest.extract(from: req).flatMap(to: HTTPStatus.self) { profileRequest in
                 return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
                     guard let profile = existingProfile else {
                         let newProfile = Profile(userID: try user.requireID(), profileRequest: profileRequest)
@@ -200,7 +201,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `Cars`s associated to a parameterized `User`.
     func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
         return try req.parameter(Resource.self).flatMap(to: [Car.PublicCar].self) { user in
@@ -209,7 +210,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
     func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
         return try req.parameter(Resource.self).flatMap(to: Car.PublicCar.self) { user in
@@ -222,7 +223,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns the `Location` for a parameterized `User`.
     func getLocation(_ req: Request) throws -> Future<Location.PublicLocation> {
         return try req.parameter(Resource.self).flatMap(to: Location.PublicLocation.self) { user in
@@ -238,7 +239,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Creates or updates the `Location` for a parameterized `User`.
     func createOrUpdateLocation(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
@@ -268,7 +269,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
@@ -277,7 +278,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `CommunityMessage`s associated to a parameterized `User`.
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
@@ -286,5 +287,6 @@ final class UserController {
             }
         }
     }
-    
+
 }
+

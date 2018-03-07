@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import FluentMySQL
 import Authentication
+import RoadChatKit
 
 final class Token: Content {
     var id: Int?
@@ -36,7 +37,7 @@ extension Token: MySQLModel, Migration {
         return \Token.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "token"
     }
 }

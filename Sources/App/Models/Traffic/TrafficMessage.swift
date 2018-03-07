@@ -10,12 +10,12 @@ import Vapor
 import FluentMySQL
 import RoadChatKit
 
-extension TrafficMessage: SQLiteModel, Migration {
+extension TrafficMessage: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
     }
     
-    static var entity: String {
+    public static var entity: String {
         return "trafficMessage"
     }
     
