@@ -18,3 +18,9 @@ extension Location: SQLiteModel, Migration {
 
 extension Location.PublicLocation: Content {}
 
+extension CLLocation {
+    convenience init(location: Location) {
+        self.init(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude), altitude: location.altitude, horizontalAccuracy: location.horizontalAccuracy, verticalAccuracy: location.verticalAccuracy, course: location.course, speed: location.speed, timestamp: location.timestamp)
+    }
+}
+

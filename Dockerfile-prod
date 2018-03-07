@@ -1,7 +1,7 @@
 # docker build -t roadchat:1.0.0 -f Dockerfile-prod . && docker run -p 80:80 roadchat:1.0.0
 
 # Build image
-FROM swift:4.0.3 as builder
+FROM norionomura/swift:swift-4.1-branch
 # RUN apt-get -qq update && apt-get -q -y install \
   # your-dependencies-here # e.g. libmysqlclient-dev
 WORKDIR /app
