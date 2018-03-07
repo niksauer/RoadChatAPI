@@ -11,103 +11,113 @@ import Validation
 
 protocol Payload {
     associatedtype RequestType: Validatable, OptionallyValidatable
-    typealias Parameters = [(name: BasicKeyRepresentable, type: Decodable)]
-    static var requiredParameters: Parameters { get }
-    static var optionalParameters: Parameters { get }
+    typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
+    static var requiredParameters: [Parameter] { get }
+    static var optionalParameters: [Parameter] { get }
 }
 
-extension Payload {
-    typealias Parameter = (name: BasicKeyRepresentable, type: Decodable)
-    
-    private static func findMissingParameters(in req: Request, required parameters: Parameters) -> Parameters {
-        var missingParameters = [Parameter]()
+extension Payload {    
+    private static func findMissingParameters(in req: Request, required parameters: [Parameter]) -> [Future<Parameter>] {
+        var missingParameters = [Future<Parameter>]()
         
         for parameter in parameters {
-            do {
-                _ = try req.content.get(String.self, at: parameter.name).await(on: req)
-            } catch {
-                missingParameters.append(parameter)
+            switch parameter.type {
+            case is [Any]:
+                req.content.get([String].self, at: parameter.name).catch({ _ in
+                    missingParameters.append(Future(parameter))
+                })
+            default:
+                req.content.get(String.self, at: parameter.name).catch({ _ in
+                    missingParameters.append(Future(parameter))
+                })
             }
         }
 
         return missingParameters
     }
     
-    private static func checkParameterType(in req: Request, parameters: Parameters) throws {
-        var invalidParameters = [String]()
+    private static func findInvalidParameters(in req: Request, expected parameters: [Parameter]) -> [Future<String>] {
+        var invalidParameters = [Future<String>]()
         
         for parameter in parameters {
-            var typeName = String()
-            
-            do {
-                switch parameter.type {
-                case is String:
-                    typeName = "String"
-                    _ = try req.content.get(String.self, at: parameter.name).await(on: req)
-                case is Int:
-                    typeName = "Int"
-                    _ = try req.content.get(Int.self, at: parameter.name).await(on: req)
-                case is Double:
-                    typeName = "Double"
-                    _ = try req.content.get(Double.self, at: parameter.name).await(on: req)
-                case is Date:
-                    typeName = "Date"
-                    _ = try req.content.get(Date.self, at: parameter.name).await(on: req)
-                case is Bool:
-                    typeName = "Bool"
-                    _ = try req.content.get(Bool.self, at: parameter.name).await(on: req)
-                case is [Int]:
-                    typeName = "Array<Int>"
-                    _ = try req.content.get([Int].self, at: parameter.name).await(on: req)
-                default:
-                    // unknown data type in request
-                    throw Abort(.badRequest)
-                }
-            } catch {
-                invalidParameters.append("\(parameter.name); expected: \(typeName)")
+            switch parameter.type {
+            case is String:
+                req.content.get(String.self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: String"))
+                })
+            case is Int:
+                req.content.get(Int.self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: Int"))
+                })
+            case is Double:
+                req.content.get(Double.self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: Double"))
+                })
+            case is Date:
+                req.content.get(Date.self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: Date"))
+                })
+            case is Bool:
+                req.content.get(Bool.self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: Bool"))
+                })
+            case is [Int]:
+                req.content.get([Int].self, at: parameter.name).catch({ _ in
+                    invalidParameters.append(Future("\(parameter.name); expected: Array<Int>"))
+                })
+            default:
+                // unknown data type in request
+                break
             }
         }
         
-        guard invalidParameters.isEmpty else {
-            throw RequestFail.invalidTypeForParameters(invalidParameters)
-        }
+        return invalidParameters
     }
     
-    static func extract(from req: Request) throws -> RequestType {
-        let missingParameters = findMissingParameters(in: req, required: requiredParameters)
-        
-        guard missingParameters.isEmpty else {
-            throw RequestFail.missingParameters(missingParameters.map({ $0.name.makeBasicKey().stringValue }))
-        }
-        
-        try checkParameterType(in: req, parameters: requiredParameters)
-        
-        let missingOptionalParameters = findMissingParameters(in: req, required: optionalParameters)
-        var presentOptionalParameters = Parameters()
-    
-        for parameter in optionalParameters {
-            let parameterName = parameter.name.makeBasicKey().stringValue
+    static func extract(from req: Request) throws -> Future<RequestType> {
+        return findMissingParameters(in: req, required: requiredParameters).flatMap(to: RequestType.self) { missingParameters in
+            guard missingParameters.isEmpty else {
+                throw RequestFail.missingParameters(missingParameters.map({ $0.name.makeBasicKey().stringValue }))
+            }
             
-            if !missingOptionalParameters.contains(where: { missingParameter in
-                let missingParameterName = missingParameter.name.makeBasicKey().stringValue
-                return missingParameterName == parameterName
-            }) {
-                presentOptionalParameters.append(parameter)
+            return findInvalidParameters(in: req, expected: requiredParameters).flatMap(to: RequestType.self) { invalidParameters in
+                guard invalidParameters.isEmpty else {
+                    throw RequestFail.invalidTypeForParameters(invalidParameters)
+                }
+
+                return findMissingParameters(in: req, required: optionalParameters).flatMap(to: RequestType.self) { missingOptionalParameters in
+                    var presentOptionalParameters = [Parameter]()
+
+                    for parameter in optionalParameters {
+                        let parameterName = parameter.name.makeBasicKey().stringValue
+
+                        if !missingOptionalParameters.contains(where: { missingParameter in
+                            let missingParameterName = missingParameter.name.makeBasicKey().stringValue
+                            return missingParameterName == parameterName
+                        }) {
+                            presentOptionalParameters.append(parameter)
+                        }
+                    }
+                    
+                    return findInvalidParameters(in: req, expected: presentOptionalParameters).flatMap(to: RequestType.self) { invalidOptionalParameters in
+                        guard invalidOptionalParameters.isEmpty else {
+                            throw RequestFail.invalidTypeForParameters(invalidOptionalParameters)
+                        }
+
+                        return try req.content.decode(RequestType.self).map(to: RequestType.self) { request in
+                            do {
+                                try request.validate()
+                                try request.validateOptionals()
+                            } catch {
+                                throw RequestFail.mismatchedContraints(error)
+                            }
+
+                            return request
+                        }
+                    }
+                }
             }
         }
-        
-        try checkParameterType(in: req, parameters: presentOptionalParameters)
-        
-        let body = try req.content.decode(RequestType.self).await(on: req)
-        
-        do {
-            try body.validate()
-            try body.validateOptionals()
-        } catch {
-            throw RequestFail.mismatchedContraints(error)
-        }
-        
-        return body
     }
 }
 

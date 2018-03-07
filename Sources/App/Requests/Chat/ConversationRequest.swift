@@ -8,14 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct ConversationRequest: Codable {
-    let title: String
-    let participants: Int
-}
+import RoadChatKit
 
 extension ConversationRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\ConversationRequest.title): IsCount(1...50),
     ]
 }
@@ -27,10 +23,10 @@ extension ConversationRequest: OptionallyValidatable {
 extension ConversationRequest: Payload {
     typealias RequestType = ConversationRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("title", "CryptoBros"),
-        ("participants", 1),
+        ("participants", [1]),
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

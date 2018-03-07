@@ -8,28 +8,10 @@
 import Foundation
 import Vapor
 import FluentSQLite
-
-final class CommunityMessage: Content {
-    var id: Int?
-    var senderID: User.ID
-    var time: Date
-    var location: String
-    var message: String
-    
-    init(senderID: Int, time: Date, location: String, message: String) {
-        self.senderID = senderID
-        self.time = time
-        self.location = location
-        self.message = message
-    }
-    
-    convenience init(communityRequest: CommunityMessageRequest) {
-        self.init(senderID: communityRequest.senderID, time: communityRequest.time, location: communityRequest.location, message: communityRequest.message)
-    }
-}
+import RoadChatKit
 
 extension CommunityMessage: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<CommunityMessage, Int?> {
+    public static var idKey: WritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
     }
 }
@@ -41,7 +23,7 @@ extension CommunityMessage: Ownable {
 }
 
 extension CommunityMessage: Parameter {
-    static func make(for parameter: String, using container: Container) throws -> Future<CommunityMessage> {
+    public static func make(for parameter: String, using container: Container) throws -> Future<CommunityMessage> {
         guard let id = Int(parameter) else {
             // id must be integer
             throw Abort(.badRequest)
@@ -59,3 +41,20 @@ extension CommunityMessage: Parameter {
         }
     }
 }
+
+extension CommunityMessage: Karmable {
+    var donations: Siblings<CommunityMessage, User, CommunityMessageKarmaDonation> {
+        return siblings()
+    }
+}
+
+extension CommunityMessage {
+    func publicCommunityMessage(on req: Request) throws -> Future<PublicCommunityMessage> {
+        return try self.getKarmaLevel(on: req).map(to: PublicCommunityMessage.self) { karmaLevel in
+            return try PublicCommunityMessage(communityMessage: self, upvotes: karmaLevel)
+        }
+    }
+}
+
+extension CommunityMessage.PublicCommunityMessage: Content {}
+

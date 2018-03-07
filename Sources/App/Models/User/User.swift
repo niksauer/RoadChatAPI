@@ -9,51 +9,10 @@ import Foundation
 import Vapor
 import FluentSQLite
 import Authentication
+import RoadChatKit
 
-final class User: Content {
-    var id: Int?
-    var email: String
-    var username: String
-    var password: String
-    var registry: Date = Date()
-    
-    init(email: String, username: String, password: String) {
-        self.email = email
-        self.username = username
-        self.password = password
-    }
-
-    convenience init(registerRequest: RegisterRequest) {
-        self.init(email: registerRequest.email, username: registerRequest.username, password: registerRequest.password)
-    }
-}
-
-extension User {
-    func publicUser(isOwner: Bool) throws -> PublicUser {
-        return try PublicUser(user: self, isOwner: isOwner)
-    }
-    
-    struct PublicUser: Content {
-        let id: Int
-        var email: String?
-        let username: String
-        let registry: Date
-        
-        init(user: User, isOwner: Bool) throws {
-            self.id = try user.requireID()
-            
-            if isOwner {
-                self.email = user.email
-            }
-            
-            self.username = user.username
-            self.registry = user.registry
-        }
-    }
-}
-
-extension User: SQLiteModel, Migration, Owner {
-    static var idKey: WritableKeyPath<User, Int?> {
+extension User: SQLiteModel, Migration, Owner, KarmaDonator {
+    public static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }
     
@@ -84,7 +43,6 @@ extension User: SQLiteModel, Migration, Owner {
     var conversations: Siblings<User, Conversation, Participation> {
         return siblings()
     }
-
 }
 
 extension User: Ownable {
@@ -94,7 +52,7 @@ extension User: Ownable {
 }
 
 extension User: Parameter {
-    static func make(for parameter: String, using container: Container) throws -> Future<User> {
+    public static func make(for parameter: String, using container: Container) throws -> Future<User> {
         guard let id = Int(parameter) else {
             // id must be integer
             throw Abort(.badRequest)
@@ -114,26 +72,31 @@ extension User: Parameter {
 }
 
 extension User: TokenAuthenticatable {
-    typealias TokenType = Token
+    public typealias TokenType = BearerToken
 }
+
+extension User.PublicUser: Content {}
 
 extension Request {
     func user() throws -> User {
         return try requireAuthenticated(User.self)
     }
     
-    func optionalUser() throws -> User? {
+    func optionalUser() throws -> Future<User?> {
         if let token = self.http.headers.bearerAuthorization?.token {
-            guard let storedToken = try Token.query(on: self).filter(\Token.token == token).first().await(on: self) else {
-                return nil
+            return BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
+                guard let storedToken = storedToken else {
+                    return Future(nil)
+                }
+                
+                return storedToken.authUser.get(on: self).map(to: User?.self) { user in
+                    return user
+                }
             }
-            
-            return try storedToken.authUser.get(on: self).await(on: self) as User
         } else {
-            return nil
+            return Future(nil)
         }
     }
-    
 }
 
 extension User {
@@ -177,6 +140,10 @@ extension User {
     
     func getConversations(on req: Request) throws -> Future<[Conversation]> {
         return try conversations.query(on: req).all()
+    }
+    
+    func getLocation(on req: Request) throws -> Future<Location?> {
+        return Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
 }
 

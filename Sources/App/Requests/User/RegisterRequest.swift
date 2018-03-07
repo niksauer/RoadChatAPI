@@ -8,15 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct RegisterRequest: Codable {
-    let email: String
-    let username: String
-    let password: String
-}
+import RoadChatKit
 
 extension RegisterRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\RegisterRequest.email): IsEmail(),
         key(\RegisterRequest.username): IsCount(4...) && IsAlphanumeric(),
         key(\RegisterRequest.password): IsCount(8...) && IsASCII()
@@ -30,11 +25,11 @@ extension RegisterRequest: OptionallyValidatable {
 extension RegisterRequest: Payload {
     typealias RequestType = RegisterRequest
     
-    static var requiredParameters: Parameters = [
+    static var requiredParameters: [Payload.Parameter] = [
         ("email", "nik.sauer@me.com"),
         ("username", "inik"),
         ("password", "safeharbour")
     ]
     
-    static var optionalParameters: Parameters = []
+    static var optionalParameters: [Payload.Parameter] = []
 }

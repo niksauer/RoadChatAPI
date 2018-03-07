@@ -8,63 +8,15 @@
 import Foundation
 import Vapor
 import FluentSQLite
-
-final class TrafficMessage: Content {
-    var id: Int?
-    var senderID: User.ID
-    var type: String
-    var time: Date
-    var location: String
-    var direction: Double
-    var note: String?
-//    var validators: Int = 0
-    
-    init(senderID: User.ID, type: String, time: Date, location: String, direction: Double, note: String?) {
-        self.senderID = senderID
-        self.type = type
-        self.time = time
-        self.location = location
-        self.direction = direction
-        self.note = note
-    }
-    
-    convenience init(senderID: User.ID, trafficRequest: TrafficMessageRequest) {
-        self.init(senderID: senderID, type: trafficRequest.type, time: trafficRequest.time, location: trafficRequest.location, direction: trafficRequest.direction, note: trafficRequest.note)
-    }
-}
-
-extension TrafficMessage {
-    func publicTrafficMessage(upvotes: Int) throws -> PublicTrafficMessage {
-        return try PublicTrafficMessage(trafficMessage: self, upvotes: upvotes)
-    }
-    
-    struct PublicTrafficMessage: Content {
-        let id: Int
-        let senderID: User.ID
-        let type: String
-        let time: Date
-        let location: String
-        let direction: Double
-        let note: String?
-//        let validators: Int
-        let upvotes: Int
-        
-        init(trafficMessage: TrafficMessage, upvotes: Int) throws {
-            self.id = try trafficMessage.requireID()
-            self.senderID = trafficMessage.senderID
-            self.type = trafficMessage.type
-            self.time = trafficMessage.time
-            self.location = trafficMessage.location
-            self.direction = trafficMessage.direction
-            self.note = trafficMessage.note
-            self.upvotes = upvotes
-        }
-    }
-}
+import RoadChatKit
 
 extension TrafficMessage: SQLiteModel, Migration {
-    static var idKey: WritableKeyPath<TrafficMessage, Int?> {
+    public static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
+    }
+    
+    var validations: Siblings<TrafficMessage, User, Validation> {
+        return siblings()
     }
 }
 
@@ -75,7 +27,7 @@ extension TrafficMessage: Ownable {
 }
 
 extension TrafficMessage: Parameter {
-    static func make(for parameter: String, using container: Container) throws -> Future<TrafficMessage> {
+    public static func make(for parameter: String, using container: Container) throws -> Future<TrafficMessage> {
         guard let id = Int(parameter) else {
             // id must be integer
             throw Abort(.badRequest)
@@ -95,40 +47,33 @@ extension TrafficMessage: Parameter {
 }
 
 extension TrafficMessage: Karmable {    
-    var interactions: Siblings<TrafficMessage, User, TrafficKarmaDonation> {
+    var donations: Siblings<TrafficMessage, User, TrafficMessageKarmaDonation> {
         return siblings()
     }
+}
+
+extension TrafficMessage {
+    func getValidationLevel(on req: Request) throws -> Future<Int> {
+        return Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count()
+    }
     
-    func donate(_ karma: KarmaType, on req: Request) throws -> Future<HTTPStatus> {
-        return try req.getInteraction(with: self).flatMap(to: HTTPStatus.self) { interaction in
-            guard let interaction = interaction else {
-                return self.interactions.attach(try req.user(), on: req).flatMap(to: HTTPStatus.self) { newInteraction in
-                    newInteraction.setKarmaType(karma)
-                    return newInteraction.save(on: req).transform(to: .ok)
-                }
+    func getLocation(on req: Request) throws -> Future<Location> {
+        return Location.query(on: req).filter(\Location.id == self.locationID).first().map(to: Location.self) { location in
+            guard let location = location else {
+                throw Abort(.internalServerError)
             }
             
-            if karma == .upvote {
-                switch try interaction.getKarmaType() {
-                case .upvote:
-                    interaction.karma = KarmaType.neutral.rawValue
-                case .neutral:
-                    interaction.karma = KarmaType.upvote.rawValue
-                case .downvote:
-                    interaction.karma = KarmaType.upvote.rawValue
-                }
-            } else {
-                switch try interaction.getKarmaType() {
-                case .upvote:
-                    interaction.karma = KarmaType.downvote.rawValue
-                case .neutral:
-                    interaction.karma = KarmaType.downvote.rawValue
-                case .downvote:
-                    interaction.karma = KarmaType.neutral.rawValue
-                }
+            return location
+        }
+    }
+    
+    func publicTrafficMessage(on req: Request) throws -> Future<PublicTrafficMessage> {
+        return try self.getKarmaLevel(on: req).flatMap(to: PublicTrafficMessage.self) { karmaLevel in
+            return try self.getValidationLevel(on: req).map(to: PublicTrafficMessage.self) { validationLevel in
+                return try PublicTrafficMessage(trafficMessage: self, upvotes: karmaLevel, validations: validationLevel)
             }
-            
-            return interaction.save(on: req).transform(to: HTTPStatus.ok)
         }
     }
 }
+
+extension TrafficMessage.PublicTrafficMessage: Content {}

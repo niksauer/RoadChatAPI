@@ -1,7 +1,7 @@
-import Foundation
 import Vapor
 import FluentSQLite
 import Authentication
+import RoadChatKit
 
 /// Called before your application initializes.
 ///
@@ -15,6 +15,18 @@ public func configure(
     try services.register(FluentSQLiteProvider())
     try services.register(AuthenticationProvider())
 
+    // Register routes to the router
+    let router = EngineRouter.default()
+    try routes(router)
+    services.register(router, as: Router.self)
+    
+    // Register middleware
+    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
+//    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
+    middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
+//    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    services.register(middlewares)
+    
     // Configure a SQLite database
     var databases = DatabaseConfig()
     try databases.add(database: SQLiteDatabase(storage: .memory), as: .sqlite)
@@ -24,16 +36,19 @@ public func configure(
     var migrations = MigrationConfig()
     
     migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: Token.self, database: .sqlite)
+    migrations.add(model: BearerToken.self, database: .sqlite)
     migrations.add(model: Settings.self, database: .sqlite)
     migrations.add(model: Privacy.self, database: .sqlite)
     migrations.add(model: Profile.self, database: .sqlite)
     migrations.add(model: Car.self, database: .sqlite)
+    migrations.add(model: Location.self, database: .sqlite)
     
     migrations.add(model: TrafficMessage.self, database: .sqlite)
-    migrations.add(model: TrafficKarmaDonation.self, database: .sqlite)
+    migrations.add(model: TrafficMessageKarmaDonation.self, database: .sqlite)
+    migrations.add(model: Validation.self, database: .sqlite)
     
     migrations.add(model: CommunityMessage.self, database: .sqlite)
+    migrations.add(model: CommunityMessageKarmaDonation.self, database: .sqlite)
     
     migrations.add(model: Conversation.self, database: .sqlite)
     migrations.add(model: DirectMessage.self, database: .sqlite)

@@ -8,17 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct CarRequest: Codable {
-    let manufacturer: String
-    let model: String
-    let production: Date
-    let performance: Int?
-    let color: Int?
-}
+import RoadChatKit
 
 extension CarRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\CarRequest.manufacturer): IsCount(1...50),
         key(\CarRequest.model): IsCount(1...50),
     ]
@@ -33,15 +26,16 @@ extension CarRequest: OptionallyValidatable {
 
 extension CarRequest: Payload {
     typealias RequestType = CarRequest
-    
-    static var requiredParameters: Parameters = [
+
+    static var requiredParameters: [Payload.Parameter] = [
         ("manufacturer", "BMW"),
         ("model", "118d"),
         ("production", Date())
     ]
-    
-    static var optionalParameters: Parameters = [
+
+    static var optionalParameters: [Payload.Parameter] = [
         ("performance", 142),
         ("color", 255),
     ]
 }
+
