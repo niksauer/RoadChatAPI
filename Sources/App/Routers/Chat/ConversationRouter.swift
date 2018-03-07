@@ -12,7 +12,7 @@ import RoadChatKit
 
 class ConversationRouter: RouteCollection {
     func boot(router: Router) throws {
-        let authMiddleware = try User.tokenAuthMiddleware(database: .sqlite)
+        let authMiddleware = User.tokenAuthMiddleware(database: .mysql)
         let conversationController = ConversationController()
         
         // /chat

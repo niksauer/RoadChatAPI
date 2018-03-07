@@ -12,7 +12,7 @@ import RoadChatKit
 
 extension CommunityMessageRequest: Validatable {
     public static var validations: Validations = [
-        key(\CommunityMessageRequest.message): IsCount(0...280),
+        key(\CommunityMessageRequest.message): IsCount(0...255),
         key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
     ]
 }

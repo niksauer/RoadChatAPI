@@ -7,13 +7,17 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import Authentication
 import RoadChatKit
 
-extension User: SQLiteModel, Migration, Owner, KarmaDonator {
+extension User: MySQLModel, Migration, Owner, KarmaDonator {
     public static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
+    }
+    
+    public static var entity: String {
+        return "User"
     }
     
     var settings: Children<User, Settings> {
@@ -58,7 +62,7 @@ extension User: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
+        return container.requestConnection(to: .mysql).flatMap(to: User.self) { database in
             return User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found

@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 enum KarmaType: Int {
     case upvote = 1
@@ -15,7 +15,7 @@ enum KarmaType: Int {
     case downvote = -1
 }
 
-protocol KarmaDonation: SQLiteModel, Migration, ModifiablePivot {
+protocol KarmaDonation: MySQLModel, Migration, ModifiablePivot {
     var resourceID: Int { get }
     var donatorID: Int { get }
     var karma: Int { get set }
@@ -32,13 +32,9 @@ extension KarmaDonation {
         
         return karma
     }
-    
-    mutating func setKarmaType(_ type: KarmaType) {
-        self.karma = type.rawValue
-    }
 }
 
-protocol KarmaDonator: SQLiteModel, Migration { }
+protocol KarmaDonator: MySQLModel, Migration { }
 
 extension KarmaDonator {
     func getDonation<T: Karmable>(for resource: T, on req: Request) throws -> Future<T.Donation?> {
@@ -81,7 +77,7 @@ extension KarmaDonator {
     }
 }
 
-protocol Karmable: SQLiteModel, Migration {
+protocol Karmable: MySQLModel, Migration {
     associatedtype Donator: KarmaDonator
     associatedtype Donation: KarmaDonation
     var donations: Siblings<Self, Donator, Donation> { get }

@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
 final class CommunityMessageKarmaDonation: Codable {
@@ -22,9 +22,13 @@ final class CommunityMessageKarmaDonation: Codable {
     }
 }
 
-extension CommunityMessageKarmaDonation: SQLiteModel, Migration {
+extension CommunityMessageKarmaDonation: MySQLModel, Migration {
     static var idKey: WritableKeyPath<CommunityMessageKarmaDonation, Int?> {
         return \CommunityMessageKarmaDonation.id
+    }
+    
+    public static var entity: String {
+        return "CommunityMessageKarmaDonation"
     }
 }
 

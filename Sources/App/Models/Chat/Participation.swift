@@ -7,16 +7,16 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension Participation: SQLiteModel, Migration {
+extension Participation: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<Participation, Int?> {
         return \Participation.id
     }
     
     public static var entity: String {
-        return "Participation"
+        return "ConversationParticipation"
     }
 }
 

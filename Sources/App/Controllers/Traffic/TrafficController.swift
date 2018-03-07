@@ -41,7 +41,7 @@ final class TrafficController {
                     let location = try message.getLocation(on: req).await(on: req)
                     let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                     
-                    if geoLocation.distance(from: requestGeoLocation) < 500 && self.validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
+                    if geoLocation.distance(from: requestGeoLocation) < 500 && self.isSameCourse(location.course, comparedTo: requestLocation.course) {
                         _ = message.validations.attach(creator, on: req)
                         return try message.publicTrafficMessage(on: req)
                     }
@@ -87,28 +87,29 @@ final class TrafficController {
         }
     }
     
-    /// Checks if the course of a `Location` in the database is within 90 degrees range of the `Location` from the request
-    func validateCourse(course: Double, requestCourse: Double) -> Bool {
+    /// Checks if the course of a provided `Location` is within 90 degrees range of the second `Location`.
+    func isSameCourse(_ courseA: Double, comparedTo courseB: Double) -> Bool {
         let left: Double
         let right: Double
         
-        if requestCourse < 90 {
-            left = 360-abs(requestCourse - 90).truncatingRemainder(dividingBy: 360)
+        if courseB < 90 {
+            left = 360-abs(courseB - 90).truncatingRemainder(dividingBy: 360)
         } else {
-            left = (requestCourse - 90).truncatingRemainder(dividingBy: 360)
+            left = (courseB - 90).truncatingRemainder(dividingBy: 360)
         }
-        right = (requestCourse + 90).truncatingRemainder(dividingBy: 360)
+        right = (courseB + 90).truncatingRemainder(dividingBy: 360)
         
-        if requestCourse >= 270 || requestCourse < 90 {
+        if courseB >= 270 || courseB < 90 {
             
-            if course >= 0 && course < 180 {
-                return course <= left && course <= right
+            if courseA >= 0 && courseA < 180 {
+                return courseA <= left && courseA <= right
             } else {
-                return course >= left
+                return courseA >= left
             }
             
         } else {
-            return course >= left && course <= right
+            return courseA >= left && courseA <= right
         }
     }
+
 }
