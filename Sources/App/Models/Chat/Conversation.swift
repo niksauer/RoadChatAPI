@@ -8,43 +8,10 @@
 import Foundation
 import Vapor
 import FluentMySQL
+import RoadChatKit
 
-final class Conversation: Content {
-    var id: Int?
-    var creatorID: User.ID
-    var title: String
-    var creation: Date = Date()
-    
-    init(creatorID: User.ID, title: String) {
-        self.creatorID = creatorID
-        self.title = title
-    }
-}
-
-extension Conversation {
-    func publicConversation(newestMessage: DirectMessage?) throws -> PublicConversation {
-        return try PublicConversation(conversation: self, newestMessage: newestMessage)
-    }
-    
-    struct PublicConversation: Content {
-        let id: Int
-        let creatorID: User.ID
-        let title: String
-        let creation: Date
-        let newestMessage: DirectMessage.PublicDirectMessage?
-        
-        init(conversation: Conversation, newestMessage: DirectMessage?) throws {
-            self.id = try conversation.requireID()
-            self.creatorID = conversation.creatorID
-            self.title = conversation.title
-            self.creation = conversation.creation
-            self.newestMessage = try newestMessage?.publicDirectMessage()
-        }
-    }
-}
-
-extension Conversation: MySQLModel, Migration {
-    static var idKey: WritableKeyPath<Conversation, Int?> {
+extension Conversation: SQLiteModel, Migration {
+    public static var idKey: WritableKeyPath<Conversation, Int?> {
         return \Conversation.id
     }
     
@@ -68,7 +35,7 @@ extension Conversation: Ownable {
 }
 
 extension Conversation: Parameter {
-    static func make(for parameter: String, using container: Container) throws -> Future<Conversation> {
+    public static func make(for parameter: String, using container: Container) throws -> Future<Conversation> {
         guard let id = Int(parameter) else {
             // id must be integer
             throw Abort(.badRequest)
@@ -100,3 +67,5 @@ extension Conversation {
         return Participation.query(on: req).filter(try \Participation.conversationID == self.requireID()).all()
     }
 }
+
+extension Conversation.PublicConversation: Content {}

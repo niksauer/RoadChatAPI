@@ -8,49 +8,10 @@
 import Foundation
 import Vapor
 import FluentMySQL
+import RoadChatKit
 
-final class DirectMessage: Content {
-    var id: Int?
-    var senderID: User.ID
-    var conversationID: Conversation.ID
-    var time: Date
-    var message: String
-    
-    init(senderID: User.ID, conversationID: Conversation.ID, time: Date, message: String) {
-        self.senderID = senderID
-        self.conversationID = conversationID
-        self.time = time
-        self.message = message
-    }
-    
-    init(senderID: User.ID, conversationID: Conversation.ID, messageRequest: DirectMessageRequest) {
-        self.senderID = senderID
-        self.conversationID = conversationID
-        self.time = messageRequest.time
-        self.message = messageRequest.message
-    }
-}
-
-extension DirectMessage {
-    func publicDirectMessage() throws -> PublicDirectMessage {
-        return PublicDirectMessage(directMessage: self)
-    }
-    
-    struct PublicDirectMessage: Content {
-        let senderID: User.ID
-        let time: Date
-        let message: String
-        
-        init(directMessage: DirectMessage) {
-            self.senderID = directMessage.senderID
-            self.time = directMessage.time
-            self.message = directMessage.message
-        }
-    }
-}
-
-extension DirectMessage: MySQLModel, Migration {
-    static var idKey: WritableKeyPath<DirectMessage, Int?> {
+extension DirectMessage: SQLiteModel, Migration {
+    public static var idKey: WritableKeyPath<DirectMessage, Int?> {
         return \DirectMessage.id
     }
     
@@ -78,3 +39,5 @@ extension DirectMessage: Ownable {
         return parent(\DirectMessage.senderID)
     }
 }
+
+extension DirectMessage.PublicDirectMessage: Content {}

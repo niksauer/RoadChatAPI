@@ -56,12 +56,6 @@ class Chatroom {
             websocket.send(string: message)
         }
     }
-    
-//    func getJSONData(for message: Message) throws -> Data {
-//        let jsonEncoder = JSONEncoder()
-//        return try jsonEncoder.encode(message)
-//    }
-    
 }
 
 extension WebSocket {

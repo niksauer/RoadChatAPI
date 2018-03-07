@@ -9,48 +9,64 @@ import Foundation
 import Vapor
 
 final class JSendMiddleware: Middleware, Service {
-    func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
-        do {
-            return try next.respond(to: request).flatMap(to: Response.self) { response in
-                // sucess
-                // use data or null as payload
-                return try JSendManager.success(response)
-            }
-        } catch {
-            switch error {
-            case let fail as APIFail:
-                // fail
-                // use details mapped to error as payload
-                return try JSendManager.fail(type: fail, using: request)
-            default:
-                // error
-                // use received details as payload
-                return try JSendManager.error(error, using: request)
-            }
-        }
-    }
-}
-
-struct JSendManager {
     typealias JSON = [String: Any?]
     
-    static func success(_ response: Response) throws -> Future<Response> {
-        guard let byteCount = response.http.body.count else {
-            throw Abort(.internalServerError)
+    struct JSendResponse {
+        let status: HTTPStatus
+        let body: String
+    }
+    
+    func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
+        let promise = Promise(Response.self)
+        
+        func handleError(_ error: Error) {
+            let response: JSendResponse
+            
+            switch error {
+            case let fail as APIFail:
+                response = JSendMiddleware.fail(fail)
+            default:
+                response = JSendMiddleware.error(error)
+            }
+
+            let res = request.makeResponse()
+            res.http.body = HTTPBody(string: response.body)
+            res.http.status = response.status
+            promise.complete(res)
         }
         
-        guard byteCount > 0 else {
-            let result: JSON = [
-                "status": "success",
-                "data": nil
-            ]
-            
-            try response.content.encode(getJSONString(for: result))
-            
-            return Future(response)
+        do {
+            try next.respond(to: request).do { res in
+                promise.complete(JSendMiddleware.success(res))
+            }.catch { error in
+                handleError(error)
+            }
+        } catch {
+            handleError(error)
         }
         
-        return response.http.body.makeData(max: byteCount).map(to: Response.self) { data in
+        return promise.future
+    }
+    
+    static func success(_ response: Response) -> Response {
+        do {
+            guard let byteCount = response.http.body.count else {
+                throw Abort(.internalServerError)
+            }
+            
+            guard byteCount > 0 else {
+                let result: JSON = [
+                    "status": "success",
+                    "data": nil
+                ]
+                
+                try response.content.encode(getJSONString(for: result))
+                
+                return response
+            }
+            
+            let data = try response.http.body.makeData(max: byteCount).await(on: response)
+            
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
                 throw Abort(.internalServerError)
             }
@@ -63,40 +79,48 @@ struct JSendManager {
             try response.content.encode(getJSONString(for: result))
             
             return response
+        } catch {
+            let result: JSON = [
+                "status": "error",
+                "message": "Error converting response to JSend success format."
+            ]
+            
+            do {
+                try response.content.encode(getJSONString(for: result))
+            } catch {
+                // handle error
+            }
+            
+            response.http.status = .internalServerError
+    
+            return response
         }
     }
     
-    static func fail(type fail: APIFail, using req: Request) throws -> Future<Response> {
+    static func fail(_ fail: APIFail) -> JSendResponse {
         let result: JSON = [
             "status": "fail",
             "data": fail.message
         ]
-        
-        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: req)
-        response.http.status = .badRequest
-        
-        return Future(response)
+    	
+	return JSendResponse(status: .badRequest, body: getJSONString(for: result))    
     }
- 
-    static func error(_ error: Error, using req: Request) throws -> Future<Response> {
+    
+    static func error(_ error: Error) -> JSendResponse {
         let result: JSON = [
             "status": "error",
             "message": error.localizedDescription
         ]
         
-        let response = try Response(http: HTTPResponse(body: getJSONString(for: result)), using: req)
-        response.http.status = .internalServerError
-        
-        return Future(response)
+	return JSendResponse(status: .internalServerError, body: getJSONString(for: result))
     }
     
-    private static func getJSONString(for json: JSON) throws -> String {
-        let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
-        
-        guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-            throw Abort(.internalServerError)
+    private static func getJSONString(for json: JSON) -> String {
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
+            return String(data: jsonData, encoding: .utf8) ?? ""
+        } catch {
+            return ""
         }
-        
-        return jsonString
     }
 }

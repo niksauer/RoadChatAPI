@@ -1,8 +1,8 @@
 //
-//  CommunityMessageRequest.swift
+//  LocationRequest.swift
 //  App
 //
-//  Created by Niklas Sauer on 08.02.18.
+//  Created by Niklas Sauer on 25.02.18.
 //
 
 import Foundation
@@ -10,24 +10,21 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension CommunityMessageRequest: Validatable {
+extension LocationRequest: Validatable {
     public static var validations: Validations = [
-        key(\CommunityMessageRequest.message): IsCount(0...255),
-        key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
+        key(\LocationRequest.course): IsCount(0.0...360.0)
     ]
 }
 
-extension CommunityMessageRequest: OptionallyValidatable {
+extension LocationRequest: OptionallyValidatable {
     static var optionalValidations: OptionallyValidatable.Validations = [:]
 }
 
-extension CommunityMessageRequest: Payload {
-    typealias RequestType = CommunityMessageRequest
+extension LocationRequest: Payload {
+    typealias RequestType = LocationRequest
     
     static var requiredParameters: [Payload.Parameter] = [
         ("time", Date()),
-        ("message", "Stau auf der A3"),
-        
         ("latitude", 45.123),
         ("longitude", 42.0),
         ("altitude", 24.2),

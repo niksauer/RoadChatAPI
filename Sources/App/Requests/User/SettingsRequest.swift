@@ -8,14 +8,10 @@
 import Foundation
 import Vapor
 import Validation
-
-struct SettingsRequest: Codable {
-    let communityRadius: Int
-    let trafficRadius: Int
-}
+import RoadChatKit
 
 extension SettingsRequest: Validatable {
-    static var validations: Validations = [
+    public static var validations: Validations = [
         key(\SettingsRequest.communityRadius): IsCount(0...500),
         key(\SettingsRequest.trafficRadius): IsCount(0...50)
     ]

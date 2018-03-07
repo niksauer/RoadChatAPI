@@ -45,6 +45,7 @@ enum RegisterFail: APIFail {
 enum ConversationFail: APIFail {
     case invalidParticipants([Int])
     case minimumParticipants
+    case noAssociatedLocation
     
     var message: String {
         switch self {
@@ -52,6 +53,8 @@ enum ConversationFail: APIFail {
             return "Invalid participants: \(participants)"
         case .minimumParticipants:
             return "A conversation must have at least one participant."
+        case .noAssociatedLocation:
+            return "No location has been associated to this user."
         }
     }
 }

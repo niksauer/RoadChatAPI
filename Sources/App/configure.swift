@@ -1,6 +1,7 @@
 import Vapor
 import FluentMySQL
 import Authentication
+import RoadChatKit
 
 /// Called before your application initializes.
 ///
@@ -13,7 +14,6 @@ public func configure(
     // Register providers first
     try services.register(FluentMySQLProvider())
     try services.register(AuthenticationProvider())
-    services.register(JSendMiddleware())
 
     // Register routes to the router
     let router = EngineRouter.default()
@@ -25,7 +25,6 @@ public func configure(
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
-    middlewares.use(JSendMiddleware.self)
     services.register(middlewares)
     
     // Configure a MySQL database
@@ -35,7 +34,7 @@ public func configure(
 
     // Configure migrations
     var migrations = MigrationConfig()
-    
+
     migrations.add(model: User.self, database: .mysql)
 
     migrations.add(model: Token.self, database: .mysql)

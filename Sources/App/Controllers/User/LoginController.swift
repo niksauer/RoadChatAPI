@@ -9,17 +9,18 @@ import Foundation
 import Vapor
 import Fluent
 import Crypto
+import RoadChatKit
 
 /// Controls token-based authentication.
 final class LoginController {
     
     /// Saves a new `Token` to the database.
-    func login(_ req: Request) throws -> Future<Token.PublicToken> {
-        return try LoginRequest.extract(from: req).flatMap(to: Token.PublicToken.self) { loginRequest in
+    func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
+        return try LoginRequest.extract(from: req).flatMap(to: BearerToken.PublicBearerToken.self) { loginRequest in
             return User.query(on: req).group(.or) { builder in
                 builder.filter(\User.email == loginRequest.user)
                 builder.filter(\User.username == loginRequest.user)
-            }.first().flatMap(to: Token.PublicToken.self) { existingUser in
+            }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.badRequest)
@@ -32,7 +33,7 @@ final class LoginController {
                     throw Abort(.badRequest)
                 }
                 
-                return try Token(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: Token.PublicToken.self) { token in
+                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: BearerToken.PublicBearerToken.self) { token in
                     return token.publicToken()
                 }
             }
@@ -46,7 +47,7 @@ final class LoginController {
             throw Abort(.unauthorized)
         }
         
-        return Token.query(on: req).filter(\Token.token == requestedToken).delete().transform(to: .ok)
+        return BearerToken.query(on: req).filter(\BearerToken.token == requestedToken).delete().transform(to: .ok)
     }
     
 }

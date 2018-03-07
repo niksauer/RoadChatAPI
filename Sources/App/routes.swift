@@ -8,14 +8,18 @@
 import Foundation
 import Routing
 import Vapor
+import WebSocket
 
 /// Register your application's routes here.
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 public func routes(_ router: Router) throws {
-    try router.grouped("user").register(collection: UserRouter())
-    try router.grouped("car").register(collection: CarRouter())
-    try router.grouped("traffic").register(collection: TrafficRouter())
-    try router.grouped("community").register(collection: CommunityRouter())
-    try router.grouped("chat").register(collection: ConversationRouter())
+    let jsendRouter = router.grouped(JSendMiddleware())
+    try jsendRouter.grouped("user").register(collection: UserRouter())
+    try jsendRouter.grouped("car").register(collection: CarRouter())
+    try jsendRouter.grouped("traffic").register(collection: TrafficRouter())
+    try jsendRouter.grouped("community").register(collection: CommunityRouter())
+    try jsendRouter.grouped("chat").register(collection: ConversationRouter())
+
+    try router.register(collection: WebsocketRouter())
 }

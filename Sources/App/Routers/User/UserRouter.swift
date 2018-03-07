@@ -7,6 +7,7 @@
 
 import Foundation
 import Vapor
+import RoadChatKit
 
 class UserRouter: RouteCollection {
     func boot(router: Router) throws {
@@ -49,6 +50,12 @@ class UserRouter: RouteCollection {
         // /user/User.parameter/cars
         user.get("cars", use: userController.getCars)
         authenticatedUser.post("cars", use: userController.createCar)
+        
+        // /user/User.parameter/location
+        authenticatedUser.group("location", configure: { group in
+            group.get(use: userController.getLocation)
+            group.put(use: userController.createOrUpdateLocation)
+        })
         
         // /user/User.parameter/trafficMessages
         user.get("trafficMessages", use: userController.getTrafficMessages)
