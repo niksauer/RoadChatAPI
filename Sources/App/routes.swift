@@ -14,7 +14,8 @@ import WebSocket
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 public func routes(_ router: Router) throws {
-    let jsendRouter = router.grouped(JSendMiddleware())
+    let jsendRouter = router
+//    let jsendRouter = router.grouped(JSendMiddleware())
     try jsendRouter.grouped("user").register(collection: UserRouter())
     try jsendRouter.grouped("car").register(collection: CarRouter())
     try jsendRouter.grouped("traffic").register(collection: TrafficRouter())

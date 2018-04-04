@@ -17,18 +17,18 @@ final class LoginController {
     /// Saves a new `Token` to the database.
     func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
         return try LoginRequest.extract(from: req).flatMap(to: BearerToken.PublicBearerToken.self) { loginRequest in
-            return User.query(on: req).group(.or) { builder in
-                builder.filter(\User.email == loginRequest.user)
-                builder.filter(\User.username == loginRequest.user)
+            return try User.query(on: req).group(.or) { builder in
+                try builder.filter(\User.email == loginRequest.user)
+                try builder.filter(\User.username == loginRequest.user)
             }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.badRequest)
                 }
                 
-                let hasher = try req.make(BCryptHasher.self)
-                
-                guard try hasher.verify(message: loginRequest.password, matches: user.password) else {
+                let hasher = try req.make(BCryptDigest.self)
+            
+                guard try hasher.verify(loginRequest.password, created: user.password) else {
                     // invalid password
                     throw Abort(.badRequest)
                 }
@@ -47,7 +47,7 @@ final class LoginController {
             throw Abort(.unauthorized)
         }
         
-        return BearerToken.query(on: req).filter(\BearerToken.token == requestedToken).delete().transform(to: .ok)
+        return try BearerToken.query(on: req).filter(\BearerToken.token == requestedToken).delete().transform(to: .ok)
     }
     
 }

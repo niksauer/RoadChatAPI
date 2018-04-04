@@ -17,7 +17,7 @@ final class JSendMiddleware: Middleware, Service {
     }
     
     func respond(to request: Request, chainingTo next: Responder) throws -> Future<Response> {
-        let promise = Promise(Response.self)
+        let promise = request.eventLoop.newPromise(Response.self)
         
         func handleError(_ error: Error) {
             let response: JSendResponse
@@ -32,12 +32,12 @@ final class JSendMiddleware: Middleware, Service {
             let res = request.makeResponse()
             res.http.body = HTTPBody(string: response.body)
             res.http.status = response.status
-            promise.complete(res)
+            promise.succeed(result: res)
         }
         
         do {
             try next.respond(to: request).do { res in
-                promise.complete(JSendMiddleware.success(res))
+                promise.succeed(result: JSendMiddleware.success(res))
             }.catch { error in
                 handleError(error)
             }
@@ -45,7 +45,7 @@ final class JSendMiddleware: Middleware, Service {
             handleError(error)
         }
         
-        return promise.future
+        return promise.futureResult
     }
     
     static func success(_ response: Response) -> Response {
@@ -65,19 +65,19 @@ final class JSendMiddleware: Middleware, Service {
                 return response
             }
             
-            let data = try response.http.body.makeData(max: byteCount).await(on: response)
-            
+            let data = try response.http.body.consumeData(max: byteCount, on: response).wait()
+
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
                 throw Abort(.internalServerError)
             }
-            
+
             let result: JSON = [
                 "status": "success",
                 "data": json
             ]
-            
+
             try response.content.encode(getJSONString(for: result))
-            
+
             return response
         } catch {
             let result: JSON = [

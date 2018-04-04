@@ -25,15 +25,14 @@ final class ConversationController {
         return try req.parameter(User.self).flatMap(to: [Result].self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
-            return try user.getConversations(on: req).map(to: [Result].self) { conversations in
-                var fullConversations = [Result]()
-                
-                for conversation in conversations {
-                    let newestMessage = try conversation.getNewestMessage(on: req).await(on: req)
-                    fullConversations.append(try conversation.publicConversation(newestMessage: newestMessage))
+            return try user.getConversations(on: req).flatMap(to: [Result].self) { conversations in
+                return try conversations.map { conversation in
+                    return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
+                        return try conversation.publicConversation(newestMessage: newestMessage)
+                    }
+                }.map(to: [Result].self, on: req) { fullConversations in
+                    return fullConversations
                 }
-                
-                return fullConversations
             }
         }
     }
@@ -49,27 +48,32 @@ final class ConversationController {
             
             let requestorGeoLocation = try GeoCoordinate2D(latitude: requestorLocation.latitude, longitude: requestorLocation.longitude)
             
-            return User.query(on: req).filter(try \User.id != requestor.requireID()).all().map(to: [User.PublicUser].self) { users in
+            return User.query(on: req).filter(try \User.id != requestor.requireID()).all().flatMap(to: [User.PublicUser].self) { users in
                 let maxDistance = 500.0
-                var nearbyUsers = [User.PublicUser]()
                 
-                for user in users {
-                    let privacy = try user.getPrivacy(on: req).await(on: req)
-                    
-                    guard privacy.shareLocation, let location = try user.getLocation(on: req).await(on: req) else {
-                        continue
+                return try users.map { user in
+                    return try user.getPrivacy(on: req).flatMap(to: User.PublicUser?.self) { privacy in
+                        guard privacy.shareLocation else {
+                            return Future.map(on: req) { nil }
+                        }
+                        
+                        return try user.getLocation(on: req).flatMap(to: User.PublicUser?.self) { location in
+                            guard let location = location else {
+                                return Future.map(on: req) { nil }
+                            }
+                            
+                            let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                            
+                            guard requestorGeoLocation.distance(from: geoLocation) <= maxDistance else {
+                                return Future.map(on: req) { nil }
+                            }
+                            
+                            return Future.map(on: req) { try user.publicUser(location: location) }
+                        }
                     }
-                    
-                    let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-                    
-                    guard requestorGeoLocation.distance(from: geoLocation) <= maxDistance else {
-                        continue
-                    }
-                    
-                    nearbyUsers.append(try user.publicUser(location: location))
+                }.map(to: [User.PublicUser].self, on: req) { users in
+                    return users.compactMap({ return $0 })
                 }
-                
-                return nearbyUsers
             }
         }
     }
@@ -78,44 +82,50 @@ final class ConversationController {
     func create(_ req: Request) throws -> Future<Result> {
         return try ConversationRequest.extract(from: req).flatMap(to: Result.self) { conversationRequest in
             let creator = try req.user()
-            
-            var participants = [creator]
+
             var invalidParticipants = [Int]()
             
-            for participant in conversationRequest.participants {
+            return try conversationRequest.participants.map { participant -> EventLoopFuture<User?> in
                 guard try participant != creator.requireID() else {
-                    continue
+                    return Future.map(on: req) { nil }
                 }
                 
-                guard let receipient = try User.query(on: req).filter(\User.id == participant).first().await(on: req) else {
-                    invalidParticipants.append(participant)
-                    continue
-                }
-                
-                participants.append(receipient)
-            }
-            
-            guard invalidParticipants.isEmpty else {
-                throw ConversationFail.invalidParticipants(invalidParticipants)
-            }
-            
-            guard participants.count > 1 else {
-                throw ConversationFail.minimumParticipants
-            }
-            
-            return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).map(to: Result.self) { conversation in
-                // add participants to conversation via pivot table
-                for participant in participants {
-                    let participation = try conversation.participations.attach(participant, on: req).await(on: req)
+                return try User.query(on: req).filter(\User.id == participant).first().flatMap(to: User?.self) { receipient in
+                    guard let receipient = receipient else {
+                        invalidParticipants.append(participant)
+                        return Future.map(on: req) { nil }
+                    }
                     
-                    if try participant.requireID() == creator.requireID() {
-                        // default approval status of creator to approved
-                        participation.approvalStatus = ApprovalStatus.accepted.rawValue
-                        _ = participation.save(on: req)
+                    return Future.map(on: req) { receipient }
+                }
+            }.flatMap(to: Result.self, on: req) { participants in
+                guard invalidParticipants.isEmpty else {
+                    throw ConversationFail.invalidParticipants(invalidParticipants)
+                }
+                
+                guard participants.count > 1 else {
+                    throw ConversationFail.minimumParticipants
+                }
+                    
+                var participants = participants.compactMap { return $0 }
+                participants.append(creator)
+                
+                return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).flatMap(to: Result.self) { conversation in
+                    // add participants to conversation via pivot table
+                    return participants.map { participant in
+                        return conversation.participations.attach(participant, on: req).flatMap(to: Participation.self) { participation in
+                            guard try participant.requireID() == creator.requireID() else {
+                                return Future.map(on: req) { participation }
+                            }
+                            
+                            // default approval status of creator to approved
+                            participation.approvalStatus = ApprovalStatus.accepted.rawValue
+                            return participation.save(on: req)
+                        }
+                        }.map(to: Result.self, on: req) { participations in
+                            return try conversation.publicConversation(newestMessage: nil)
                     }
                 }
-                
-                return try conversation.publicConversation(newestMessage: nil)
             }
         }
     }
@@ -132,51 +142,51 @@ final class ConversationController {
     }
     
     /// Opens a WebSocket for a parameterized `Conversation`.
-    func liveChat(_ req: Request, _ websocket: WebSocket) throws -> Void {
-        // timer to keep connection alive
-        var pingTimer: DispatchSourceTimer?
-        pingTimer = DispatchSource.makeTimerSource()
-        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
-        pingTimer?.setEventHandler(handler: { websocket.ping() })
-        pingTimer?.resume()
-        
-        let user = try req.user()
-        let userID = try user.requireID()
-
-        let conversation = try req.parameter(Resource.self).await(on: req)
-        try user.checkParticipation(in: conversation, on: req)
-        
-        let chatroom: Chatroom
-        
-        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
-            chatroom = existingChatroom
-        } else {
-            chatroom = Chatroom(conversationID: try conversation.requireID())
-            activeChatrooms.append(chatroom)
-        }
-    
-        if let priorSocket = chatroom.connections[userID] {
-            // close and notify user that prior session will be closed
-            priorSocket.close()
-            websocket.notify(event: .existingSession)
-        }
-        
-        // set user session to this socket and notify chatroom that user is online
-        chatroom.connections[userID] = websocket
-        chatroom.notify(event: .online(userID: userID))
-        
-        websocket.onString { websocket, message in
-            chatroom.send(senderID: userID, message: message)
-        }
-        
-        websocket.onClose { websocket, _ in
-            pingTimer?.cancel()
-            pingTimer = nil
-            
-            chatroom.connections.removeValue(forKey: userID)
-            chatroom.notify(event: .offline(userID: userID))
-        }
-    }
+//    func liveChat(_ req: Request, _ websocket: WebSocket) throws -> Void {
+//        // timer to keep connection alive
+////        var pingTimer: DispatchSourceTimer?
+////        pingTimer = DispatchSource.makeTimerSource()
+////        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
+////        pingTimer?.setEventHandler(handler: { websocket.ping() })
+////        pingTimer?.resume()
+//        
+//        let user = try req.user()
+//        let userID = try user.requireID()
+//
+//        let conversation = try req.parameter(Resource.self).wait()
+//        try user.checkParticipation(in: conversation, on: req)
+//        
+//        let chatroom: Chatroom
+//        
+//        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
+//            chatroom = existingChatroom
+//        } else {
+//            chatroom = Chatroom(conversationID: try conversation.requireID())
+//            activeChatrooms.append(chatroom)
+//        }
+//    
+//        if let priorSocket = chatroom.connections[userID] {
+//            // close and notify user that prior session will be closed
+//            priorSocket.close()
+//            websocket.notify(event: .existingSession)
+//        }
+//        
+//        // set user session to this socket and notify chatroom that user is online
+//        chatroom.connections[userID] = websocket
+//        chatroom.notify(event: .online(userID: userID))
+//        
+//        websocket.onText { message in
+//            chatroom.send(senderID: userID, message: message)
+//        }
+//        
+//        websocket.onClose {
+////            pingTimer?.cancel()
+////            pingTimer = nil
+//            
+//            chatroom.connections.removeValue(forKey: userID)
+//            chatroom.notify(event: .offline(userID: userID))
+//        }
+//    }
     
     /// Deletes a parameterized `Conversation` from the `Conversation`s associated to a `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
@@ -189,7 +199,7 @@ final class ConversationController {
                         // delete conversation if no more participations
                         return conversation.delete(on: req).transform(to: .ok)
                     } else {
-                        return Future(HTTPStatus.ok)
+                        return Future.map(on: req) { HTTPStatus.ok }
                     }
                 }
             }

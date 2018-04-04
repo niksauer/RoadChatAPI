@@ -12,11 +12,11 @@ import RoadChatKit
 
 class WebsocketRouter: RouteCollection {
     func boot(router: Router) throws {
-        let authMiddleware = User.tokenAuthMiddleware(database: .sqlite)
-        let conversationController = ConversationController()
-        
+//        let authMiddleware = User.tokenAuthMiddleware(database: .sqlite)
+//        let conversationController = ConversationController()
+//        
         // /chat/Conversation.parameter/live
-        router.grouped(authMiddleware).websocket("chat", Conversation.parameter, "live", onUpgrade: conversationController.liveChat)
+//        router.grouped(authMiddleware).websocket("chat", Conversation.parameter, "live", onUpgrade: conversationController.liveChat)
     }
 }
 

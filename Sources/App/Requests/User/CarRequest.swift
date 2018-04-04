@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension CarRequest: Validatable {
+extension CarRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\CarRequest.manufacturer): IsCount(1...50),
         key(\CarRequest.model): IsCount(1...50),

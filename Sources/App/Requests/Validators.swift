@@ -11,7 +11,7 @@ import RoadChatKit
 
 struct ValidationFail: ValidationError {
     var reason: String
-    var codingPath: [CodingKey]
+    var path: [String]
 }
 
 struct IsSex: Validator {

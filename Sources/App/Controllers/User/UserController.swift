@@ -20,20 +20,20 @@ final class UserController {
     /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         return try RegisterRequest.extract(from: req).flatMap(to: Result.self) { registerRequest in
-            return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
+            return try User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
                 guard existingUser == nil else {
                     // email already registered
                     throw RegisterFail.emailTaken
                 }
                 
-                return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
+                return try User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
                     guard existingUser == nil else {
                         // username taken
                         throw RegisterFail.usernameTaken
                     }
                     
-                    let hasher = try req.make(BCryptHasher.self)
-                    let hashedPassword = try hasher.make(registerRequest.password)
+                    let hasher = try req.make(BCryptDigest.self)
+                    let hashedPassword = try hasher.hash(registerRequest.password)
                     
                     let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
                     
@@ -47,35 +47,6 @@ final class UserController {
                 }
             }
         }
-        
-//        let registerRequest = try RegisterRequest.extract(from: req).await(on: req)
-        
-//        return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
-//            guard existingUser == nil else {
-//                // email already registered
-//                throw RegisterFail.emailTaken
-//            }
-//
-//            return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
-//                guard existingUser == nil else {
-//                    // username taken
-//                    throw RegisterFail.usernameTaken
-//                }
-//
-//                let hasher = try req.make(BCryptHasher.self)
-//                let hashedPassword = try hasher.make(registerRequest.password)
-//
-//                let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
-//
-//                return newUser.create(on: req).map(to: Result.self) { user in
-//                    // further user setup
-//                    _ = Settings(userID: try user.requireID()).create(on: req)
-//                    _ = Privacy(userID: try user.requireID()).create(on: req)
-//
-//                    return try newUser.publicUser(isOwner: true)
-//                }
-//            }
-//        }
     }
     
     /// Returns a parameterized `User`.
@@ -96,9 +67,9 @@ final class UserController {
             try req.user().checkOwnership(for: user, on: req)
             
             return try RegisterRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
-                let hasher = try req.make(BCryptHasher.self)
-                let hashedPassword = try hasher.make(updatedUser.password)
-                
+                let hasher = try req.make(BCryptDigest.self)
+                let hashedPassword = try hasher.hash(updatedUser.password)
+
                 user.email = updatedUser.email
                 user.username = updatedUser.username
                 user.password = hashedPassword
@@ -303,8 +274,12 @@ final class UserController {
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
-            return try user.getTrafficMessages(on: req).map(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
-                return try messages.map({ try $0.publicTrafficMessage(on: req).await(on: req) })
+            return try user.getTrafficMessages(on: req).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
+                return try messages.map {
+                    return try $0.publicTrafficMessage(on: req)
+                }.map(to: [TrafficMessage.PublicTrafficMessage].self, on: req) { publicMesages in
+                    return publicMesages
+                }
             }
         }
     }
@@ -312,8 +287,12 @@ final class UserController {
     /// Returns all `CommunityMessage`s associated to a parameterized `User`.
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
         return try req.parameter(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
-            return try user.getCommunityMessages(on: req).map(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
-                return try messages.map({ try $0.publicCommunityMessage(on: req).await(on: req) })
+            return try user.getCommunityMessages(on: req).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
+                return try messages.map {
+                    return try $0.publicCommunityMessage(on: req)
+                }.map(to: [CommunityMessage.PublicCommunityMessage].self, on: req) { publicMesages in
+                    return publicMesages
+                }
             }
         }
     }

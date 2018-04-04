@@ -21,7 +21,7 @@ public func configure(
     services.register(router, as: Router.self)
     
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
+    var middlewares = MiddlewareConfig() // Create empty middleware config
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
@@ -56,3 +56,11 @@ public func configure(
     
     services.register(migrations)
 }
+
+//func configureWebsockets(_ services: inout Services) {
+//    let websockets = EngineWebSocketServer.default()
+//    let conversationController = ConversationController()
+//    
+//    websockets.get(at: "chat", use: conversationController.liveChat)
+//    services.register(websockets, as: WebSocketServer.self)
+//}

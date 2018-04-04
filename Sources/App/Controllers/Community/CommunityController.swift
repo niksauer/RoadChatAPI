@@ -18,8 +18,12 @@ final class CommunityController {
     
     /// Returns all `CommunityMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
-        return CommunityMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicCommunityMessage(on: req).await(on: req) })
+        return CommunityMessage.query(on: req).all().flatMap(to: [Result].self) { messages in
+            return try messages.map {
+                return try $0.publicCommunityMessage(on: req)
+            }.map(to: [Result].self, on: req) { messages in
+                return messages
+            }
         }
     }
     
