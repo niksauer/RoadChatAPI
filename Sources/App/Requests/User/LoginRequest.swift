@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension LoginRequest: Validatable {
+extension LoginRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\LoginRequest.user): IsASCII(),
         key(\LoginRequest.password): IsCount(8...) && IsASCII()

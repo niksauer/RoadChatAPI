@@ -3,6 +3,8 @@ import FluentMySQL
 import Authentication
 import RoadChatKit
 
+let hashingCost: Int = 6 // default = 12
+
 /// Called before your application initializes.
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#configureswift)
@@ -21,7 +23,7 @@ public func configure(
     services.register(router, as: Router.self)
     
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
+    var middlewares = MiddlewareConfig() // Create empty middleware config
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
     middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
@@ -29,7 +31,9 @@ public func configure(
     
     // Configure a MySQL database
     var databases = DatabaseConfig()
-    databases.add(database: MySQLDatabase(hostname: "localhost", user: "swift", password: "swift", database: "roadchat"), as: .mysql)
+    let mySQLConfig = MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "swift", password: "swift", database: "roadchat")
+    let mySQLDatabase = MySQLDatabase(config: mySQLConfig)
+    databases.add(database: mySQLDatabase, as: .mysql)
     services.register(databases)
 
     // Configure migrations
@@ -55,4 +59,16 @@ public func configure(
     migrations.add(model: Participation.self, database: .mysql)
     
     services.register(migrations)
+    
+//    configureWebsockets(&services)
+}
+
+func configureWebsockets(_ services: inout Services) {
+    let websockets = EngineWebSocketServer.default()
+    let _ = User.tokenAuthMiddleware(database: .mysql)
+    let conversationController = ConversationController()
+    
+    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
+    
+    services.register(websockets, as: WebSocketServer.self)
 }

@@ -34,7 +34,7 @@ extension CommunityMessage: Parameter {
         }
         
         return container.requestConnection(to: .mysql).flatMap(to: CommunityMessage.self) { database in
-            return CommunityMessage.find(id, on: database).map(to: CommunityMessage.self) { existingMessage in
+            return try CommunityMessage.find(id, on: database).map(to: CommunityMessage.self) { existingMessage in
                 guard let message = existingMessage else {
                     // message not found
                     throw Abort(.notFound)

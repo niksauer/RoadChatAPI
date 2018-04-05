@@ -19,18 +19,18 @@ extension DirectMessage: MySQLModel, Migration {
         return "DirectMessage"
     }
     
-    var conversation: Parent<DirectMessage, Conversation> {
-        return parent(\DirectMessage.conversationID)
-    }
-    
     public static func prepare(on connection: MySQLConnection) -> Future<Void> {
         return MySQLDatabase.create(self, on: connection) { builder in
             try builder.field(for: \DirectMessage.id)
             try builder.field(for: \DirectMessage.senderID)
             try builder.field(for: \DirectMessage.conversationID)
             try builder.field(for: \DirectMessage.time)
-            builder.field(type: .text(), for: \DirectMessage.message)
+            try builder.field(type: .text(), for: \DirectMessage.message)
         }
+    }
+    
+    var conversation: Parent<DirectMessage, Conversation> {
+        return parent(\DirectMessage.conversationID)
     }
 }
 

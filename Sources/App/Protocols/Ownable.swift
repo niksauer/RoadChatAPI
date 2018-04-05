@@ -21,7 +21,7 @@ protocol Ownable: MySQLModel {
 extension Owner {
     /// Checks resource ownership for an `Ownable`.
     func checkOwnership<T: Ownable>(for resource: T, on req: Request) throws {
-        _ = resource.owner.query(on: req).first().map(to: Void.self) { owner in
+        _ = try resource.owner.query(on: req).first().map(to: Void.self) { owner in
             guard let owner = owner else {
                 // no owner associated to resource
                 throw Abort(.internalServerError)

@@ -13,6 +13,5 @@ let package = Package(
     targets: [
         .target(name: "App", dependencies: ["Vapor", "FluentMySQL", "Authentication", "GeoSwift", "RoadChatKit"]),
         .target(name: "Run", dependencies: ["App"]),
-        .testTarget(name: "AppTests", dependencies: ["App"]),
     ]
 )

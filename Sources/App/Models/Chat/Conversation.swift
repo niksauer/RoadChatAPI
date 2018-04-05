@@ -42,7 +42,7 @@ extension Conversation: Parameter {
         }
         
         return container.requestConnection(to: .mysql).flatMap(to: Conversation.self) { database in
-            return Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
+            return try Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
                 guard let conversation = existingConversation else {
                     // conversation not found
                     throw Abort(.notFound)

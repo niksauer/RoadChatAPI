@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension LocationRequest: Validatable {
+extension LocationRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\LocationRequest.course): IsCount(0.0...360.0)
     ]

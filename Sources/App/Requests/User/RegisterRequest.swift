@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension RegisterRequest: Validatable {
+extension RegisterRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\RegisterRequest.email): IsEmail(),
         key(\RegisterRequest.username): IsCount(4...) && IsAlphanumeric(),

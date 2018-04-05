@@ -7,10 +7,11 @@
 
 import Foundation
 import Validation
+import RoadChatKit
 
 struct ValidationFail: ValidationError {
     var reason: String
-    var codingPath: [CodingKey]
+    var path: [String]
 }
 
 struct IsSex: Validator {
@@ -52,10 +53,6 @@ struct IsColor: Validator {
 }
 
 struct IsTrafficType: Validator {
-    enum TrafficType: String {
-        case jam, accident, danger, detour
-    }
-    
     // Validator
     var inverseMessage: String = "valid traffic type"
     
