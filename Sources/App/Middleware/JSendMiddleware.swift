@@ -24,9 +24,9 @@ final class JSendMiddleware: Middleware, Service {
             
             switch error {
             case let fail as APIFail:
-                response = JSendMiddleware.fail(fail)
+                response = self.fail(fail)
             default:
-                response = JSendMiddleware.error(error)
+                response = self.error(error)
             }
 
             let res = request.makeResponse()
@@ -37,7 +37,9 @@ final class JSendMiddleware: Middleware, Service {
         
         do {
             try next.respond(to: request).do { res in
-                promise.succeed(result: JSendMiddleware.success(res))
+                _ = self.success(res).map(to: Void.self) { response in
+                    promise.succeed(result: response)
+                }
             }.catch { error in
                 handleError(error)
             }
@@ -48,7 +50,7 @@ final class JSendMiddleware: Middleware, Service {
         return promise.futureResult
     }
     
-    static func success(_ response: Response) -> Response {
+    func success(_ response: Response) -> Future<Response> {
         do {
             guard let byteCount = response.http.body.count else {
                 throw Abort(.internalServerError)
@@ -62,23 +64,23 @@ final class JSendMiddleware: Middleware, Service {
                 
                 try response.content.encode(getJSONString(for: result))
                 
-                return response
+                return Future.map(on: response) { response }
             }
-            
-            let data = try response.http.body.consumeData(max: byteCount, on: response).wait()
+        
+            return response.http.body.consumeData(max: byteCount, on: response).flatMap(to: Response.self) { data in
+                guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
+                    throw Abort(.internalServerError)
+                }
 
-            guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                throw Abort(.internalServerError)
+                let result: JSON = [
+                    "status": "success",
+                    "data": json
+                ]
+
+                try response.content.encode(self.getJSONString(for: result))
+
+                return Future.map(on: response) { response }
             }
-
-            let result: JSON = [
-                "status": "success",
-                "data": json
-            ]
-
-            try response.content.encode(getJSONString(for: result))
-
-            return response
         } catch {
             let result: JSON = [
                 "status": "error",
@@ -93,11 +95,11 @@ final class JSendMiddleware: Middleware, Service {
             
             response.http.status = .internalServerError
     
-            return response
+            return Future.map(on: response) { response }
         }
     }
     
-    static func fail(_ fail: APIFail) -> JSendResponse {
+    func fail(_ fail: APIFail) -> JSendResponse {
         let result: JSON = [
             "status": "fail",
             "data": fail.message
@@ -106,7 +108,7 @@ final class JSendMiddleware: Middleware, Service {
         return JSendResponse(status: .badRequest, body: getJSONString(for: result))
     }
     
-    static func error(_ error: Error) -> JSendResponse {
+    func error(_ error: Error) -> JSendResponse {
         let result: JSON = [
             "status": "error",
             "message": error.localizedDescription
@@ -115,7 +117,7 @@ final class JSendMiddleware: Middleware, Service {
         return JSendResponse(status: .internalServerError, body: getJSONString(for: result))
     }
     
-    private static func getJSONString(for json: JSON) -> String {
+    func getJSONString(for json: JSON) -> String {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: json, options: [])
             return String(data: jsonData, encoding: .utf8) ?? ""

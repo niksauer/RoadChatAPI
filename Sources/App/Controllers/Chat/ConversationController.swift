@@ -142,51 +142,51 @@ final class ConversationController {
     }
     
     /// Opens a WebSocket for a parameterized `Conversation`.
-//    func liveChat(_ req: Request, _ websocket: WebSocket) throws -> Void {
-//        // timer to keep connection alive
-////        var pingTimer: DispatchSourceTimer?
-////        pingTimer = DispatchSource.makeTimerSource()
-////        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
-////        pingTimer?.setEventHandler(handler: { websocket.ping() })
-////        pingTimer?.resume()
-//        
-//        let user = try req.user()
-//        let userID = try user.requireID()
-//
-//        let conversation = try req.parameter(Resource.self).wait()
-//        try user.checkParticipation(in: conversation, on: req)
-//        
-//        let chatroom: Chatroom
-//        
-//        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
-//            chatroom = existingChatroom
-//        } else {
-//            chatroom = Chatroom(conversationID: try conversation.requireID())
-//            activeChatrooms.append(chatroom)
-//        }
-//    
-//        if let priorSocket = chatroom.connections[userID] {
-//            // close and notify user that prior session will be closed
-//            priorSocket.close()
-//            websocket.notify(event: .existingSession)
-//        }
-//        
-//        // set user session to this socket and notify chatroom that user is online
-//        chatroom.connections[userID] = websocket
-//        chatroom.notify(event: .online(userID: userID))
-//        
-//        websocket.onText { message in
-//            chatroom.send(senderID: userID, message: message)
-//        }
-//        
-//        websocket.onClose {
-////            pingTimer?.cancel()
-////            pingTimer = nil
-//            
-//            chatroom.connections.removeValue(forKey: userID)
-//            chatroom.notify(event: .offline(userID: userID))
-//        }
-//    }
+    func liveChat(websocket: WebSocket, req: Request) throws -> Void {
+        // timer to keep connection alive
+//        var pingTimer: DispatchSourceTimer?
+//        pingTimer = DispatchSource.makeTimerSource()
+//        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
+//        pingTimer?.setEventHandler(handler: { websocket.ping() })
+//        pingTimer?.resume()
+
+        let user = try req.user()
+        let userID = try user.requireID()
+
+        let conversation = try req.parameter(Resource.self).wait()
+        try user.checkParticipation(in: conversation, on: req)
+
+        let chatroom: Chatroom
+
+        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
+            chatroom = existingChatroom
+        } else {
+            chatroom = Chatroom(conversationID: try conversation.requireID())
+            activeChatrooms.append(chatroom)
+        }
+
+        if let priorSocket = chatroom.connections[userID] {
+            // close and notify user that prior session will be closed
+            priorSocket.close()
+            websocket.notify(event: .existingSession)
+        }
+
+        // set user session to this socket and notify chatroom that user is online
+        chatroom.connections[userID] = websocket
+        chatroom.notify(event: .online(userID: userID))
+
+        websocket.onText { message in
+            chatroom.send(senderID: userID, message: message)
+        }
+
+        websocket.onClose {
+//            pingTimer?.cancel()
+//            pingTimer = nil
+
+            chatroom.connections.removeValue(forKey: userID)
+            chatroom.notify(event: .offline(userID: userID))
+        }
+    }
     
     /// Deletes a parameterized `Conversation` from the `Conversation`s associated to a `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {

@@ -3,6 +3,8 @@ import FluentSQLite
 import Authentication
 import RoadChatKit
 
+let hashingCost: Int = 6 // default = 12
+
 /// Called before your application initializes.
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#configureswift)
@@ -55,12 +57,15 @@ public func configure(
     migrations.add(model: Participation.self, database: .sqlite)
     
     services.register(migrations)
+    
+//    configureWebsockets(&services)
 }
 
-//func configureWebsockets(_ services: inout Services) {
-//    let websockets = EngineWebSocketServer.default()
-//    let conversationController = ConversationController()
-//    
-//    websockets.get(at: "chat", use: conversationController.liveChat)
-//    services.register(websockets, as: WebSocketServer.self)
-//}
+func configureWebsockets(_ services: inout Services) {
+    let websockets = EngineWebSocketServer.default()
+    let conversationController = ConversationController()
+    
+    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
+    
+    services.register(websockets, as: WebSocketServer.self)
+}

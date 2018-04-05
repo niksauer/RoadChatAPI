@@ -33,7 +33,7 @@ final class UserController {
                     }
                     
                     let hasher = try req.make(BCryptDigest.self)
-                    let hashedPassword = try hasher.hash(registerRequest.password)
+                    let hashedPassword = try hasher.hash(registerRequest.password, cost: hashingCost)
                     
                     let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
                     
@@ -69,8 +69,8 @@ final class UserController {
             
             return try RegisterRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
                 let hasher = try req.make(BCryptDigest.self)
-                let hashedPassword = try hasher.hash(updatedUser.password)
-
+                let hashedPassword = try hasher.hash(updatedUser.password, cost: hashingCost)
+                
                 user.email = updatedUser.email
                 user.username = updatedUser.username
                 user.password = hashedPassword

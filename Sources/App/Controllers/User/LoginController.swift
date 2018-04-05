@@ -27,7 +27,7 @@ final class LoginController {
                 }
                 
                 let hasher = try req.make(BCryptDigest.self)
-            
+    
                 guard try hasher.verify(loginRequest.password, created: user.password) else {
                     // invalid password
                     throw Abort(.badRequest)
