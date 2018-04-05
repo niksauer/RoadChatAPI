@@ -1,5 +1,5 @@
 //
-//  Extensions.swift
+//  VaporExtensions.swift
 //  App
 //
 //  Created by Niklas Sauer on 05.04.18.

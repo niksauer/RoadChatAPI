@@ -63,6 +63,7 @@ public func configure(
 
 func configureWebsockets(_ services: inout Services) {
     let websockets = EngineWebSocketServer.default()
+    let _ = User.tokenAuthMiddleware(database: .sqlite)
     let conversationController = ConversationController()
     
     websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
