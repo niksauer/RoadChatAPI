@@ -37,12 +37,13 @@ final class UserController {
                     
                     let newUser = User(email: registerRequest.email, username: registerRequest.username, password: hashedPassword)
                     
-                    return newUser.create(on: req).map(to: Result.self) { user in
-                        // further user setup
-                        _ = Settings(userID: try user.requireID()).create(on: req)
-                        _ = Privacy(userID: try user.requireID()).create(on: req)
-                        
-                        return try newUser.publicUser(isOwner: true)
+                    return newUser.create(on: req).flatMap(to: Result.self) { user in
+                        // default user setup
+                        return Settings(userID: try user.requireID()).create(on: req).flatMap(to: Result.self) { _ in
+                            return Privacy(userID: try user.requireID()).create(on: req).map(to: Result.self) { _ in
+                                return try newUser.publicUser(isOwner: true)
+                            }
+                        }
                     }
                 }
             }
@@ -162,7 +163,7 @@ final class UserController {
                     // no profile associated to user
                     throw Abort(.notFound)
                 }
-            
+        
                 return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
                     do {
                         try req.checkOptionalOwnership(for: user)
