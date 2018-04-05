@@ -44,7 +44,7 @@ class Chatroom {
             return
         }
         
-        websocket.send(string: message)
+        websocket.send(message)
     }
     
     private func send(senderID: Int, message: String, exclude: [Int]) {
@@ -53,7 +53,7 @@ class Chatroom {
                 continue
             }
             
-            websocket.send(string: message)
+            websocket.send(message)
         }
     }
 }
@@ -66,7 +66,7 @@ extension WebSocket {
     func notify(event: Notification) {
         switch event {
         case .existingSession:
-            self.send(string: "You already have an active session. Redirecting messages here.")
+            self.send("You already have an active session. Redirecting messages here.")
         }
     }
 }

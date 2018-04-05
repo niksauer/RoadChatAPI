@@ -19,8 +19,12 @@ final class TrafficController {
     
     /// Returns all `TrafficMessage`s.
     func index(_ req: Request) throws -> Future<[Result]> {
-        return TrafficMessage.query(on: req).all().map(to: [Result].self) { messages in
-            return try messages.map({ try $0.publicTrafficMessage(on: req).await(on: req) })
+        return TrafficMessage.query(on: req).all().flatMap(to: [Result].self) { messages in
+            return try messages.map {
+                return try $0.publicTrafficMessage(on: req)
+            }.map(to: [Result].self, on: req) { messages in
+                return messages
+            }
         }
     }
 
@@ -36,21 +40,32 @@ final class TrafficController {
                 throw Abort(.internalServerError)
             }
             
-            return TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
-                for message in recentMessages {
-                    let location = try message.getLocation(on: req).await(on: req)
-                    let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
-                    
-                    if geoLocation.distance(from: requestGeoLocation) < 500 && self.validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
-                        _ = message.validations.attach(creator, on: req)
-                        return try message.publicTrafficMessage(on: req)
-                    }
-                }
+            return try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
                 
-                return requestLocation.create(on: req).flatMap(to: Result.self) { location in
-                    return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
-                        return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
-                            return try message.publicTrafficMessage(on: req)
+                return try recentMessages.map { message in
+                    return try message.getLocation(on: req).flatMap(to: Result?.self) { location in
+                        let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
+                        
+                        if geoLocation.distance(from: requestGeoLocation) < 500 && self.validateCourse(course: location.course, requestCourse: requestLocation.course) == true {
+                            return message.validations.attach(creator, on: req).flatMap(to: Result?.self) { _ in
+                                return try message.publicTrafficMessage(on: req).map(to: Result?.self) { publicMessage in
+                                    return publicMessage
+                                }
+                            }
+                        } else {
+                            return Future.map(on: req) { nil }
+                        }
+                    }
+                }.flatMap(to: Result.self, on: req) { validatedMessages in
+                    if let validatedMessage = validatedMessages.compactMap({ return $0 }).first {
+                        return Future.map(on: req) { validatedMessage }
+                    } else {
+                        return requestLocation.create(on: req).flatMap(to: Result.self) { location in
+                            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                                return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
+                                    return try message.publicTrafficMessage(on: req)
+                                }
+                            }
                         }
                     }
                 }

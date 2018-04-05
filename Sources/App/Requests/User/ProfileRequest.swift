@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension ProfileRequest: Validatable {
+extension ProfileRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\ProfileRequest.firstName): IsCount(1...50),
         key(\ProfileRequest.lastName): IsCount(1...50),

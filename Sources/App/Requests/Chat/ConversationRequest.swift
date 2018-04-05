@@ -10,9 +10,9 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension ConversationRequest: Validatable {
+extension ConversationRequest: Validatable, Reflectable {
     public static var validations: Validations = [
-        key(\ConversationRequest.title): IsCount(1...50),
+        key(\.title): IsCount(1...50),
     ]
 }
 

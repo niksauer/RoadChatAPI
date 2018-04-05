@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import Vapor
 import Validation
 
-protocol OptionallyValidatable {
+protocol OptionallyValidatable: Reflectable {
     typealias Validations = [ValidationKey : Validator]
     static var optionalValidations: Validations { get }
 }
@@ -27,7 +28,7 @@ extension OptionallyValidatable {
             do {
                 try validation.validate(data)
             } catch var error as ValidationError {
-                error.codingPath += key.codingPath
+                error.path += key.path
                 errors.append(error)
             }
         }

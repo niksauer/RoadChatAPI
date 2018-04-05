@@ -56,7 +56,7 @@ class UserRouter: RouteCollection {
             group.get(use: userController.getLocation)
             group.put(use: userController.createOrUpdateLocation)
         })
-        
+
         // /user/User.parameter/trafficMessages
         user.get("trafficMessages", use: userController.getTrafficMessages)
         

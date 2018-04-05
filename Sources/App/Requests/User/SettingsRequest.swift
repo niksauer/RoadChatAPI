@@ -10,7 +10,7 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension SettingsRequest: Validatable {
+extension SettingsRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\SettingsRequest.communityRadius): IsCount(0...500),
         key(\SettingsRequest.trafficRadius): IsCount(0...50)

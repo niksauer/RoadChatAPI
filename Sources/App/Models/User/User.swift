@@ -59,7 +59,7 @@ extension User: Parameter {
         }
         
         return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
-            return User.find(id, on: database).map(to: User.self) { existingUser in
+            return try User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.notFound)
@@ -84,17 +84,17 @@ extension Request {
     
     func optionalUser() throws -> Future<User?> {
         if let token = self.http.headers.bearerAuthorization?.token {
-            return BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
+            return try BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
                 guard let storedToken = storedToken else {
-                    return Future(nil)
+                    return Future.map(on: self) { nil }
                 }
                 
-                return storedToken.authUser.get(on: self).map(to: User?.self) { user in
+                return try storedToken.authUser.get(on: self).map(to: User?.self) { user in
                     return user
                 }
             }
         } else {
-            return Future(nil)
+            return Future.map(on: self) { nil }
         }
     }
 }
@@ -143,7 +143,7 @@ extension User {
     }
     
     func getLocation(on req: Request) throws -> Future<Location?> {
-        return Location.query(on: req).filter(\Location.id == self.locationID).first()
+        return try Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
 }
 
