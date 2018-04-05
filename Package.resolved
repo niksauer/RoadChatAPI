@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "225aff2b69049f2a4d9a4aae71d27ba7fb083032",
-          "version": "3.0.1"
+          "revision": "5383e40f19d71da99e496afa9972c085abc2379d",
+          "version": "3.0.2"
         }
       },
       {
@@ -87,7 +87,7 @@
         "repositoryURL": "https://github.com/niksauer/RoadChatKit",
         "state": {
           "branch": "master",
-          "revision": "bf68debc2bf06682ae571e6423b42abcae416e02",
+          "revision": "44a02057fa337fd31cd13b396ff95cbe64ba43bd",
           "version": null
         }
       },
