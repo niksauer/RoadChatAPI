@@ -13,14 +13,15 @@ import RoadChatKit
 extension CommunityMessageRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\CommunityMessageRequest.title): IsCount(1...140),
-        key(\CommunityMessageRequest.message): IsCount(0...280),
         
         key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
     ]
 }
 
 extension CommunityMessageRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
+    static var optionalValidations: OptionallyValidatable.Validations = [
+        key(\CommunityMessageRequest.message): IsCount(0...280),
+    ]
 }
 
 extension CommunityMessageRequest: Payload {
