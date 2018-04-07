@@ -13,6 +13,7 @@ import RoadChatKit
 extension TrafficMessageRequest: Validatable, Reflectable {
     public static var validations: Validations = [
         key(\TrafficMessageRequest.type): IsTrafficType(),
+        
         key(\TrafficMessageRequest.course): IsCount(0.0...360.0)
     ]
 }
