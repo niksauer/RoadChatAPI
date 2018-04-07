@@ -8,12 +8,7 @@
 import Foundation
 import Vapor
 import FluentSQLite
-
-enum KarmaType: Int {
-    case upvote = 1
-    case neutral = 0
-    case downvote = -1
-}
+import RoadChatKit
 
 protocol KarmaDonation: SQLiteModel, Migration, ModifiablePivot {
     var resourceID: Int { get }
