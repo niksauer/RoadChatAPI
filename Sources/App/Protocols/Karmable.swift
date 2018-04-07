@@ -89,8 +89,14 @@ protocol Karmable: SQLiteModel, Migration {
 
 extension Karmable {
     func getKarmaLevel(on req: Request) throws -> Future<Int> {
-        return try Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).sum(\Donation.karma).map(to: Int.self) { upvotes in
-            return Int(upvotes)
+        return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == 1).count().flatMap(to: Int.self) { upvotes in
+            return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == -1).count().map(to: Int.self) { downvotes in
+                return (upvotes-downvotes)
+            }
         }
+        
+//        return try Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).sum(\Donation.karma).map(to: Int.self) { upvotes in
+//            return Int(upvotes)
+//        }
     }
 }
