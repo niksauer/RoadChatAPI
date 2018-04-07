@@ -91,14 +91,14 @@ final class TrafficController {
     /// Upvotes a parameterized `TrafficMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.upvote, to: message, on: req)
+            return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
 
     /// Downvotes a parameterized `TrafficMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.downvote, to: message, on: req)
+            return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
     

@@ -60,14 +60,14 @@ final class CommunityController {
     /// Upvotes a parameterized `CommunityMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.upvote, to: message, on: req)
+            return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
     
     /// Downvotes a parameterized `CommunityMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.downvote, to: message, on: req)
+            return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
 
