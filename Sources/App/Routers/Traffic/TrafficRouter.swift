@@ -15,10 +15,11 @@ class TrafficRouter: RouteCollection {
         let trafficController = TrafficController()
         
         // /traffic/board
-        let trafficMessageBoard = router.grouped("board")
+        let trafficBoard = router.grouped("board")
+        let authenticatedTrafficBoard = trafficBoard.grouped(authMiddleware)
         
-        trafficMessageBoard.get(use: trafficController.index)
-        trafficMessageBoard.grouped(authMiddleware).post(use: trafficController.create)
+        authenticatedTrafficBoard.get(use: trafficController.index)
+        authenticatedTrafficBoard.grouped(authMiddleware).post(use: trafficController.create)
         
         // /traffic/messages/TrafficMessage.parameter
         let trafficMessage = router.grouped("message").grouped(TrafficMessage.parameter)
