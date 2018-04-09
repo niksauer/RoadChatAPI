@@ -58,10 +58,10 @@ class UserRouter: RouteCollection {
         })
 
         // /user/User.parameter/trafficMessages
-        user.get("trafficMessages", use: userController.getTrafficMessages)
+        authenticatedUser.get("trafficMessages", use: userController.getTrafficMessages)
         
         // /user/User.parameter/communityMessages
-        user.get("communityMessages", use: userController.getCommunityMessages)
+        authenticatedUser.get("communityMessages", use: userController.getCommunityMessages)
         
         // /user/User.parameter/conversations
         authenticatedUser.get("conversations", use: conversationController.index)

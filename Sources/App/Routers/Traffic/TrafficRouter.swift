@@ -25,7 +25,7 @@ class TrafficRouter: RouteCollection {
         let trafficMessage = router.grouped("message").grouped(TrafficMessage.parameter)
         let authenticatedTrafficMessage = trafficMessage.grouped(authMiddleware)
         
-        trafficMessage.get(use: trafficController.get)
+        authenticatedTrafficMessage.get(use: trafficController.get)
         authenticatedTrafficMessage.delete(use: trafficController.delete)
         
         // /traffic/messages/TrafficMessage.parameter/upvote

@@ -278,8 +278,8 @@ final class UserController {
             return try user.getTrafficMessages(on: req).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicTrafficMessage(on: req)
-                }.map(to: [TrafficMessage.PublicTrafficMessage].self, on: req) { publicMesages in
-                    return publicMesages
+                }.map(to: [TrafficMessage.PublicTrafficMessage].self, on: req) { publicMessages in
+                    return publicMessages
                 }
             }
         }
@@ -291,8 +291,8 @@ final class UserController {
             return try user.getCommunityMessages(on: req).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicCommunityMessage(on: req)
-                }.map(to: [CommunityMessage.PublicCommunityMessage].self, on: req) { publicMesages in
-                    return publicMesages
+                }.map(to: [CommunityMessage.PublicCommunityMessage].self, on: req) { publicMessages in
+                    return publicMessages
                 }
             }
         }

@@ -55,7 +55,7 @@ extension CommunityMessage {
         return try self.getKarmaLevel(on: req).flatMap(to: PublicCommunityMessage.self) { karmaLevel in
             return try user.getDonation(for: self, on: req).map(to: PublicCommunityMessage.self) { donation in
                 guard let donation = donation, let karma = KarmaType(rawValue: donation.karma) else {
-                    return try self.publicCommunityMessage(upvotes: karmaLevel, karma: nil)
+                    return try self.publicCommunityMessage(upvotes: karmaLevel, karma: .neutral)
                 }
                 
                 return try self.publicCommunityMessage(upvotes: karmaLevel, karma: karma)

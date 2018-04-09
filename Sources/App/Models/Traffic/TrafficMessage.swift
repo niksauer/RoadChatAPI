@@ -74,7 +74,7 @@ extension TrafficMessage {
             return try self.getValidationLevel(on: req).flatMap(to: PublicTrafficMessage.self) { validationLevel in
                 return try user.getDonation(for: self, on: req).map(to: PublicTrafficMessage.self) { donation in
                     guard let donation = donation, let karma = KarmaType(rawValue: donation.karma) else {
-                        return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: nil)
+                        return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: .neutral)
                     }
                     
                     return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: karma)
