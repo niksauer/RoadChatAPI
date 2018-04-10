@@ -26,9 +26,9 @@ extension RegisterRequest: Payload {
     typealias RequestType = RegisterRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("email", "nik.sauer@me.com"),
-        ("username", "inik"),
-        ("password", "safeharbour")
+        ("email", String.self),
+        ("username", String.self),
+        ("password", String.self)
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

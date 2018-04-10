@@ -25,8 +25,8 @@ extension SettingsRequest: Payload {
     typealias RequestType = SettingsRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("communityRadius", 10),
-        ("trafficRadius", 5),
+        ("communityRadius", Int.self),
+        ("trafficRadius", Int.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

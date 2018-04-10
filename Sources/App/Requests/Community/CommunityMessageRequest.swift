@@ -28,16 +28,16 @@ extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("time", Date()),
-        ("message", "Stau auf der A3"),
+        ("time", Date.self),
+        ("message", String.self),
         
-        ("latitude", 45.123),
-        ("longitude", 42.0),
-        ("altitude", 24.2),
-        ("horizontalAccuracy", 34.0),
-        ("verticalAccuracy", 34.0),
-        ("course", 0.0),
-        ("speed", 60.0),
+        ("latitude", Double.self),
+        ("longitude", Double.self),
+        ("altitude", Double.self),
+        ("horizontalAccuracy", Double.self),
+        ("verticalAccuracy", Double.self),
+        ("course", Double.self),
+        ("speed", Double.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

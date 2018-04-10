@@ -28,14 +28,14 @@ extension CarRequest: Payload {
     typealias RequestType = CarRequest
 
     static var requiredParameters: [Payload.Parameter] = [
-        ("manufacturer", "BMW"),
-        ("model", "118d"),
-        ("production", Date())
+        ("manufacturer", String.self),
+        ("model", String.self),
+        ("production", Date.self)
     ]
 
     static var optionalParameters: [Payload.Parameter] = [
-        ("performance", 142),
-        ("color", 255),
+        ("performance", Int.self),
+        ("color", Int.self),
     ]
 }
 

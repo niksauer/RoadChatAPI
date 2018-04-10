@@ -30,17 +30,17 @@ extension ProfileRequest: Payload {
     typealias RequestType = ProfileRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("firstName", "Niklas"),
-        ("lastName", "Sauer"),
-        ("birth", Date()),
+        ("firstName", String.self),
+        ("lastName", String.self),
+        ("birth", Date.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
-        ("sex", "male"),
-        ("biography", "Dualer Student"),
-        ("streetName", "Ernststraße"),
-        ("streetNumber", 12),
-        ("postalCode", 63456),
-        ("country", "Germany")
+        ("sex", String.self),
+        ("biography", String.self),
+        ("streetName", String.self),
+        ("streetNumber", Int.self),
+        ("postalCode", Int.self),
+        ("country", String.self)
     ]
 }

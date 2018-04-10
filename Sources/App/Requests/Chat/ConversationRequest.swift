@@ -24,8 +24,8 @@ extension ConversationRequest: Payload {
     typealias RequestType = ConversationRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("title", "CryptoBros"),
-        ("participants", [1]),
+        ("title", String.self),
+        ("participants", [Int].self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

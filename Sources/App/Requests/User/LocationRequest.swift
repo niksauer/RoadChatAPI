@@ -24,14 +24,14 @@ extension LocationRequest: Payload {
     typealias RequestType = LocationRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("time", Date()),
-        ("latitude", 45.123),
-        ("longitude", 42.0),
-        ("altitude", 24.2),
-        ("horizontalAccuracy", 34.0),
-        ("verticalAccuracy", 34.0),
-        ("course", 0.0),
-        ("speed", 60.0),
+        ("time", Date.self),
+        ("latitude", Double.self),
+        ("longitude", Double.self),
+        ("altitude", Double.self),
+        ("horizontalAccuracy", Double.self),
+        ("verticalAccuracy", Double.self),
+        ("course", Double.self),
+        ("speed", Double.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

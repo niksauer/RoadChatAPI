@@ -24,8 +24,8 @@ extension DirectMessageRequest: Payload {
     typealias RequestType = DirectMessageRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("time", Date()),
-        ("message", "Hey, wie gehts?"),
+        ("time", Date.self),
+        ("message", String.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

@@ -22,13 +22,13 @@ extension PrivacyRequest: Payload {
     typealias RequestType = PrivacyRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("shareLocation", false),
-        ("showFirstName", true),
-        ("showLastName", false),
-        ("showBirth", false),
-        ("showSex", true),
-        ("showAddress", false),
-        ("showBiography", true)
+        ("shareLocation", Bool.self),
+        ("showFirstName", Bool.self),
+        ("showLastName", Bool.self),
+        ("showBirth", Bool.self),
+        ("showSex", Bool.self),
+        ("showAddress", Bool.self),
+        ("showBiography", Bool.self)
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

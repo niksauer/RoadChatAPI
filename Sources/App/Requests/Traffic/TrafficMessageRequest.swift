@@ -28,19 +28,19 @@ extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("type", "traffic jam"),
-        ("time", Date()),
+        ("type", String.self),
+        ("time", Date.self),
         
-        ("latitude", 45.123),
-        ("longitude", 42.0),
-        ("altitude", 24.2),
-        ("horizontalAccuracy", 34.0),
-        ("verticalAccuracy", 34.0),
-        ("course", 0.0),
-        ("speed", 60.0),
+        ("latitude", Double.self),
+        ("longitude", Double.self),
+        ("altitude", Double.self),
+        ("horizontalAccuracy", Double.self),
+        ("verticalAccuracy", Double.self),
+        ("course", Double.self),
+        ("speed", Double.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
-        ("note", "Achtung, Kinder auf der Fahrbahn")
+        ("note", String.self)
     ]
 }

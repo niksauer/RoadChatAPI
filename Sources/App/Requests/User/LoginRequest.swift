@@ -25,8 +25,8 @@ extension LoginRequest: Payload {
     typealias RequestType = LoginRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("user", "inik"),
-        ("password", "safeharbour")
+        ("user", String.self),
+        ("password", String.self)
     ]
     
     static var optionalParameters: [Payload.Parameter] = []

@@ -12,16 +12,13 @@ protocol APIFail: Error {
 }
 
 enum RequestFail: APIFail {
-    case missingParameters([String])
-    case invalidTypeForParameters([String])
+    case missingOrInvalidParameters([String])
     case mismatchedContraints(Error)
     
     var message: String {
         switch self {
-        case .missingParameters(let parameters):
-            return "Missing required parameters: \(parameters.description)"
-        case .invalidTypeForParameters(let parameters):
-            return "Invalid type for parameters: \(parameters)"
+        case .missingOrInvalidParameters(let parameters):
+            return "Found missing or invalid parameters: \(parameters.description)"
         case .mismatchedContraints(let violations):
             return "Mismatched constraints: \(violations)"
         }
