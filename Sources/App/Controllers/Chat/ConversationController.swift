@@ -119,10 +119,10 @@ final class ConversationController {
                             }
                             
                             // default approval status of creator to approved
-                            participation.approvalStatus = ApprovalStatus.accepted.rawValue
+                            participation.status = ApprovalType.accepted.rawValue
                             return participation.save(on: req)
                         }
-                        }.map(to: Result.self, on: req) { participations in
+                    }.map(to: Result.self, on: req) { participations in
                             return try conversation.publicConversation(newestMessage: nil)
                     }
                 }
@@ -241,18 +241,18 @@ final class ConversationController {
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.accepted`.
     func acceptConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setApprovalStatus(.accepted, on: req)
+        return try setStatus(.accepted, on: req)
     }
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.denied`.
     func denyConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setApprovalStatus(.denied, on: req)
+        return try setStatus(.denied, on: req)
     }
     
-    private func setApprovalStatus(_ status: ApprovalStatus, on req: Request) throws -> Future<HTTPStatus> {
+    private func setStatus(_ status: ApprovalType, on req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
             return try req.user().getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
-                participation.approvalStatus = status.rawValue
+                participation.status = status.rawValue
                 return participation.save(on: req).transform(to: .ok)
             }
         }

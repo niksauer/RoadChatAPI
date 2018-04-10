@@ -15,17 +15,13 @@ struct ValidationFail: ValidationError {
 }
 
 struct IsSex: Validator {
-    enum Sex: String {
-        case male, female, other
-    }
-    
     // Validator
     var inverseMessage: String = "valid sex"
     
     func validate(_ data: ValidationData) throws {
         switch data {
         case .string(let string):
-            guard let _ = Sex(rawValue: string) else {
+            guard let _ = SexType(rawValue: string) else {
                 throw BasicValidationError("is not a valid sex")
             }
         default:

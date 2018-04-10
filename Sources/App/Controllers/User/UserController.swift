@@ -184,7 +184,7 @@ final class UserController {
             return try ProfileRequest.extract(from: req).flatMap(to: HTTPStatus.self) { profileRequest in
                 return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
                     guard let profile = existingProfile else {
-                        let newProfile = Profile(userID: try user.requireID(), profileRequest: profileRequest)
+                        let newProfile = try Profile(userID: try user.requireID(), profileRequest: profileRequest)
                         return newProfile.create(on: req).transform(to: .created)
                     }
                     

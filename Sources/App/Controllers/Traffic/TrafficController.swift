@@ -61,7 +61,7 @@ final class TrafficController {
                         return Future.map(on: req) { validatedMessage }
                     } else {
                         return requestLocation.create(on: req).flatMap(to: Result.self) { location in
-                            return TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
+                            return try TrafficMessage(senderID: try creator.requireID(), locationID: try location.requireID(), trafficRequest: trafficMessageRequest).create(on: req).flatMap(to: Result.self) { message in
                                 return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
                                     return try message.publicTrafficMessage(on: req)
                                 }
