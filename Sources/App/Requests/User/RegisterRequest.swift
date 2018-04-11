@@ -11,16 +11,18 @@ import Validation
 import RoadChatKit
 
 extension RegisterRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\RegisterRequest.email): IsEmail(),
-        key(\RegisterRequest.username): IsCount(4...) && IsAlphanumeric(),
-        key(\RegisterRequest.password): IsCount(8...) && IsASCII()
-    ]
+    public static func validations() throws -> Validations<RegisterRequest> {
+        var validations = Validations(RegisterRequest.self)
+        try validations.add(\.email, .email)
+        try validations.add(\.username, .count(4...) && .alphanumeric)
+        try validations.add(\.password, .count(8...) && .ascii)
+        return validations
+    }
 }
 
-extension RegisterRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension RegisterRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension RegisterRequest: Payload {
     typealias RequestType = RegisterRequest

@@ -70,14 +70,16 @@ extension TrafficMessage {
     func publicTrafficMessage(on req: Request) throws -> Future<PublicTrafficMessage> {
         let user = try req.user()
         
-        return try self.getKarmaLevel(on: req).flatMap(to: PublicTrafficMessage.self) { karmaLevel in
-            return try self.getValidationLevel(on: req).flatMap(to: PublicTrafficMessage.self) { validationLevel in
-                return try user.getDonation(for: self, on: req).map(to: PublicTrafficMessage.self) { donation in
-                    guard let donation = donation, let karma = KarmaType(rawValue: donation.karma) else {
-                        return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: .neutral)
+        return try self.getLocation(on: req).flatMap(to: PublicTrafficMessage.self) { location in
+            return try self.getKarmaLevel(on: req).flatMap(to: PublicTrafficMessage.self) { karmaLevel in
+                return try self.getValidationLevel(on: req).flatMap(to: PublicTrafficMessage.self) { validationLevel in
+                    return try user.getDonation(for: self, on: req).map(to: PublicTrafficMessage.self) { donation in
+                        guard let donation = donation, let karma = KarmaType(rawValue: donation.karma) else {
+                            return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: .neutral, location: location)
+                        }
+                        
+                        return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: karma, location: location)
                     }
-                    
-                    return try self.publicTrafficMessage(validations: validationLevel, upvotes: karmaLevel, karma: karma)
                 }
             }
         }

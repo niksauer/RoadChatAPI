@@ -37,6 +37,8 @@ final class ConversationController {
         }
     }
 
+    let maxDistance = 500.0
+    
     /// Returns all `User`s which are within 500m distance of a tokenized `User`.
     func getNearbyUsers(_ req: Request) throws -> Future<[User.PublicUser]> {
         let requestor = try req.user()
@@ -49,8 +51,6 @@ final class ConversationController {
             let requestorGeoLocation = try GeoCoordinate2D(latitude: requestorLocation.latitude, longitude: requestorLocation.longitude)
             
             return User.query(on: req).filter(try \User.id != requestor.requireID()).all().flatMap(to: [User.PublicUser].self) { users in
-                let maxDistance = 500.0
-                
                 return try users.map { user in
                     return try user.getPrivacy(on: req).flatMap(to: User.PublicUser?.self) { privacy in
                         guard privacy.shareLocation else {
@@ -64,11 +64,11 @@ final class ConversationController {
                             
                             let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                             
-                            guard requestorGeoLocation.distance(from: geoLocation) <= maxDistance else {
+                            guard requestorGeoLocation.distance(from: geoLocation) <= self.maxDistance else {
                                 return Future.map(on: req) { nil }
                             }
                             
-                            return Future.map(on: req) { try user.publicUser(location: location) }
+                            return Future.map(on: req) { try user.publicUser(isOwner: false, location: location) }
                         }
                     }
                 }.map(to: [User.PublicUser].self, on: req) { users in

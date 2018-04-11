@@ -11,14 +11,16 @@ import Validation
 import RoadChatKit
 
 extension ConversationRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\.title): IsCount(1...50),
-    ]
+    public static func validations() throws -> Validations<ConversationRequest> {
+        var validations = Validations(ConversationRequest.self)
+        try validations.add(\.title, .count(1...50))
+        return validations
+    }
 }
 
-extension ConversationRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension ConversationRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension ConversationRequest: Payload {
     typealias RequestType = ConversationRequest

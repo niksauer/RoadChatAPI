@@ -11,12 +11,15 @@ import Validation
 import RoadChatKit
 
 extension LocationRequest: Validatable, Reflectable {
-    public static var validations: Validations = [:]
+    public static func validations() throws -> Validations<LocationRequest> {
+        let validations = Validations(LocationRequest.self)
+        return validations
+    }
 }
 
-extension LocationRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension LocationRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension LocationRequest: Payload {
     typealias RequestType = LocationRequest

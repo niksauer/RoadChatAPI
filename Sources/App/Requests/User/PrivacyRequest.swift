@@ -11,12 +11,15 @@ import Validation
 import RoadChatKit
 
 extension PrivacyRequest: Validatable {
-    public static var validations: Validations = [:]
+    public static func validations() throws -> Validations<PrivacyRequest> {
+        let validations = Validations(PrivacyRequest.self)
+        return validations
+    }
 }
 
-extension PrivacyRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension PrivacyRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension PrivacyRequest: Payload {
     typealias RequestType = PrivacyRequest

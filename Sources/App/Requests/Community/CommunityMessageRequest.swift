@@ -11,16 +11,18 @@ import Validation
 import RoadChatKit
 
 extension CommunityMessageRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\CommunityMessageRequest.title): IsCount(1...140),
-    ]
+    public static func validations() throws -> Validations<CommunityMessageRequest> {
+        var validations = Validations(CommunityMessageRequest.self)
+        try validations.add(\.title, .count(1...140))
+        return validations
+    }
 }
 
-extension CommunityMessageRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\CommunityMessageRequest.message): IsCount(0...280),
-    ]
-}
+//extension CommunityMessageRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [
+//        key(\CommunityMessageRequest.message): IsCount(0...280),
+//    ]
+//}
 
 extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest

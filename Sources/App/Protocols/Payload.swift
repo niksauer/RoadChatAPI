@@ -10,7 +10,7 @@ import Vapor
 import Validation
 
 protocol Payload {
-    associatedtype RequestType: Validatable, OptionallyValidatable
+    associatedtype RequestType: Decodable, Validatable
     typealias Parameter = (name: BasicKeyRepresentable, type: Decodable.Type)
     static var requiredParameters: [Parameter] { get }
     static var optionalParameters: [Parameter] { get }
@@ -86,7 +86,7 @@ extension Payload {
                     return try req.content.decode(RequestType.self).map(to: RequestType.self) { request in
                         do {
                             try request.validate()
-                            try request.validateOptionals()
+//                            try request.validateOptionals()
                         } catch {
                             throw RequestFail.mismatchedContraints(error)
                         }

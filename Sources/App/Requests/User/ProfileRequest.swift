@@ -11,20 +11,22 @@ import Validation
 import RoadChatKit
 
 extension ProfileRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\ProfileRequest.firstName): IsCount(1...50),
-        key(\ProfileRequest.lastName): IsCount(1...50),
-    ]
+    public static func validations() throws -> Validations<ProfileRequest> {
+        var validations = Validations(ProfileRequest.self)
+        try validations.add(\.firstName, .count(1...50))
+        try validations.add(\.lastName, .count(1...50))
+        return validations
+    }
 }
 
-extension ProfileRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\ProfileRequest.sex): IsSex(),
-        key(\ProfileRequest.biography): IsCount(0...280),
-        key(\ProfileRequest.streetName): IsCount(0...50),
-        key(\ProfileRequest.country): IsCount(0...50),
-    ]
-}
+//extension ProfileRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [
+//        key(\ProfileRequest.sex): IsSex(),
+//        key(\ProfileRequest.biography): IsCount(0...280),
+//        key(\ProfileRequest.streetName): IsCount(0...50),
+//        key(\ProfileRequest.country): IsCount(0...50),
+//    ]
+//}
 
 extension ProfileRequest: Payload {
     typealias RequestType = ProfileRequest

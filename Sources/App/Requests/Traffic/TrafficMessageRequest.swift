@@ -11,16 +11,22 @@ import Validation
 import RoadChatKit
 
 extension TrafficMessageRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\TrafficMessageRequest.type): IsTrafficType(),
-    ]
+    public static func validations() throws -> Validations<TrafficMessageRequest> {
+        let validations = Validations(TrafficMessageRequest.self)
+        
+        return validations
+    }
+    
+//    public static var validations: Validations = [
+//        key(\TrafficMessageRequest.type): IsTrafficType(),
+//    ]
 }
 
-extension TrafficMessageRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\TrafficMessageRequest.message): IsCount(0...280)
-    ]
-}
+//extension TrafficMessageRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [
+//        key(\TrafficMessageRequest.message): IsCount(0...280)
+//    ]
+//}
 
 extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest

@@ -87,7 +87,7 @@
         "repositoryURL": "https://github.com/niksauer/RoadChatKit",
         "state": {
           "branch": "master",
-          "revision": "189ff49399f20f9518715a91957b8ba1178fa13b",
+          "revision": "c51f4a306436e10bb3dddfae5ffc401127c2fb44",
           "version": null
         }
       },
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "a0b7f646fba61402da384b3202f54c27debb5e13",
-          "version": "1.3.1"
+          "revision": "241aed70c8fcaa26f2b1c86300e05ca102faf594",
+          "version": "1.4.1"
         }
       },
       {
@@ -168,8 +168,8 @@
         "repositoryURL": "https://github.com/vapor/validation.git",
         "state": {
           "branch": null,
-          "revision": "1ce87fc2d18a8f15a491805825063c8db493a51e",
-          "version": "2.0.0-rc.2.1.1"
+          "revision": "ab6c5a352d97c8687b91ed4963aef8e7cfe0795b",
+          "version": "2.0.0"
         }
       },
       {

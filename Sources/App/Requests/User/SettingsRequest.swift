@@ -11,15 +11,17 @@ import Validation
 import RoadChatKit
 
 extension SettingsRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\SettingsRequest.communityRadius): IsCount(0...500),
-        key(\SettingsRequest.trafficRadius): IsCount(0...50)
-    ]
+    public static func validations() throws -> Validations<SettingsRequest> {
+        let validations = Validations(SettingsRequest.self)
+//        try validations.add(\.communityRadius, .count(0...500))
+//        try validations.add(\.trafficRadius, .count(0...50))
+        return validations
+    }
 }
 
-extension SettingsRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension SettingsRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension SettingsRequest: Payload {
     typealias RequestType = SettingsRequest

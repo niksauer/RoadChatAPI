@@ -10,15 +10,17 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension DirectMessageRequest: Validatable {
-    public static var validations: Validations = [
-        key(\DirectMessageRequest.message): IsCount(1...1000),
-    ]
+extension DirectMessageRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<DirectMessageRequest> {
+        var validations = Validations(DirectMessageRequest.self)
+        try validations.add(\.message, .count(1...1000))
+        return validations
+    }
 }
 
-extension DirectMessageRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension DirectMessageRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension DirectMessageRequest: Payload {
     typealias RequestType = DirectMessageRequest

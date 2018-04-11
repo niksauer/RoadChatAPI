@@ -41,7 +41,7 @@ final class UserController {
                         // default user setup
                         return Settings(userID: try user.requireID()).create(on: req).flatMap(to: Result.self) { _ in
                             return Privacy(userID: try user.requireID()).create(on: req).map(to: Result.self) { _ in
-                                return try newUser.publicUser(isOwner: true)
+                                return try newUser.publicUser(isOwner: true, location: nil)
                             }
                         }
                     }
@@ -52,12 +52,15 @@ final class UserController {
     
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).map(to: Result.self) { user in
+        return try req.parameter(Resource.self).flatMap(to: Result.self) { user in
             do {
                 try req.checkOptionalOwnership(for: user)
-                return try user.publicUser(isOwner: true)
+                
+                return try user.getLocation(on: req).map(to: Result.self) { location in
+                    return try user.publicUser(isOwner: true, location: location)
+                }
             } catch {
-                return try user.publicUser(isOwner: false)
+                return Future.map(on: req) { try user.publicUser(isOwner: false, location: nil) }
             }
         }
     }
