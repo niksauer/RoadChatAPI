@@ -11,9 +11,7 @@ import Validation
 import RoadChatKit
 
 extension LocationRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\LocationRequest.course): IsCount(0.0...360.0)
-    ]
+    public static var validations: Validations = [:]
 }
 
 extension LocationRequest: OptionallyValidatable {
