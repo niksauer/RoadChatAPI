@@ -19,7 +19,10 @@ extension DirectMessageRequest: Validatable, Reflectable {
 }
 
 //extension DirectMessageRequest: OptionallyValidatable {
-//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//    static func optionalValidations() throws -> Validations<DirectMessageRequest> {
+//        let validations = Validations(DirectMessageRequest.self)
+//        return validations
+//    }
 //}
 
 extension DirectMessageRequest: Payload {

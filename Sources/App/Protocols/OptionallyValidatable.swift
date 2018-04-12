@@ -9,8 +9,8 @@ import Foundation
 import Vapor
 import Validation
 
-//protocol OptionallyValidatable: Reflectable {
-//    static func validations() throws -> Validations<Self>
+//protocol OptionallyValidatable: Validatable {
+//    static func optionalValidations() throws -> Validations<Self>
 //}
 
 //extension OptionallyValidatable {

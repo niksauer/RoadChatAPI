@@ -14,12 +14,16 @@ extension ConversationRequest: Validatable, Reflectable {
     public static func validations() throws -> Validations<ConversationRequest> {
         var validations = Validations(ConversationRequest.self)
         try validations.add(\.title, .count(1...50))
+        try validations.add(\.participants, .count(2...))
         return validations
     }
 }
 
 //extension ConversationRequest: OptionallyValidatable {
-//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//    static func optionalValidations() throws -> Validations<ConversationRequest> {
+//        let validations = Validations(ConversationRequest.self)
+//        return validations
+//    }
 //}
 
 extension ConversationRequest: Payload {

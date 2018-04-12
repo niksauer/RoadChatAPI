@@ -12,14 +12,10 @@ import RoadChatKit
 
 extension TrafficMessageRequest: Validatable, Reflectable {
     public static func validations() throws -> Validations<TrafficMessageRequest> {
-        let validations = Validations(TrafficMessageRequest.self)
-        
+        var validations = Validations(TrafficMessageRequest.self)
+        try validations.add(\.type, .trafficType)
         return validations
     }
-    
-//    public static var validations: Validations = [
-//        key(\TrafficMessageRequest.type): IsTrafficType(),
-//    ]
 }
 
 //extension TrafficMessageRequest: OptionallyValidatable {
@@ -32,19 +28,12 @@ extension TrafficMessageRequest: Payload {
     typealias RequestType = TrafficMessageRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("type", String.self),
+        ("type", TrafficType.RawValue.self),
         ("time", Date.self),
-        
-        ("latitude", Double.self),
-        ("longitude", Double.self),
-        ("altitude", Double.self),
-        ("horizontalAccuracy", Double.self),
-        ("verticalAccuracy", Double.self),
-        ("course", Double.self),
-        ("speed", Double.self),
+        ("location", Location.self)
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
-        ("note", String.self)
+        ("message", String.self)
     ]
 }

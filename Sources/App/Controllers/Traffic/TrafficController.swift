@@ -33,7 +33,7 @@ final class TrafficController {
         return try TrafficMessageRequest.extract(from: req).flatMap(to: Result.self) { trafficMessageRequest in
             let creator = try req.user()
             
-            let requestLocation = Location(trafficMessageRequest: trafficMessageRequest)
+            let requestLocation = trafficMessageRequest.location
             let requestGeoLocation = try GeoCoordinate2D(latitude: requestLocation.latitude, longitude: requestLocation.longitude)
             
             guard let compareDate = Calendar.current.date(byAdding: .hour, value: -1, to: trafficMessageRequest.time) else {

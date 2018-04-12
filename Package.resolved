@@ -87,7 +87,7 @@
         "repositoryURL": "https://github.com/niksauer/RoadChatKit",
         "state": {
           "branch": "master",
-          "revision": "c51f4a306436e10bb3dddfae5ffc401127c2fb44",
+          "revision": "2f65dc2f0e76fd35893d1491bc5dcf0d1f3b63c6",
           "version": null
         }
       },
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "241aed70c8fcaa26f2b1c86300e05ca102faf594",
-          "version": "1.4.1"
+          "revision": "3275ff7c9c791a628631c2c51b39fd94346b2492",
+          "version": "1.4.2"
         }
       },
       {

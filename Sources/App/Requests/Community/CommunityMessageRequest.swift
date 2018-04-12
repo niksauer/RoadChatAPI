@@ -19,26 +19,23 @@ extension CommunityMessageRequest: Validatable, Reflectable {
 }
 
 //extension CommunityMessageRequest: OptionallyValidatable {
-//    static var optionalValidations: OptionallyValidatable.Validations = [
-//        key(\CommunityMessageRequest.message): IsCount(0...280),
-//    ]
+//    static func optionalValidations() throws -> Validations<CommunityMessageRequest> {
+//        let validations = Validations(CommunityMessageRequest.self)
+//        try validations.add(\.message, .count(0...280))
+//        return validations
+//    }
 //}
 
 extension CommunityMessageRequest: Payload {
     typealias RequestType = CommunityMessageRequest
     
     static var requiredParameters: [Payload.Parameter] = [
+        ("title", String.self),
         ("time", Date.self),
-        ("message", String.self),
-        
-        ("latitude", Double.self),
-        ("longitude", Double.self),
-        ("altitude", Double.self),
-        ("horizontalAccuracy", Double.self),
-        ("verticalAccuracy", Double.self),
-        ("course", Double.self),
-        ("speed", Double.self),
+        ("location", Location.self)
     ]
     
-    static var optionalParameters: [Payload.Parameter] = []
+    static var optionalParameters: [Payload.Parameter] = [
+        ("message", String.self),
+    ]
 }

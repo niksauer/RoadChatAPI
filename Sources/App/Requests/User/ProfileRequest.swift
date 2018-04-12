@@ -38,7 +38,7 @@ extension ProfileRequest: Payload {
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
-        ("sex", String.self),
+        ("sex", SexType.RawValue.self),
         ("biography", String.self),
         ("streetName", String.self),
         ("streetNumber", Int.self),

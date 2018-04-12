@@ -32,7 +32,7 @@ final class CommunityController {
         return try CommunityMessageRequest.extract(from: req).flatMap(to: Result.self) { communityMessageRequest in
             let creator = try req.user()
             
-            return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
+            return communityMessageRequest.location.create(on: req).flatMap(to: Result.self) { location in
                 return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
                     return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
                         return try message.publicCommunityMessage(on: req)
