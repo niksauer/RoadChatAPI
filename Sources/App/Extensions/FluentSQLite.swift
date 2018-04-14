@@ -22,7 +22,7 @@ extension Bool: SQLiteDataConvertible {
             throw SQLiteError.invalidBool
         }
     }
-    
+
     public func convertToSQLiteData() throws -> SQLiteData {
         let state = self == false ? 0 : 1
         return SQLiteData.integer(state)

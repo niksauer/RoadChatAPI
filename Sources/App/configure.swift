@@ -31,7 +31,7 @@ public func configure(
     
     // Configure a SQLite database
     var databases = DatabaseConfig()
-    try databases.add(database: SQLiteDatabase(storage: .memory), as: .sqlite)
+    try databases.add(database: SQLiteDatabase(storage: .file(path: "RoadChat.sqlite")), as: .sqlite)
     services.register(databases)
 
     // Configure migrations
