@@ -54,9 +54,27 @@ extension CommunityMessage: Karmable {
 
 extension CommunityMessage {
     func publicCommunityMessage(on req: Request) throws -> Future<PublicCommunityMessage> {
-        return try self.getKarmaLevel(on: req).map(to: PublicCommunityMessage.self) { karmaLevel in
-            return try PublicCommunityMessage(communityMessage: self, upvotes: karmaLevel)
+        let user = try req.user()
+        
+        return try self.getKarmaLevel(on: req).flatMap(to: PublicCommunityMessage.self) { karmaLevel in
+            return try self.getLocation(on: req).flatMap(to: PublicCommunityMessage.self) { location in
+                guard let location = location else {
+                    throw Abort(.internalServerError)
+                }
+                
+                return try user.getDonation(for: self, on: req).map(to: PublicCommunityMessage.self) { donation in
+                    guard let donation = donation, let karma = KarmaType(rawValue: donation.karma) else {
+                        return try self.publicCommunityMessage(upvotes: karmaLevel, karma: .neutral, location: location)
+                    }
+                    
+                    return try self.publicCommunityMessage(upvotes: karmaLevel, karma: karma, location: location)
+                }
+            }
         }
+    }
+    
+    func getLocation(on req: Request) throws -> Future<Location?> {
+        return try Location.find(locationID, on: req)
     }
 }
 

@@ -37,6 +37,8 @@ final class ConversationController {
         }
     }
 
+    let maxDistance = 500.0
+    
     /// Returns all `User`s which are within 500m distance of a tokenized `User`.
     func getNearbyUsers(_ req: Request) throws -> Future<[User.PublicUser]> {
         let requestor = try req.user()
@@ -49,8 +51,6 @@ final class ConversationController {
             let requestorGeoLocation = try GeoCoordinate2D(latitude: requestorLocation.latitude, longitude: requestorLocation.longitude)
             
             return User.query(on: req).filter(try \User.id != requestor.requireID()).all().flatMap(to: [User.PublicUser].self) { users in
-                let maxDistance = 500.0
-                
                 return try users.map { user in
                     return try user.getPrivacy(on: req).flatMap(to: User.PublicUser?.self) { privacy in
                         guard privacy.shareLocation else {
@@ -64,11 +64,11 @@ final class ConversationController {
                             
                             let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                             
-                            guard requestorGeoLocation.distance(from: geoLocation) <= maxDistance else {
+                            guard requestorGeoLocation.distance(from: geoLocation) <= self.maxDistance else {
                                 return Future.map(on: req) { nil }
                             }
                             
-                            return Future.map(on: req) { try user.publicUser(location: location) }
+                            return Future.map(on: req) { try user.publicUser(isOwner: false, location: location) }
                         }
                     }
                 }.map(to: [User.PublicUser].self, on: req) { users in
@@ -119,10 +119,10 @@ final class ConversationController {
                             }
                             
                             // default approval status of creator to approved
-                            participation.approvalStatus = ApprovalStatus.accepted.rawValue
+                            participation.status = ApprovalType.accepted.rawValue
                             return participation.save(on: req)
                         }
-                        }.map(to: Result.self, on: req) { participations in
+                    }.map(to: Result.self, on: req) { participations in
                             return try conversation.publicConversation(newestMessage: nil)
                     }
                 }
@@ -241,18 +241,18 @@ final class ConversationController {
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.accepted`.
     func acceptConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setApprovalStatus(.accepted, on: req)
+        return try setStatus(.accepted, on: req)
     }
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.denied`.
     func denyConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setApprovalStatus(.denied, on: req)
+        return try setStatus(.denied, on: req)
     }
     
-    private func setApprovalStatus(_ status: ApprovalStatus, on req: Request) throws -> Future<HTTPStatus> {
+    private func setStatus(_ status: ApprovalType, on req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
             return try req.user().getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
-                participation.approvalStatus = status.rawValue
+                participation.status = status.rawValue
                 return participation.save(on: req).transform(to: .ok)
             }
         }

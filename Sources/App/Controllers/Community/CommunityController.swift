@@ -32,7 +32,7 @@ final class CommunityController {
         return try CommunityMessageRequest.extract(from: req).flatMap(to: Result.self) { communityMessageRequest in
             let creator = try req.user()
             
-            return Location(communityMessageRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { location in
+            return communityMessageRequest.location.create(on: req).flatMap(to: Result.self) { location in
                 return CommunityMessage(senderID: try creator.requireID(), locationID: try location.requireID(), communityRequest: communityMessageRequest).create(on: req).flatMap(to: Result.self) { message in
                     return try creator.donate(.upvote, to: message, on: req).flatMap(to: Result.self) { _ in
                         return try message.publicCommunityMessage(on: req)
@@ -60,14 +60,14 @@ final class CommunityController {
     /// Upvotes a parameterized `CommunityMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.upvote, to: message, on: req)
+            return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
     
     /// Downvotes a parameterized `CommunityMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
-            return try req.user().donate(.downvote, to: message, on: req)
+            return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
 

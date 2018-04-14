@@ -59,6 +59,7 @@ extension User: MySQLModel, Migration, Owner, KarmaDonator {
     var conversations: Siblings<User, Conversation, Participation> {
         return siblings()
     }
+    
 }
 
 extension User: Ownable {

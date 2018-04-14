@@ -9,61 +9,61 @@ import Foundation
 import Validation
 import RoadChatKit
 
-struct ValidationFail: ValidationError {
-    var reason: String
-    var path: [String]
-}
-
-struct IsSex: Validator {
-    enum Sex: String {
-        case male, female, other
+// Sex Type Validator
+struct SexTypeValidator: ValidatorType {
+    var validatorReadable: String {
+        return "a valid sex type"
     }
     
-    // Validator
-    var inverseMessage: String = "valid sex"
-    
-    func validate(_ data: ValidationData) throws {
-        switch data {
-        case .string(let string):
-            guard let _ = Sex(rawValue: string) else {
-                throw BasicValidationError("is not a valid sex")
-            }
-        default:
-            throw BasicValidationError("is not a string")
+    func validate(_ type: String) throws {
+        guard let _ = SexType(rawValue: type) else {
+            throw BasicValidationError("is not a valid sex type")
         }
     }
 }
 
-struct IsColor: Validator {
+extension Validator where T == String {
+    public static var sexType: Validator<T> {
+        return SexTypeValidator().validator()
+    }
+}
+
+// RGB Color Validator
+struct RGBColorValidator: ValidatorType {
     let maxRGB = 16777215
+
+    var validatorReadable: String {
+        return "a valid color"
+    }
     
-    // Validator
-    var inverseMessage: String = "valid RGB color"
-    
-    func validate(_ data: ValidationData) throws {
-        switch data {
-        case .int(let int):
-            guard int <= maxRGB else {
-                throw BasicValidationError("is not a valid RGB color")
-            }
-        default:
-            throw BasicValidationError("is not an integer")
+    func validate(_ int: Int) throws {
+        guard int <= maxRGB else {
+            throw BasicValidationError("is not a valid RGB color")
         }
     }
 }
 
-struct IsTrafficType: Validator {
-    // Validator
-    var inverseMessage: String = "valid traffic type"
-    
-    func validate(_ data: ValidationData) throws {
-        switch data {
-        case .string(let string):
-            guard let _ = TrafficType(rawValue: string) else {
-                throw BasicValidationError("is not a valid traffic type")
-            }
-        default:
-            throw BasicValidationError("is not a string")
+extension Validator where T == Int {
+    public static var rgbColor: Validator<T> {
+        return RGBColorValidator().validator()
+    }
+}
+
+// Traffic Type Validator
+struct TrafficTypeValidator: ValidatorType {
+    var validatorReadable: String {
+        return "a valid traffic type"
+    }
+
+    func validate(_ type: String) throws {
+        guard let _ = TrafficType(rawValue: type) else {
+            throw BasicValidationError("is not a valid traffic type")
         }
+    }
+}
+
+extension Validator where T == String {
+    public static var trafficType: Validator<T> {
+        return TrafficTypeValidator().validator()
     }
 }

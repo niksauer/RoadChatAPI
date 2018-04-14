@@ -8,12 +8,7 @@
 import Foundation
 import Vapor
 import FluentMySQL
-
-enum KarmaType: Int {
-    case upvote = 1
-    case neutral = 0
-    case downvote = -1
-}
+import RoadChatKit
 
 protocol KarmaDonation: MySQLModel, Migration, ModifiablePivot {
     var resourceID: Int { get }
@@ -38,16 +33,16 @@ protocol KarmaDonator: MySQLModel, Migration { }
 
 extension KarmaDonator {
     func getDonation<T: Karmable>(for resource: T, on req: Request) throws -> Future<T.Donation?> {
-        return T.Donation.query(on: req).filter(try \T.Donation.donatorID == self.requireID()).first()
+        return T.Donation.query(on: req).filter(try \T.Donation.donatorID == self.requireID()).filter(try \T.Donation.resourceID == resource.requireID()).first()
     }
     
-    func donate<T: Karmable>(_ karma: KarmaType, to resource: T, on req: Request) throws -> Future<HTTPStatus> {
-        return try self.getDonation(for: resource, on: req).flatMap(to: HTTPStatus.self) { donation in
+    func donate<T: Karmable>(_ karma: KarmaType, to resource: T, on req: Request) throws -> Future<T.Donation> {
+        return try self.getDonation(for: resource, on: req).flatMap(to: T.Donation.self) { donation in
             guard var donation = donation else {
                 var donation = try T.Donation(resourceID: resource.requireID(), donatorID: self.requireID())
                 donation.karma = karma.rawValue
                 
-                return donation.save(on: req).transform(to: .ok)
+                return donation.save(on: req)
             }
             
             let currentKarma = try donation.getKarmaType()
@@ -72,7 +67,7 @@ extension KarmaDonator {
                 }
             }
 
-            return donation.save(on: req).transform(to: HTTPStatus.ok)
+            return donation.save(on: req)
         }
     }
 }
@@ -85,8 +80,14 @@ protocol Karmable: MySQLModel, Migration {
 
 extension Karmable {
     func getKarmaLevel(on req: Request) throws -> Future<Int> {
-        return try Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).sum(\Donation.karma).map(to: Int.self) { upvotes in
-            return Int(upvotes)
+        return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == 1).count().flatMap(to: Int.self) { upvotes in
+            return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == -1).count().map(to: Int.self) { downvotes in
+                return (upvotes-downvotes)
+            }
         }
+        
+//        return try Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).sum(\Donation.karma).map(to: Int.self) { upvotes in
+//            return Int(upvotes)
+//        }
     }
 }

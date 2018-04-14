@@ -41,7 +41,7 @@ final class UserController {
                         // default user setup
                         return Settings(userID: try user.requireID()).create(on: req).flatMap(to: Result.self) { _ in
                             return Privacy(userID: try user.requireID()).create(on: req).map(to: Result.self) { _ in
-                                return try newUser.publicUser(isOwner: true)
+                                return try newUser.publicUser(isOwner: true, location: nil)
                             }
                         }
                     }
@@ -52,12 +52,15 @@ final class UserController {
     
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).map(to: Result.self) { user in
+        return try req.parameter(Resource.self).flatMap(to: Result.self) { user in
             do {
                 try req.checkOptionalOwnership(for: user)
-                return try user.publicUser(isOwner: true)
+                
+                return try user.getLocation(on: req).map(to: Result.self) { location in
+                    return try user.publicUser(isOwner: true, location: location)
+                }
             } catch {
-                return try user.publicUser(isOwner: false)
+                return Future.map(on: req) { try user.publicUser(isOwner: false, location: nil) }
             }
         }
     }
@@ -184,7 +187,7 @@ final class UserController {
             return try ProfileRequest.extract(from: req).flatMap(to: HTTPStatus.self) { profileRequest in
                 return try user.getProfile(on: req).flatMap(to: HTTPStatus.self) { existingProfile in
                     guard let profile = existingProfile else {
-                        let newProfile = Profile(userID: try user.requireID(), profileRequest: profileRequest)
+                        let newProfile = try Profile(userID: try user.requireID(), profileRequest: profileRequest)
                         return newProfile.create(on: req).transform(to: .created)
                     }
                     
@@ -278,8 +281,8 @@ final class UserController {
             return try user.getTrafficMessages(on: req).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicTrafficMessage(on: req)
-                }.map(to: [TrafficMessage.PublicTrafficMessage].self, on: req) { publicMesages in
-                    return publicMesages
+                }.map(to: [TrafficMessage.PublicTrafficMessage].self, on: req) { publicMessages in
+                    return publicMessages
                 }
             }
         }
@@ -291,8 +294,8 @@ final class UserController {
             return try user.getCommunityMessages(on: req).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicCommunityMessage(on: req)
-                }.map(to: [CommunityMessage.PublicCommunityMessage].self, on: req) { publicMesages in
-                    return publicMesages
+                }.map(to: [CommunityMessage.PublicCommunityMessage].self, on: req) { publicMessages in
+                    return publicMessages
                 }
             }
         }

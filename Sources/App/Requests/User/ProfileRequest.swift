@@ -11,36 +11,38 @@ import Validation
 import RoadChatKit
 
 extension ProfileRequest: Validatable, Reflectable {
-    public static var validations: Validations = [
-        key(\ProfileRequest.firstName): IsCount(1...50),
-        key(\ProfileRequest.lastName): IsCount(1...50),
-    ]
+    public static func validations() throws -> Validations<ProfileRequest> {
+        var validations = Validations(ProfileRequest.self)
+        try validations.add(\.firstName, .count(1...50))
+        try validations.add(\.lastName, .count(1...50))
+        return validations
+    }
 }
 
-extension ProfileRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [
-        key(\ProfileRequest.sex): IsSex(),
-        key(\ProfileRequest.biography): IsCount(0...255),
-        key(\ProfileRequest.streetName): IsCount(0...50),
-        key(\ProfileRequest.country): IsCount(0...50),
-    ]
-}
+//extension ProfileRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [
+//        key(\ProfileRequest.sex): IsSex(),
+//        key(\ProfileRequest.biography): IsCount(0...255),
+//        key(\ProfileRequest.streetName): IsCount(0...50),
+//        key(\ProfileRequest.country): IsCount(0...50),
+//    ]
+//}
 
 extension ProfileRequest: Payload {
     typealias RequestType = ProfileRequest
     
     static var requiredParameters: [Payload.Parameter] = [
-        ("firstName", "Niklas"),
-        ("lastName", "Sauer"),
-        ("birth", Date()),
+        ("firstName", String.self),
+        ("lastName", String.self),
+        ("birth", Date.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
-        ("sex", "male"),
-        ("biography", "Dualer Student"),
-        ("streetName", "Ernststraße"),
-        ("streetNumber", 12),
-        ("postalCode", 63456),
-        ("country", "Germany")
+        ("sex", SexType.RawValue.self),
+        ("biography", String.self),
+        ("streetName", String.self),
+        ("streetNumber", Int.self),
+        ("postalCode", Int.self),
+        ("country", String.self)
     ]
 }
