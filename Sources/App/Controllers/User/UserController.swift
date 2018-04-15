@@ -199,6 +199,7 @@ final class UserController {
                     profile.streetName = profileRequest.streetName
                     profile.streetNumber = profileRequest.streetNumber
                     profile.postalCode = profileRequest.postalCode
+                    profile.city = profileRequest.city
                     profile.country = profileRequest.country
                     
                     return profile.update(on: req).transform(to: .ok)
