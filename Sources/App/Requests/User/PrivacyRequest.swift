@@ -26,11 +26,14 @@ extension PrivacyRequest: Payload {
     
     static var requiredParameters: [Payload.Parameter] = [
         ("shareLocation", Bool.self),
+        ("showEmail", Bool.self),
         ("showFirstName", Bool.self),
         ("showLastName", Bool.self),
         ("showBirth", Bool.self),
         ("showSex", Bool.self),
-        ("showAddress", Bool.self),
+        ("showStreet", Bool.self),
+        ("showCity", Bool.self),
+        ("showCountry", Bool.self),
         ("showBiography", Bool.self)
     ]
     

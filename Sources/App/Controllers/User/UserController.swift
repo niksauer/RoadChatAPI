@@ -150,12 +150,16 @@ final class UserController {
             
             return try PrivacyRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedPrivacy in
                 return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
+                    privacy.shareLocation = updatedPrivacy.shareLocation
+                    privacy.showEmail = updatedPrivacy.showEmail
                     privacy.showFirstName = updatedPrivacy.showFirstName
                     privacy.showLastName = updatedPrivacy.showLastName
                     privacy.showBirth = updatedPrivacy.showBirth
                     privacy.showSex = updatedPrivacy.showSex
-                    privacy.showAddress = updatedPrivacy.showAddress
                     privacy.showBiography = updatedPrivacy.showBiography
+                    privacy.showStreet = updatedPrivacy.showStreet
+                    privacy.showCity = updatedPrivacy.showCity
+                    privacy.showCountry = updatedPrivacy.showCountry
                     
                     return privacy.update(on: req).transform(to: .ok)
                 }

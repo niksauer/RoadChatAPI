@@ -37,7 +37,7 @@ extension CarRequest: Payload {
 
     static var optionalParameters: [Payload.Parameter] = [
         ("performance", Int.self),
-        ("color", Int.self),
+        ("color", String.self),
     ]
 }
 

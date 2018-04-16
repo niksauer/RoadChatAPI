@@ -14,7 +14,7 @@ extension SettingsRequest: Validatable, Reflectable {
     public static func validations() throws -> Validations<SettingsRequest> {
         var validations = Validations(SettingsRequest.self)
         try validations.add(\.communityRadius, .range(0...500))
-        try validations.add(\.trafficRadius, .range(0...50))
+        try validations.add(\.trafficRadius, .range(0...500))
         return validations
     }
 }
