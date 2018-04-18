@@ -41,12 +41,11 @@ final class TrafficController {
             }
             
             return try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
-                
                 return try recentMessages.map { message in
                     return try message.getLocation(on: req).flatMap(to: Result?.self) { location in
                         let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        if geoLocation.distance(from: requestGeoLocation) < 500 && self.isSameCourse(location.course, comparedTo: requestLocation.course) == true {
+                        if geoLocation.distance(from: requestGeoLocation) < 500 && self.isSameCourse(location.course, comparedTo: requestLocation.course) {
                             return message.validations.attach(creator, on: req).flatMap(to: Result?.self) { _ in
                                 return try message.publicTrafficMessage(on: req).map(to: Result?.self) { publicMessage in
                                     return publicMessage
@@ -104,6 +103,10 @@ final class TrafficController {
     
     /// Checks if the course of a `Location` in the database is within 90 degrees range of the `Location` from the request
     func isSameCourse(_ courseA: Double, comparedTo courseB: Double) -> Bool {
+        guard courseA >= 0 && courseB >= 0 else {
+            return true
+        }
+        
         let left: Double
         let right: Double
         
@@ -112,16 +115,15 @@ final class TrafficController {
         } else {
             left = (courseB - 90).truncatingRemainder(dividingBy: 360)
         }
+        
         right = (courseB + 90).truncatingRemainder(dividingBy: 360)
         
         if courseB >= 270 || courseB < 90 {
-            
             if courseA >= 0 && courseA < 180 {
                 return courseA <= left && courseA <= right
             } else {
                 return courseA >= left
             }
-            
         } else {
             return courseA >= left && courseA <= right
         }
