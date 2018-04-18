@@ -9,8 +9,7 @@ import Foundation
 import Vapor
 import Validation
 
-protocol Payload {
-    associatedtype RequestType: Decodable, Validatable
+protocol Payload: Decodable, Validatable {
     typealias Parameter = (name: BasicKeyRepresentable, type: Decodable.Type)
     static var requiredParameters: [Parameter] { get }
     static var optionalParameters: [Parameter] { get }
@@ -58,13 +57,13 @@ extension Payload {
         return invalidParameters
     }
     
-    static func extract(from req: Request) throws -> Future<RequestType> {
-        return findMissingOrInvalidParameters(in: req, expected: requiredParameters).flatMap(to: RequestType.self, on: req) { invalidParameters in
+    static func extract(from req: Request) throws -> Future<Self> {
+        return findMissingOrInvalidParameters(in: req, expected: requiredParameters).flatMap(to: Self.self, on: req) { invalidParameters in
             guard invalidParameters.isEmpty else {
                 throw RequestFail.missingOrInvalidParameters(invalidParameters.map({ "\($0.name.makeBasicKey().stringValue) (expectedType: \(String(describing: $0.type.self))" }))
             }
             
-            return findMissingOrInvalidParameters(in: req, expected: optionalParameters).flatMap(to: RequestType.self, on: req) { invalidOptionalParameters in
+            return findMissingOrInvalidParameters(in: req, expected: optionalParameters).flatMap(to: Self.self, on: req) { invalidOptionalParameters in
                 var presentOptionalParameters = [Parameter]()
                 
                 for parameter in optionalParameters {
@@ -78,12 +77,12 @@ extension Payload {
                     }
                 }
                 
-                return findMissingOrInvalidParameters(in: req, expected: presentOptionalParameters).flatMap(to: RequestType.self, on: req) { presentInvalidOptionalParameters in
+                return findMissingOrInvalidParameters(in: req, expected: presentOptionalParameters).flatMap(to: Self.self, on: req) { presentInvalidOptionalParameters in
                     guard presentInvalidOptionalParameters.isEmpty else {
                         throw RequestFail.missingOrInvalidParameters(presentInvalidOptionalParameters.map({ "\($0.name.makeBasicKey().stringValue) (expectedType: \(String(describing: $0.type.self))" }))
                     }
                     
-                    return try req.content.decode(RequestType.self).map(to: RequestType.self) { request in
+                    return try req.content.decode(Self.self).map(to: Self.self) { request in
                         do {
                             try request.validate()
 //                            try request.validateOptionals()

@@ -27,8 +27,6 @@ extension CarRequest: Validatable, Reflectable {
 //}
 
 extension CarRequest: Payload {
-    typealias RequestType = CarRequest
-
     static var requiredParameters: [Payload.Parameter] = [
         ("manufacturer", String.self),
         ("model", String.self),

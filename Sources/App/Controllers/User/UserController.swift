@@ -70,14 +70,21 @@ final class UserController {
         return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
-            return try RegisterRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
-                let hasher = try req.make(BCryptDigest.self)
-                let hashedPassword = try hasher.hash(updatedUser.password, cost: hashingCost)
+            return try UserRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
+                if let email = updatedUser.email {
+                    user.email = email
+                }
                 
-                user.email = updatedUser.email
-                user.username = updatedUser.username
-                user.password = hashedPassword
+                if let username = updatedUser.username {
+                    user.username = username
+                }
                 
+                if let password = updatedUser.password {
+                    let hasher = try req.make(BCryptDigest.self)
+                    let hashedPassword = try hasher.hash(password, cost: hashingCost)
+                    user.password = hashedPassword
+                }
+        
                 return user.update(on: req).transform(to: .ok)
             }
         }

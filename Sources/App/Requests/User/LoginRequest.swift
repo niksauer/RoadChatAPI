@@ -24,8 +24,6 @@ extension LoginRequest: Validatable, Reflectable {
 //}
 
 extension LoginRequest: Payload {
-    typealias RequestType = LoginRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("user", String.self),
         ("password", String.self)

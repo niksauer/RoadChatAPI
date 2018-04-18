@@ -27,8 +27,6 @@ extension SettingsRequest: Validatable, Reflectable {
 //}
 
 extension SettingsRequest: Payload {
-    typealias RequestType = SettingsRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("communityRadius", Int.self),
         ("trafficRadius", Int.self),

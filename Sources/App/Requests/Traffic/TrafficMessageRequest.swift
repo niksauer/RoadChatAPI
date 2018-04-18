@@ -25,8 +25,6 @@ extension TrafficMessageRequest: Validatable, Reflectable {
 //}
 
 extension TrafficMessageRequest: Payload {
-    typealias RequestType = TrafficMessageRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("type", TrafficType.RawValue.self),
         ("time", Date.self),

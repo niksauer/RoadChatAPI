@@ -26,8 +26,6 @@ extension DirectMessageRequest: Validatable, Reflectable {
 //}
 
 extension DirectMessageRequest: Payload {
-    typealias RequestType = DirectMessageRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("time", Date.self),
         ("message", String.self),

@@ -25,8 +25,6 @@ extension RegisterRequest: Validatable, Reflectable {
 //}
 
 extension RegisterRequest: Payload {
-    typealias RequestType = RegisterRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("email", String.self),
         ("username", String.self),

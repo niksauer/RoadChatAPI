@@ -22,8 +22,6 @@ extension PrivacyRequest: Validatable {
 //}
 
 extension PrivacyRequest: Payload {
-    typealias RequestType = PrivacyRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("shareLocation", Bool.self),
         ("showEmail", Bool.self),
