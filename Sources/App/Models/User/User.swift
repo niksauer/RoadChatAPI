@@ -101,6 +101,25 @@ extension Request {
 }
 
 extension User {
+    func publicUser(on req: Request) throws -> Future<User.PublicUser> {
+        return try self.getLocation(on: req).flatMap(to: User.PublicUser.self) { location in
+            do {
+                try req.checkOptionalOwnership(for: self)
+                return Future.map(on: req) { try self.publicUser(isOwner: true, location: location) }
+            } catch {
+                return try self.getPrivacy(on: req).flatMap(to: User.PublicUser.self) { privacy in
+                    guard privacy.shareLocation else {
+                        return Future.map(on: req) { try self.publicUser(isOwner: false, location: nil) }
+                    }
+                    
+                    return try self.getLocation(on: req).map(to: User.PublicUser.self) { location in
+                        return try self.publicUser(isOwner: false, location: location)
+                    }
+                }
+            }
+        }
+    }
+    
     func getSettings(on req: Request) throws -> Future<Settings> {
         return try settings.query(on: req).first().map(to: Settings.self) { settings in
             guard let settings = settings else {

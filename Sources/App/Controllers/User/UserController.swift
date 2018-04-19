@@ -53,15 +53,7 @@ final class UserController {
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<Result> {
         return try req.parameter(Resource.self).flatMap(to: Result.self) { user in
-            do {
-                try req.checkOptionalOwnership(for: user)
-                
-                return try user.getLocation(on: req).map(to: Result.self) { location in
-                    return try user.publicUser(isOwner: true, location: location)
-                }
-            } catch {
-                return Future.map(on: req) { try user.publicUser(isOwner: false, location: nil) }
-            }
+            return try user.publicUser(on: req)
         }
     }
     
