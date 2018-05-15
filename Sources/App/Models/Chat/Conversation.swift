@@ -37,7 +37,7 @@ extension Conversation: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: Conversation.self) { database in
+        return container.newConnection(to: .sqlite).flatMap(to: Conversation.self) { database in
             return try Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
                 guard let conversation = existingConversation else {
                     // conversation not found

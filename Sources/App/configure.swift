@@ -23,14 +23,13 @@ public func configure(
     services.register(router, as: Router.self)
     
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create empty middleware config
+    let middlewares = MiddlewareConfig() // Create empty middleware config
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
-    middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
     
     // Configure a SQLite database
-    var databases = DatabaseConfig()
+    var databases = DatabasesConfig()
     try databases.add(database: SQLiteDatabase(storage: .file(path: "RoadChat.sqlite")), as: .sqlite)
     services.register(databases)
 
@@ -61,12 +60,12 @@ public func configure(
 //    configureWebsockets(&services)
 }
 
-func configureWebsockets(_ services: inout Services) {
-    let websockets = EngineWebSocketServer.default()
-    let _ = User.tokenAuthMiddleware(database: .sqlite)
-    let conversationController = ConversationController()
-    
-    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
-    
-    services.register(websockets, as: WebSocketServer.self)
-}
+//func configureWebsockets(_ services: inout Services) {
+//    let websockets = EngineWebSocketServer.default()
+//    let _ = User.tokenAuthMiddleware(database: .sqlite)
+//    let conversationController = ConversationController()
+//
+//    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
+//
+//    services.register(websockets, as: WebSocketServer.self)
+//}

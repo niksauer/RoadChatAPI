@@ -74,14 +74,14 @@ final class TrafficController {
     
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).flatMap(to: Result.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: Result.self) { message in
             return try message.publicTrafficMessage(on: req)
         }
     }
     
     /// Deletes a parameterized `TrafficMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { trafficMessage in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { trafficMessage in
             try req.user().checkOwnership(for: trafficMessage, on: req)
             return trafficMessage.delete(on: req).transform(to: .ok)
         }
@@ -89,14 +89,14 @@ final class TrafficController {
     
     /// Upvotes a parameterized `TrafficMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
 
     /// Downvotes a parameterized `TrafficMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
