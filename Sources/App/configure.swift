@@ -23,14 +23,13 @@ public func configure(
     services.register(router, as: Router.self)
     
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create empty middleware config
+    let middlewares = MiddlewareConfig() // Create empty middleware config
 //    middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
-    middlewares.use(DateMiddleware.self) // Adds `Date` header to responses
 //    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
     services.register(middlewares)
     
     // Configure a MySQL database
-    var databases = DatabaseConfig()
+    var databases = DatabasesConfig()
     let mySQLConfig = MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "swift", password: "swift", database: "roadchat")
     let mySQLDatabase = MySQLDatabase(config: mySQLConfig)
     databases.add(database: mySQLDatabase, as: .mysql)
@@ -63,12 +62,12 @@ public func configure(
 //    configureWebsockets(&services)
 }
 
-func configureWebsockets(_ services: inout Services) {
-    let websockets = EngineWebSocketServer.default()
-    let _ = User.tokenAuthMiddleware(database: .mysql)
-    let conversationController = ConversationController()
-    
-    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
-    
-    services.register(websockets, as: WebSocketServer.self)
-}
+//func configureWebsockets(_ services: inout Services) {
+//    let websockets = EngineWebSocketServer.default()
+//    let _ = User.tokenAuthMiddleware(database: .mysql)
+//    let conversationController = ConversationController()
+//    
+//    websockets.get("chat", Conversation.parameter, "live", use: conversationController.liveChat)
+//    
+//    services.register(websockets, as: WebSocketServer.self)
+//}

@@ -40,12 +40,12 @@ final class TrafficController {
                 throw Abort(.internalServerError)
             }
             
-            return try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in                
+            return try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
                 return try recentMessages.map { message in
                     return try message.getLocation(on: req).flatMap(to: Result?.self) { location in
                         let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)
                         
-                        if geoLocation.distance(from: requestGeoLocation) < 500 && self.isSameCourse(location.course, comparedTo: requestLocation.course) == true {
+                        if geoLocation.distance(from: requestGeoLocation) < 500 && self.isSameCourse(location.course, comparedTo: requestLocation.course) {
                             return message.validations.attach(creator, on: req).flatMap(to: Result?.self) { _ in
                                 return try message.publicTrafficMessage(on: req).map(to: Result?.self) { publicMessage in
                                     return publicMessage
@@ -74,14 +74,14 @@ final class TrafficController {
     
     /// Returns a parameterized `TrafficMessage`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).flatMap(to: Result.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: Result.self) { message in
             return try message.publicTrafficMessage(on: req)
         }
     }
     
     /// Deletes a parameterized `TrafficMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { trafficMessage in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { trafficMessage in
             try req.user().checkOwnership(for: trafficMessage, on: req)
             return trafficMessage.delete(on: req).transform(to: .ok)
         }
@@ -89,20 +89,24 @@ final class TrafficController {
     
     /// Upvotes a parameterized `TrafficMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
 
     /// Downvotes a parameterized `TrafficMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
 
     /// Checks if the course of a provided `Location` is within 90 degrees range of the second `Location`.
     func isSameCourse(_ courseA: Double, comparedTo courseB: Double) -> Bool {
+        guard courseA >= 0 && courseB >= 0 else {
+            return true
+        }
+        
         let left: Double
         let right: Double
         
@@ -111,16 +115,15 @@ final class TrafficController {
         } else {
             left = (courseB - 90).truncatingRemainder(dividingBy: 360)
         }
+        
         right = (courseB + 90).truncatingRemainder(dividingBy: 360)
         
         if courseB >= 270 || courseB < 90 {
-            
             if courseA >= 0 && courseA < 180 {
                 return courseA <= left && courseA <= right
             } else {
                 return courseA >= left
             }
-            
         } else {
             return courseA >= left && courseA <= right
         }

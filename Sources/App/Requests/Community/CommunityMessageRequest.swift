@@ -27,8 +27,6 @@ extension CommunityMessageRequest: Validatable, Reflectable {
 //}
 
 extension CommunityMessageRequest: Payload {
-    typealias RequestType = CommunityMessageRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("title", String.self),
         ("time", Date.self),

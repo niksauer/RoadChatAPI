@@ -29,8 +29,6 @@ extension ProfileRequest: Validatable, Reflectable {
 //}
 
 extension ProfileRequest: Payload {
-    typealias RequestType = ProfileRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("firstName", String.self),
         ("lastName", String.self),

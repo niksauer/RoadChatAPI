@@ -44,14 +44,14 @@ final class CommunityController {
     
     /// Returns a parameterized `CommunityMessage`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).flatMap(to: Result.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: Result.self) { message in
             return try message.publicCommunityMessage(on: req)
         }
     }
     
     /// Deletes a parameterized `CommunityMessage`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { communityMessage in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { communityMessage in
             try req.user().checkOwnership(for: communityMessage, on: req)
             return communityMessage.delete(on: req).transform(to: .ok)
         }
@@ -59,14 +59,14 @@ final class CommunityController {
     
     /// Upvotes a parameterized `CommunityMessage`.
     func upvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.upvote, to: message, on: req).transform(to: .ok)
         }
     }
     
     /// Downvotes a parameterized `CommunityMessage`.
     func downvote(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { message in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { message in
             return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }

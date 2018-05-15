@@ -22,7 +22,7 @@ final class ConversationController {
     
     /// Returns all `Conversation`s associated to a parameterized `User`.
     func index(_ req: Request) throws -> Future<[Result]> {
-        return try req.parameter(User.self).flatMap(to: [Result].self) { user in
+        return try req.parameters.next(User.self).flatMap(to: [Result].self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try user.getConversations(on: req).flatMap(to: [Result].self) { conversations in
@@ -132,7 +132,7 @@ final class ConversationController {
     
     /// Returns a parameterized `Conversation` including the newest `DirectMessage` as an excerpt.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).flatMap(to: Result.self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: Result.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
             return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
@@ -142,55 +142,55 @@ final class ConversationController {
     }
     
     /// Opens a WebSocket for a parameterized `Conversation`.
-    func liveChat(websocket: WebSocket, req: Request) throws -> Void {
-        // timer to keep connection alive
-//        var pingTimer: DispatchSourceTimer?
-//        pingTimer = DispatchSource.makeTimerSource()
-//        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
-//        pingTimer?.setEventHandler(handler: { websocket.ping() })
-//        pingTimer?.resume()
-
-        let user = try req.user()
-        let userID = try user.requireID()
-
-        let conversation = try req.parameter(Resource.self).wait()
-        try user.checkParticipation(in: conversation, on: req)
-
-        let chatroom: Chatroom
-
-        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
-            chatroom = existingChatroom
-        } else {
-            chatroom = Chatroom(conversationID: try conversation.requireID())
-            activeChatrooms.append(chatroom)
-        }
-
-        if let priorSocket = chatroom.connections[userID] {
-            // close and notify user that prior session will be closed
-            priorSocket.close()
-            websocket.notify(event: .existingSession)
-        }
-
-        // set user session to this socket and notify chatroom that user is online
-        chatroom.connections[userID] = websocket
-        chatroom.notify(event: .online(userID: userID))
-
-        websocket.onText { message in
-            chatroom.send(senderID: userID, message: message)
-        }
-
-        websocket.onClose {
-//            pingTimer?.cancel()
-//            pingTimer = nil
-
-            chatroom.connections.removeValue(forKey: userID)
-            chatroom.notify(event: .offline(userID: userID))
-        }
-    }
+//    func liveChat(websocket: WebSocket, req: Request) throws -> Void {
+//        // timer to keep connection alive
+////        var pingTimer: DispatchSourceTimer?
+////        pingTimer = DispatchSource.makeTimerSource()
+////        pingTimer?.schedule(deadline: .now(), repeating: .seconds(25))
+////        pingTimer?.setEventHandler(handler: { websocket.ping() })
+////        pingTimer?.resume()
+//
+//        let user = try req.user()
+//        let userID = try user.requireID()
+//
+//        let conversation = try req.parameter(Resource.self).wait()
+//        try user.checkParticipation(in: conversation, on: req)
+//
+//        let chatroom: Chatroom
+//
+//        if let existingChatroom = try activeChatrooms.first(where: { try $0.conversationID == conversation.requireID() }) {
+//            chatroom = existingChatroom
+//        } else {
+//            chatroom = Chatroom(conversationID: try conversation.requireID())
+//            activeChatrooms.append(chatroom)
+//        }
+//
+//        if let priorSocket = chatroom.connections[userID] {
+//            // close and notify user that prior session will be closed
+//            priorSocket.close()
+//            websocket.notify(event: .existingSession)
+//        }
+//
+//        // set user session to this socket and notify chatroom that user is online
+//        chatroom.connections[userID] = websocket
+//        chatroom.notify(event: .online(userID: userID))
+//
+//        websocket.onText { message in
+//            chatroom.send(senderID: userID, message: message)
+//        }
+//
+//        websocket.onClose {
+////            pingTimer?.cancel()
+////            pingTimer = nil
+//
+//            chatroom.connections.removeValue(forKey: userID)
+//            chatroom.notify(event: .offline(userID: userID))
+//        }
+//    }
     
     /// Deletes a parameterized `Conversation` from the `Conversation`s associated to a `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
             return conversation.participations.detach(try req.user(), on: req).flatMap(to: HTTPStatus.self) { _ in
@@ -208,7 +208,7 @@ final class ConversationController {
     
     /// Returns all `DirectMessage`s associated to a parameterized `Conversation`.
     func getMessages(_ req: Request) throws -> Future<[DirectMessage.PublicDirectMessage]> {
-        return try req.parameter(Resource.self).flatMap(to: [DirectMessage.PublicDirectMessage].self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: [DirectMessage.PublicDirectMessage].self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
             return try conversation.getMessages(on: req).map(to: [DirectMessage.PublicDirectMessage].self) { messages in
@@ -219,7 +219,7 @@ final class ConversationController {
     
     /// Saves a new `DirectMessage` associated to a parameterized `Conversation` to the database.
     func createMessage(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
             return try DirectMessageRequest.extract(from: req).flatMap(to: HTTPStatus.self) { messageRequest in
@@ -230,7 +230,7 @@ final class ConversationController {
     
     /// Returns all `User`s associated to a parameterized `Conversation`.
     func getParticipants(_ req: Request) throws -> Future<[Participation.PublicParticipant]> {
-        return try req.parameter(Resource.self).flatMap(to: [Participation.PublicParticipant].self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: [Participation.PublicParticipant].self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
             return try conversation.getParticipations(on: req).map(to: [Participation.PublicParticipant].self) { participations in
@@ -250,7 +250,7 @@ final class ConversationController {
     }
     
     private func setStatus(_ status: ApprovalType, on req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
             return try req.user().getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
                 participation.status = status.rawValue
                 return participation.save(on: req).transform(to: .ok)

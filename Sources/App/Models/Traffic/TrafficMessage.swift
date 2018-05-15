@@ -37,7 +37,7 @@ extension TrafficMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .mysql).flatMap(to: TrafficMessage.self) { database in
+        return container.newConnection(to: .mysql).flatMap(to: TrafficMessage.self) { database in
             return try TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
                 guard let trafficMessage = existingTrafficMessage else {
                     // traffic message not found

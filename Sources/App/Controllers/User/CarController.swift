@@ -18,14 +18,14 @@ final class CarController {
     
     /// Returns a parameterized `Car`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Car.self).map(to: Result.self) { car in
+        return try req.parameters.next(Car.self).map(to: Result.self) { car in
             return try car.publicCar()
         }
     }
     
     /// Updates a parameterized `Car`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { car in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { car in
             try req.user().checkOwnership(for: car, on: req)
             
             return try CarRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedCar in
@@ -42,7 +42,7 @@ final class CarController {
     
     /// Deletes a parameterized `Car`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { car in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { car in
             try req.user().checkOwnership(for: car, on: req)
             return car.delete(on: req).transform(to: .ok)
         }

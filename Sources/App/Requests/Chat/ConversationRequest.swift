@@ -27,8 +27,6 @@ extension ConversationRequest: Validatable, Reflectable {
 //}
 
 extension ConversationRequest: Payload {
-    typealias RequestType = ConversationRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("title", String.self),
         ("participants", [Int].self),

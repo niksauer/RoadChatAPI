@@ -52,32 +52,31 @@ final class UserController {
     
     /// Returns a parameterized `User`.
     func get(_ req: Request) throws -> Future<Result> {
-        return try req.parameter(Resource.self).flatMap(to: Result.self) { user in
-            do {
-                try req.checkOptionalOwnership(for: user)
-                
-                return try user.getLocation(on: req).map(to: Result.self) { location in
-                    return try user.publicUser(isOwner: true, location: location)
-                }
-            } catch {
-                return Future.map(on: req) { try user.publicUser(isOwner: false, location: nil) }
-            }
+        return try req.parameters.next(Resource.self).flatMap(to: Result.self) { user in
+            return try user.publicUser(on: req)
         }
     }
     
     /// Updates a parameterized `User`.
     func update(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
-            return try RegisterRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
-                let hasher = try req.make(BCryptDigest.self)
-                let hashedPassword = try hasher.hash(updatedUser.password, cost: hashingCost)
+            return try UserRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedUser in
+                if let email = updatedUser.email {
+                    user.email = email
+                }
                 
-                user.email = updatedUser.email
-                user.username = updatedUser.username
-                user.password = hashedPassword
+                if let username = updatedUser.username {
+                    user.username = username
+                }
                 
+                if let password = updatedUser.password {
+                    let hasher = try req.make(BCryptDigest.self)
+                    let hashedPassword = try hasher.hash(password, cost: hashingCost)
+                    user.password = hashedPassword
+                }
+        
                 return user.update(on: req).transform(to: .ok)
             }
         }
@@ -85,24 +84,29 @@ final class UserController {
     
     /// Deletes a parameterized `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             // delete requested user and all of his associated resources and participations in chat
-            _ = try user.authTokens.query(on: req).delete()
-            _ = try user.settings.query(on: req).delete()
-            _ = try user.privacy.query(on: req).delete()
-            _ = try user.profile.query(on: req).delete()
-            _ = try user.cars.query(on: req).delete()
-            _ = Participation.query(on: req).filter(try \Participation.userID == user.requireID()).delete()
-            
-            return user.delete(on: req).transform(to: .ok)
+            return try user.authTokens.query(on: req).delete().flatMap(to: HTTPStatus.self) { _ in
+                return try user.settings.query(on: req).delete().flatMap(to: HTTPStatus.self) { _ in
+                    return try user.privacy.query(on: req).delete().flatMap(to: HTTPStatus.self) { _ in
+                        return try user.profile.query(on: req).delete().flatMap(to: HTTPStatus.self) { _ in
+                            return try user.cars.query(on: req).delete().flatMap(to: HTTPStatus.self) { _ in
+                                return Participation.query(on: req).filter(try \Participation.userID == user.requireID()).delete().flatMap(to: HTTPStatus.self) { _ in
+                                    return user.delete(on: req).transform(to: .ok)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     
     /// Returns the `Setting`s for a parameterized `User`.
     func getSettings(_ req: Request) throws -> Future<Settings.PublicSettings> {
-        return try req.parameter(Resource.self).flatMap(to: Settings.PublicSettings.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: Settings.PublicSettings.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try user.getSettings(on: req).map(to: Settings.PublicSettings.self) { settings in
@@ -113,7 +117,7 @@ final class UserController {
     
     /// Updates the `Setting`s for a parameterized `User`.
     func updateSettings(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try SettingsRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedSettings in
@@ -129,7 +133,7 @@ final class UserController {
     
     /// Returns the `Privacy` for a parameterized `User`.
     func getPrivacy(_ req: Request) throws -> Future<Privacy.PublicPrivacy> {
-        return try req.parameter(Resource.self).flatMap(to: Privacy.PublicPrivacy.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: Privacy.PublicPrivacy.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try user.getPrivacy(on: req).map(to: Privacy.PublicPrivacy.self) { privacy in
@@ -140,17 +144,21 @@ final class UserController {
     
     /// Updates the `Privacy` for a parameterized `User`.
     func updatePrivacy(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try PrivacyRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedPrivacy in
                 return try user.getPrivacy(on: req).flatMap(to: HTTPStatus.self) { privacy in
+                    privacy.shareLocation = updatedPrivacy.shareLocation
+                    privacy.showEmail = updatedPrivacy.showEmail
                     privacy.showFirstName = updatedPrivacy.showFirstName
                     privacy.showLastName = updatedPrivacy.showLastName
                     privacy.showBirth = updatedPrivacy.showBirth
                     privacy.showSex = updatedPrivacy.showSex
-                    privacy.showAddress = updatedPrivacy.showAddress
                     privacy.showBiography = updatedPrivacy.showBiography
+                    privacy.showStreet = updatedPrivacy.showStreet
+                    privacy.showCity = updatedPrivacy.showCity
+                    privacy.showCountry = updatedPrivacy.showCountry
                     
                     return privacy.update(on: req).transform(to: .ok)
                 }
@@ -160,7 +168,7 @@ final class UserController {
     
     /// Returns the `Profile` for a parameterized `User`.
     func getProfile(_ req: Request) throws -> Future<Profile.PublicProfile> {
-        return try req.parameter(Resource.self).flatMap(to: Profile.PublicProfile.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: Profile.PublicProfile.self) { user in
             return try user.getProfile(on: req).flatMap(to: Profile.PublicProfile.self) { profile in
                 guard let profile = profile else {
                     // no profile associated to user
@@ -181,7 +189,7 @@ final class UserController {
     
     /// Creates or updates the `Profile` for a parameterized `User`.
     func createOrUpdateProfile(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try ProfileRequest.extract(from: req).flatMap(to: HTTPStatus.self) { profileRequest in
@@ -199,6 +207,7 @@ final class UserController {
                     profile.streetName = profileRequest.streetName
                     profile.streetNumber = profileRequest.streetNumber
                     profile.postalCode = profileRequest.postalCode
+                    profile.city = profileRequest.city
                     profile.country = profileRequest.country
                     
                     return profile.update(on: req).transform(to: .ok)
@@ -209,7 +218,7 @@ final class UserController {
 
     /// Returns all `Cars`s associated to a parameterized `User`.
     func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
-        return try req.parameter(Resource.self).flatMap(to: [Car.PublicCar].self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: [Car.PublicCar].self) { user in
             return try user.getCars(on: req).map(to: [Car.PublicCar].self) { cars in
                 return try cars.map({ try $0.publicCar() })
             }
@@ -218,7 +227,7 @@ final class UserController {
 
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
     func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
-        return try req.parameter(Resource.self).flatMap(to: Car.PublicCar.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: Car.PublicCar.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try CarRequest.extract(from: req).flatMap(to: Car.PublicCar.self) { carRequest in
@@ -231,7 +240,7 @@ final class UserController {
 
     /// Returns the `Location` for a parameterized `User`.
     func getLocation(_ req: Request) throws -> Future<Location.PublicLocation> {
-        return try req.parameter(Resource.self).flatMap(to: Location.PublicLocation.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: Location.PublicLocation.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try user.getLocation(on: req).map(to: Location.PublicLocation.self) { location in
@@ -247,7 +256,7 @@ final class UserController {
 
     /// Creates or updates the `Location` for a parameterized `User`.
     func createOrUpdateLocation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameter(Resource.self).flatMap(to: HTTPStatus.self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
             try req.user().checkOwnership(for: user, on: req)
             
             return try LocationRequest.extract(from: req).flatMap(to: HTTPStatus.self) { locationRequest in
@@ -277,7 +286,7 @@ final class UserController {
 
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
-        return try req.parameter(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
             return try user.getTrafficMessages(on: req).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicTrafficMessage(on: req)
@@ -290,7 +299,7 @@ final class UserController {
 
     /// Returns all `CommunityMessage`s associated to a parameterized `User`.
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
-        return try req.parameter(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
+        return try req.parameters.next(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
             return try user.getCommunityMessages(on: req).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { messages in
                 return try messages.map {
                     return try $0.publicCommunityMessage(on: req)

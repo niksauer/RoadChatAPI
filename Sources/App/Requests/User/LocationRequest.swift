@@ -22,8 +22,6 @@ extension LocationRequest: Validatable, Reflectable {
 //}
 
 extension LocationRequest: Payload {
-    typealias RequestType = LocationRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
         ("time", Date.self),
         ("latitude", Double.self),
