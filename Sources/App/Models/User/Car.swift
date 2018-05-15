@@ -29,7 +29,7 @@ extension Car: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: Car.self) { database in
+        return container.newConnection(to: .sqlite).flatMap(to: Car.self) { database in
             return try Car.find(id, on: database).map(to: Car.self) { existingCar in
                 guard let car = existingCar else {
                     // user not found

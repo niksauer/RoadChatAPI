@@ -29,7 +29,7 @@ extension CommunityMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: CommunityMessage.self) { database in
+        return container.newConnection(to: .sqlite).flatMap(to: CommunityMessage.self) { database in
             return try CommunityMessage.find(id, on: database).map(to: CommunityMessage.self) { existingMessage in
                 guard let message = existingMessage else {
                     // message not found

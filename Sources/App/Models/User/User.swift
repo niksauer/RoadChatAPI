@@ -59,7 +59,7 @@ extension User: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
+        return container.newConnection(to: .sqlite).flatMap(to: User.self) { database in
             return try User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
