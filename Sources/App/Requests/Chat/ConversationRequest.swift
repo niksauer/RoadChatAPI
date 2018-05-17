@@ -28,9 +28,10 @@ extension ConversationRequest: Validatable, Reflectable {
 
 extension ConversationRequest: Payload {
     static var requiredParameters: [Payload.Parameter] = [
-        ("title", String.self),
         ("participants", [Int].self),
     ]
     
-    static var optionalParameters: [Payload.Parameter] = []
+    static var optionalParameters: [Payload.Parameter] = [
+//        ("title", String.self),
+    ]
 }
