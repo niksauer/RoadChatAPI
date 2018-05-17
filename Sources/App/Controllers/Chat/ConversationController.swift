@@ -103,7 +103,7 @@ final class ConversationController {
                     throw ConversationFail.invalidParticipants(invalidParticipants)
                 }
                 
-                guard participants.count > 1 else {
+                guard participants.count >= 1 else {
                     throw ConversationFail.minimumParticipants
                 }
                     
