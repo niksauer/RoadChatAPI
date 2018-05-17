@@ -14,7 +14,7 @@ extension ConversationRequest: Validatable, Reflectable {
     public static func validations() throws -> Validations<ConversationRequest> {
         var validations = Validations(ConversationRequest.self)
         try validations.add(\.title, .count(1...50))
-        try validations.add(\.participants, .count(2...))
+        try validations.add(\.participants, .count(1...))
         return validations
     }
 }
