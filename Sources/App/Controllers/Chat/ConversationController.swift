@@ -218,12 +218,14 @@ final class ConversationController {
     }
     
     /// Saves a new `DirectMessage` associated to a parameterized `Conversation` to the database.
-    func createMessage(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+    func createMessage(_ req: Request) throws -> Future<DirectMessage.PublicDirectMessage> {
+        return try req.parameters.next(Resource.self).flatMap(to: DirectMessage.PublicDirectMessage.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
-            return try DirectMessageRequest.extract(from: req).flatMap(to: HTTPStatus.self) { messageRequest in
-                return try DirectMessage(senderID: req.user().requireID(), conversationID: conversation.requireID(), messageRequest: messageRequest).create(on: req).transform(to: .ok)
+            return try DirectMessageRequest.extract(from: req).flatMap(to: DirectMessage.PublicDirectMessage.self) { messageRequest in
+                return try DirectMessage(senderID: req.user().requireID(), conversationID: conversation.requireID(), messageRequest: messageRequest).save(on: req).map(to: DirectMessage.PublicDirectMessage.self) { message in
+                    return try message.publicDirectMessage()
+                }
             }
         }
     }
