@@ -68,7 +68,9 @@ final class ConversationController {
                                 return Future.map(on: req) { nil }
                             }
                             
-                            return Future.map(on: req) { try user.publicUser(isOwner: false, location: location) }
+                            return try user.publicUser(on: req).map(to: User.PublicUser?.self) { publicUser in
+                                return publicUser
+                            }
                         }
                     }
                 }.map(to: [User.PublicUser].self, on: req) { users in
@@ -242,7 +244,9 @@ final class ConversationController {
                             return Future.map(on: req) { nil }
                         }
 
-                        return Future.map(on: req) { participant.publicParticipant(user: try user.publicUser(isOwner: false, location: nil)) }
+                        return try user.publicUser(on: req).map(to: Participation.PublicParticipant?.self) { publicUser in
+                            return participant.publicParticipant(user: publicUser )
+                        }
                     }
                 }.map(to: [Participation.PublicParticipant].self, on: req) { participants in
                     return participants.compactMap { $0 }
