@@ -40,8 +40,8 @@ final class UserController {
                     return newUser.create(on: req).flatMap(to: Result.self) { user in
                         // default user setup
                         return Settings(userID: try user.requireID()).create(on: req).flatMap(to: Result.self) { _ in
-                            return Privacy(userID: try user.requireID()).create(on: req).map(to: Result.self) { _ in
-                                return try newUser.publicUser(isOwner: true, location: nil)
+                            return Privacy(userID: try user.requireID()).create(on: req).flatMap(to: Result.self) { _ in
+                                return try newUser.publicUser(on: req)
                             }
                         }
                     }

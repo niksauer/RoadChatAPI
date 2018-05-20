@@ -68,7 +68,9 @@ final class ConversationController {
                                 return Future.map(on: req) { nil }
                             }
                             
-                            return Future.map(on: req) { try user.publicUser(isOwner: false, location: location) }
+                            return try user.publicUser(on: req).map(to: User.PublicUser?.self) { publicUser in
+                                return publicUser
+                            }
                         }
                     }
                 }.map(to: [User.PublicUser].self, on: req) { users in
@@ -103,7 +105,7 @@ final class ConversationController {
                     throw ConversationFail.invalidParticipants(invalidParticipants)
                 }
                 
-                guard participants.count > 1 else {
+                guard participants.count >= 1 else {
                     throw ConversationFail.minimumParticipants
                 }
                     
@@ -218,12 +220,14 @@ final class ConversationController {
     }
     
     /// Saves a new `DirectMessage` associated to a parameterized `Conversation` to the database.
-    func createMessage(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+    func createMessage(_ req: Request) throws -> Future<DirectMessage.PublicDirectMessage> {
+        return try req.parameters.next(Resource.self).flatMap(to: DirectMessage.PublicDirectMessage.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
-            return try DirectMessageRequest.extract(from: req).flatMap(to: HTTPStatus.self) { messageRequest in
-                return try DirectMessage(senderID: req.user().requireID(), conversationID: conversation.requireID(), messageRequest: messageRequest).create(on: req).transform(to: .ok)
+            return try DirectMessageRequest.extract(from: req).flatMap(to: DirectMessage.PublicDirectMessage.self) { messageRequest in
+                return try DirectMessage(senderID: req.user().requireID(), conversationID: conversation.requireID(), messageRequest: messageRequest).save(on: req).map(to: DirectMessage.PublicDirectMessage.self) { message in
+                    return try message.publicDirectMessage()
+                }
             }
         }
     }
@@ -233,8 +237,20 @@ final class ConversationController {
         return try req.parameters.next(Resource.self).flatMap(to: [Participation.PublicParticipant].self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
-            return try conversation.getParticipations(on: req).map(to: [Participation.PublicParticipant].self) { participations in
-                return participations.map({ $0.publicParticipant() })
+            return try conversation.getParticipations(on: req).flatMap(to: [Participation.PublicParticipant].self) { participations in
+                return try participations.map { participant -> EventLoopFuture<Participation.PublicParticipant?> in
+                    return User.query(on: req).filter(try \User.id == participant.requireID()).first().flatMap(to: Participation.PublicParticipant?.self) { user in
+                        guard let user = user else {
+                            return Future.map(on: req) { nil }
+                        }
+
+                        return try user.publicUser(on: req).map(to: Participation.PublicParticipant?.self) { publicUser in
+                            return participant.publicParticipant(user: publicUser )
+                        }
+                    }
+                }.map(to: [Participation.PublicParticipant].self, on: req) { participants in
+                    return participants.compactMap { $0 }
+                }
             }
         }
     }
