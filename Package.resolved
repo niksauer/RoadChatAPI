@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/vapor/fluent-mysql",
         "state": {
           "branch": null,
-          "revision": "19956a04b1983f20879d9c770a49d7948c42b270",
-          "version": "3.0.0-rc.2.4"
+          "revision": "d8880a9325dfe76d1464436fda15894b831f1d77",
+          "version": "3.0.0-rc.2.5"
         }
       },
       {
