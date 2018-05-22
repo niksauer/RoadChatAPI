@@ -10,23 +10,45 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension ConversationRequest: Validatable {
-    public static var validations: Validations = [
-        key(\ConversationRequest.title): IsCount(1...50),
-    ]
+extension ConversationRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<ConversationRequest> {
+        var validations = Validations(ConversationRequest.self)
+        try validations.add(\.participants, .count(1...))
+        return validations
+    }
 }
 
-extension ConversationRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension ConversationRequest: OptionallyValidatable {
+//    static func optionalValidations() throws -> Validations<ConversationRequest> {
+//        let validations = Validations(ConversationRequest.self)
+//        try validations.add(\.title, .count(1...50))
+//        return validations
+//    }
+//}
 
 extension ConversationRequest: Payload {
-    typealias RequestType = ConversationRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
-        ("title", "CryptoBros"),
-        ("participants", [1]),
+        ("participants", [Int].self),
     ]
     
-    static var optionalParameters: [Payload.Parameter] = []
+    static var optionalParameters: [Payload.Parameter] = [
+//        ("title", String.self),
+    ]
+}
+
+extension ConversationUpdateRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<ConversationUpdateRequest> {
+        let validations = Validations(ConversationUpdateRequest.self)
+        return validations
+    }
+}
+
+extension ConversationUpdateRequest: Payload {
+    static var requiredParameters: [Payload.Parameter] = [
+    
+    ]
+    
+    static var optionalParameters: [Payload.Parameter] = [
+    
+    ]
 }

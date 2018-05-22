@@ -7,13 +7,17 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import Authentication
 import RoadChatKit
 
-extension BearerToken: SQLiteModel, Migration {
+extension BearerToken: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<BearerToken, Int?> {
         return \BearerToken.id
+    }
+    
+    public static var entity: String {
+        return "BearerToken"
     }
 }
 

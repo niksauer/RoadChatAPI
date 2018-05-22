@@ -14,26 +14,29 @@ import RoadChatKit
 /// Controls token-based authentication.
 final class LoginController {
     
+    typealias Resource = BearerToken
+    typealias Result = BearerToken.PublicBearerToken
+    
     /// Saves a new `Token` to the database.
-    func login(_ req: Request) throws -> Future<BearerToken.PublicBearerToken> {
-        return try LoginRequest.extract(from: req).flatMap(to: BearerToken.PublicBearerToken.self) { loginRequest in
-            return User.query(on: req).group(.or) { builder in
-                builder.filter(\User.email == loginRequest.user)
-                builder.filter(\User.username == loginRequest.user)
-            }.first().flatMap(to: BearerToken.PublicBearerToken.self) { existingUser in
+    func login(_ req: Request) throws -> Future<Result> {
+        return try LoginRequest.extract(from: req).flatMap(to: Result.self) { loginRequest in
+            return try User.query(on: req).group(.or) { builder in
+                try builder.filter(\User.email == loginRequest.user)
+                try builder.filter(\User.username == loginRequest.user)
+            }.first().flatMap(to: Result.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.badRequest)
                 }
                 
-                let hasher = try req.make(BCryptHasher.self)
-                
-                guard try hasher.verify(message: loginRequest.password, matches: user.password) else {
+                let hasher = try req.make(BCryptDigest.self)
+    
+                guard try hasher.verify(loginRequest.password, created: user.password) else {
                     // invalid password
                     throw Abort(.badRequest)
                 }
                 
-                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: BearerToken.PublicBearerToken.self) { token in
+                return try BearerToken(userID: user.requireID(), token: UUID().uuidString).create(on: req).map(to: Result.self) { token in
                     return token.publicToken()
                 }
             }
@@ -47,7 +50,7 @@ final class LoginController {
             throw Abort(.unauthorized)
         }
         
-        return BearerToken.query(on: req).filter(\BearerToken.token == requestedToken).delete().transform(to: .ok)
+        return try BearerToken.query(on: req).filter(\BearerToken.token == requestedToken).delete().transform(to: .ok)
     }
     
 }

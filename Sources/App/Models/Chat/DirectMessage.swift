@@ -7,12 +7,26 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension DirectMessage: SQLiteModel, Migration {
+extension DirectMessage: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<DirectMessage, Int?> {
         return \DirectMessage.id
+    }
+    
+    public static var entity: String {
+        return "DirectMessage"
+    }
+    
+    public static func prepare(on connection: MySQLConnection) -> Future<Void> {
+        return MySQLDatabase.create(self, on: connection) { builder in
+            try builder.field(for: \DirectMessage.id)
+            try builder.field(for: \DirectMessage.senderID)
+            try builder.field(for: \DirectMessage.conversationID)
+            try builder.field(for: \DirectMessage.time)
+            try builder.field(type: .text(), for: \DirectMessage.message)
+        }
     }
     
     var conversation: Parent<DirectMessage, Conversation> {

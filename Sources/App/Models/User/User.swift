@@ -7,14 +7,30 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import Authentication
 import RoadChatKit
 
-extension User: SQLiteModel, Migration, Owner, KarmaDonator {
+extension User: MySQLModel, Migration, Owner, KarmaDonator {
     public static var idKey: WritableKeyPath<User, Int?> {
         return \User.id
     }
+    
+    public static var entity: String {
+        return "User"
+    }
+
+//    public static func prepare(on connection: MySQLConnection) -> Future<Void> {
+//        return MySQLDatabase.create(self, on: connection) { builder in
+//            try builder.field(for: \User.id)
+//            try builder.field(for: \User.locationID)
+//            try builder.field(for: \User.email)
+//            try builder.field(for: \User.username)
+////            try builder.field(type: .binary(length: 100), for: \User.password)
+////            try builder.field(type: .blob(length: 100), for: \User.password)
+//            try builder.field(for: \User.registry)
+//        }
+//    }
     
     var settings: Children<User, Settings> {
         return children(\Settings.userID)
@@ -43,6 +59,7 @@ extension User: SQLiteModel, Migration, Owner, KarmaDonator {
     var conversations: Siblings<User, Conversation, Participation> {
         return siblings()
     }
+    
 }
 
 extension User: Ownable {
@@ -58,8 +75,8 @@ extension User: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.requestConnection(to: .sqlite).flatMap(to: User.self) { database in
-            return User.find(id, on: database).map(to: User.self) { existingUser in
+        return container.newConnection(to: .mysql).flatMap(to: User.self) { database in
+            return try User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.notFound)
@@ -84,22 +101,39 @@ extension Request {
     
     func optionalUser() throws -> Future<User?> {
         if let token = self.http.headers.bearerAuthorization?.token {
-            return BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
+            return try BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
                 guard let storedToken = storedToken else {
-                    return Future(nil)
+                    return Future.map(on: self) { nil }
                 }
                 
-                return storedToken.authUser.get(on: self).map(to: User?.self) { user in
+                return try storedToken.authUser.get(on: self).map(to: User?.self) { user in
                     return user
                 }
             }
         } else {
-            return Future(nil)
+            return Future.map(on: self) { nil }
         }
     }
 }
 
 extension User {
+    func publicUser(on req: Request) throws -> Future<User.PublicUser> {
+        return try self.getLocation(on: req).flatMap(to: User.PublicUser.self) { location in
+            return try self.getPrivacy(on: req).flatMap(to: User.PublicUser.self) { privacy in
+                do {
+                    try req.checkOptionalOwnership(for: self)
+                    return Future.map(on: req) { try self.publicUser(isOwner: true, privacy: privacy.publicPrivacy(), location: location) }
+                } catch {
+                    guard privacy.shareLocation else {
+                        return Future.map(on: req) { try self.publicUser(isOwner: false, privacy: privacy.publicPrivacy(), location: nil) }
+                    }
+                    
+                    return Future.map(on: req) { try self.publicUser(isOwner: false, privacy: privacy.publicPrivacy(), location: location)}
+                }
+            }
+        }
+    }
+    
     func getSettings(on req: Request) throws -> Future<Settings> {
         return try settings.query(on: req).first().map(to: Settings.self) { settings in
             guard let settings = settings else {
@@ -143,7 +177,7 @@ extension User {
     }
     
     func getLocation(on req: Request) throws -> Future<Location?> {
-        return Location.query(on: req).filter(\Location.id == self.locationID).first()
+        return try Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
 }
 

@@ -10,32 +10,30 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension CommunityMessageRequest: Validatable {
-    public static var validations: Validations = [
-        key(\CommunityMessageRequest.message): IsCount(0...280),
-        key(\CommunityMessageRequest.course): IsCount(0.0...360.0)
-    ]
+extension CommunityMessageRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<CommunityMessageRequest> {
+        var validations = Validations(CommunityMessageRequest.self)
+        try validations.add(\.title, .count(1...140))
+        return validations
+    }
 }
 
-extension CommunityMessageRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension CommunityMessageRequest: OptionallyValidatable {
+//    static func optionalValidations() throws -> Validations<CommunityMessageRequest> {
+//        let validations = Validations(CommunityMessageRequest.self)
+//        try validations.add(\.message, .count(0...280))
+//        return validations
+//    }
+//}
 
 extension CommunityMessageRequest: Payload {
-    typealias RequestType = CommunityMessageRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
-        ("time", Date()),
-        ("message", "Stau auf der A3"),
-        
-        ("latitude", 45.123),
-        ("longitude", 42.0),
-        ("altitude", 24.2),
-        ("horizontalAccuracy", 34.0),
-        ("verticalAccuracy", 34.0),
-        ("course", 0.0),
-        ("speed", 60.0),
+        ("title", String.self),
+        ("time", Date.self),
+        ("location", Location.self)
     ]
     
-    static var optionalParameters: [Payload.Parameter] = []
+    static var optionalParameters: [Payload.Parameter] = [
+        ("message", String.self),
+    ]
 }

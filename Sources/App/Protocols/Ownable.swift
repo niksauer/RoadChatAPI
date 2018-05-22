@@ -7,13 +7,13 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
-protocol Owner: SQLiteModel {
+protocol Owner: MySQLModel {
     var id: Int? { get }
 }
 
-protocol Ownable: SQLiteModel {
+protocol Ownable: MySQLModel {
     associatedtype OwnerResource: Owner
     var owner: Parent<Self, OwnerResource> { get }
 }
@@ -21,7 +21,7 @@ protocol Ownable: SQLiteModel {
 extension Owner {
     /// Checks resource ownership for an `Ownable`.
     func checkOwnership<T: Ownable>(for resource: T, on req: Request) throws {
-        _ = resource.owner.query(on: req).first().map(to: Void.self) { owner in
+        _ = try resource.owner.query(on: req).first().map(to: Void.self) { owner in
             guard let owner = owner else {
                 // no owner associated to resource
                 throw Abort(.internalServerError)

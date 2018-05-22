@@ -7,12 +7,16 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension Privacy: SQLiteModel, Migration {
+extension Privacy: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<Privacy, Int?> {
         return \Privacy.id
+    }
+    
+    public static var entity: String {
+        return "Privacy"
     }
     
     var user: Parent<Privacy, User> {
