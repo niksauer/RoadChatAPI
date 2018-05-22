@@ -28,9 +28,7 @@ final class ConversationController {
             
             return try user.getConversations(on: req).flatMap(to: [Result].self) { conversations in
                 return try conversations.map { conversation in
-                    return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
-                        return try conversation.publicConversation(newestMessage: newestMessage)
-                    }
+                    return try conversation.publicConversation(on: req)
                 }.map(to: [Result].self, on: req) { fullConversations in
                     return fullConversations
                 }
@@ -123,8 +121,8 @@ final class ConversationController {
                             participation.status = ApprovalType.accepted.rawValue
                             return participation.save(on: req)
                         }
-                    }.map(to: Result.self, on: req) { participations in
-                            return try conversation.publicConversation(newestMessage: nil)
+                    }.flatMap(to: Result.self, on: req) { _ in
+                        return try conversation.publicConversation(on: req)
                     }
                 }
             }
@@ -136,9 +134,7 @@ final class ConversationController {
         return try req.parameters.next(Resource.self).flatMap(to: Result.self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
-            return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
-                return try conversation.publicConversation(newestMessage: newestMessage)
-            }
+            return try conversation.publicConversation(on: req)
         }
     }
     
@@ -249,21 +245,7 @@ final class ConversationController {
         return try req.parameters.next(Resource.self).flatMap(to: [Participation.PublicParticipant].self) { conversation in
             try req.user().checkParticipation(in: conversation, on: req)
             
-            return try conversation.getParticipations(on: req).flatMap(to: [Participation.PublicParticipant].self) { participations in
-                return try participations.map { participant -> EventLoopFuture<Participation.PublicParticipant?> in
-                    return User.query(on: req).filter(try \User.id == participant.requireID()).first().flatMap(to: Participation.PublicParticipant?.self) { user in
-                        guard let user = user else {
-                            return Future.map(on: req) { nil }
-                        }
-
-                        return try user.publicUser(on: req).map(to: Participation.PublicParticipant?.self) { publicUser in
-                            return participant.publicParticipant(user: publicUser )
-                        }
-                    }
-                }.map(to: [Participation.PublicParticipant].self, on: req) { participants in
-                    return participants.compactMap { $0 }
-                }
-            }
+            return try conversation.getParticipants(on: req)
         }
     }
     
