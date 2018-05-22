@@ -27,6 +27,7 @@ class ConversationRouter: RouteCollection {
         
         authenticatedConversation.get(use: conversationController.get)
         authenticatedConversation.delete(use: conversationController.delete)
+        authenticatedConversation.put(use: conversationController.update)
         
         // /chat/Conversation.parameter/live
         // see WebsocketRouter.swift
