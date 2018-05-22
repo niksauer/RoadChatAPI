@@ -7,15 +7,19 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension TrafficMessage: SQLiteModel, Migration {
+extension TrafficMessage: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<TrafficMessage, Int?> {
         return \TrafficMessage.id
     }
     
-    var validations: Siblings<TrafficMessage, User, Validation> {
+    public static var entity: String {
+        return "TrafficMessage"
+    }
+    
+    var validations: Siblings<TrafficMessage, User, TrafficMessageValidation> {
         return siblings()
     }
 }
@@ -33,7 +37,7 @@ extension TrafficMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.newConnection(to: .sqlite).flatMap(to: TrafficMessage.self) { database in
+        return container.newConnection(to: .mysql).flatMap(to: TrafficMessage.self) { database in
             return try TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
                 guard let trafficMessage = existingTrafficMessage else {
                     // traffic message not found
@@ -54,7 +58,7 @@ extension TrafficMessage: Karmable {
 
 extension TrafficMessage {
     func getValidationLevel(on req: Request) throws -> Future<Int> {
-        return Validation.query(on: req).filter(try \Validation.messageID == self.requireID()).count()
+        return TrafficMessageValidation.query(on: req).filter(try \TrafficMessageValidation.messageID == self.requireID()).count()
     }
     
     func getLocation(on req: Request) throws -> Future<Location> {

@@ -7,13 +7,13 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
-protocol Owner: SQLiteModel {
+protocol Owner: MySQLModel {
     var id: Int? { get }
 }
 
-protocol Ownable: SQLiteModel {
+protocol Ownable: MySQLModel {
     associatedtype OwnerResource: Owner
     var owner: Parent<Self, OwnerResource> { get }
 }

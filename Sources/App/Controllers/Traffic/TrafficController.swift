@@ -100,8 +100,8 @@ final class TrafficController {
             return try req.user().donate(.downvote, to: message, on: req).transform(to: .ok)
         }
     }
-    
-    /// Checks if the course of a `Location` in the database is within 90 degrees range of the `Location` from the request
+
+    /// Checks if the course of a provided `Location` is within 90 degrees range of the second `Location`.
     func isSameCourse(_ courseA: Double, comparedTo courseB: Double) -> Bool {
         guard courseA >= 0 && courseB >= 0 else {
             return true
@@ -128,4 +128,5 @@ final class TrafficController {
             return courseA >= left && courseA <= right
         }
     }
+
 }

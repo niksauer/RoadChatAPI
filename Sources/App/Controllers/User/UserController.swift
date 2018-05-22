@@ -174,7 +174,7 @@ final class UserController {
                     // no profile associated to user
                     throw Abort(.notFound)
                 }
-        
+                
                 return try user.getPrivacy(on: req).map(to: Profile.PublicProfile.self) { privacy in
                     do {
                         try req.checkOptionalOwnership(for: user)
@@ -215,7 +215,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `Cars`s associated to a parameterized `User`.
     func getCars(_ req: Request) throws -> Future<[Car.PublicCar]> {
         return try req.parameters.next(Resource.self).flatMap(to: [Car.PublicCar].self) { user in
@@ -224,7 +224,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Saves a new `Car` to the database which is associated to a parameterized `User`.
     func createCar(_ req: Request) throws -> Future<Car.PublicCar> {
         return try req.parameters.next(Resource.self).flatMap(to: Car.PublicCar.self) { user in
@@ -237,7 +237,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns the `Location` for a parameterized `User`.
     func getLocation(_ req: Request) throws -> Future<Location.PublicLocation> {
         return try req.parameters.next(Resource.self).flatMap(to: Location.PublicLocation.self) { user in
@@ -253,7 +253,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Creates or updates the `Location` for a parameterized `User`.
     func createOrUpdateLocation(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
@@ -283,7 +283,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `TrafficMessage`s associated to a parameterized `User`.
     func getTrafficMessages(_ req: Request) throws -> Future<[TrafficMessage.PublicTrafficMessage]> {
         return try req.parameters.next(Resource.self).flatMap(to: [TrafficMessage.PublicTrafficMessage].self) { user in
@@ -296,7 +296,7 @@ final class UserController {
             }
         }
     }
-    
+
     /// Returns all `CommunityMessage`s associated to a parameterized `User`.
     func getCommunityMessages(_ req: Request) throws -> Future<[CommunityMessage.PublicCommunityMessage]> {
         return try req.parameters.next(Resource.self).flatMap(to: [CommunityMessage.PublicCommunityMessage].self) { user in
@@ -309,5 +309,6 @@ final class UserController {
             }
         }
     }
-    
+
 }
+

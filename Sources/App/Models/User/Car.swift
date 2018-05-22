@@ -7,12 +7,16 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension Car: SQLiteModel, Migration {
+extension Car: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<Car, Int?> {
         return \Car.id
+    }
+    
+    public static var entity: String {
+        return "Car"
     }
 }
 
@@ -29,7 +33,7 @@ extension Car: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.newConnection(to: .sqlite).flatMap(to: Car.self) { database in
+        return container.newConnection(to: .mysql).flatMap(to: Car.self) { database in
             return try Car.find(id, on: database).map(to: Car.self) { existingCar in
                 guard let car = existingCar else {
                     // user not found

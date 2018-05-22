@@ -22,7 +22,7 @@ extension ProfileRequest: Validatable, Reflectable {
 //extension ProfileRequest: OptionallyValidatable {
 //    static var optionalValidations: OptionallyValidatable.Validations = [
 //        key(\ProfileRequest.sex): IsSex(),
-//        key(\ProfileRequest.biography): IsCount(0...280),
+//        key(\ProfileRequest.biography): IsCount(0...255),
 //        key(\ProfileRequest.streetName): IsCount(0...50),
 //        key(\ProfileRequest.country): IsCount(0...50),
 //    ]

@@ -7,12 +7,16 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension CommunityMessage: SQLiteModel, Migration {
+extension CommunityMessage: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<CommunityMessage, Int?> {
         return \CommunityMessage.id
+    }
+    
+    public static var entity: String {
+        return "CommunityMessage"
     }
 }
 
@@ -29,7 +33,7 @@ extension CommunityMessage: Parameter {
             throw Abort(.badRequest)
         }
         
-        return container.newConnection(to: .sqlite).flatMap(to: CommunityMessage.self) { database in
+        return container.newConnection(to: .mysql).flatMap(to: CommunityMessage.self) { database in
             return try CommunityMessage.find(id, on: database).map(to: CommunityMessage.self) { existingMessage in
                 guard let message = existingMessage else {
                     // message not found
