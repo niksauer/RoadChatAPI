@@ -35,3 +35,20 @@ extension ConversationRequest: Payload {
 //        ("title", String.self),
     ]
 }
+
+extension ConversationUpdateRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<ConversationUpdateRequest> {
+        let validations = Validations(ConversationUpdateRequest.self)
+        return validations
+    }
+}
+
+extension ConversationUpdateRequest: Payload {
+    static var requiredParameters: [Payload.Parameter] = [
+    
+    ]
+    
+    static var optionalParameters: [Payload.Parameter] = [
+    
+    ]
+}

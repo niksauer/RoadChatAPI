@@ -96,7 +96,7 @@
         "repositoryURL": "https://github.com/niksauer/RoadChatKit",
         "state": {
           "branch": "master",
-          "revision": "76a46c5e49e2e1f51ac75ad1b80303d1715a04e1",
+          "revision": "9981fa6993094ebc3ba19325454eb874f884ea86",
           "version": null
         }
       },
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/vapor/sqlite.git",
         "state": {
           "branch": null,
-          "revision": "aa16db0a4e670c94543120dd9c4f5a49abf20a97",
-          "version": "3.0.0-rc.2.3"
+          "revision": "3bbf797f2340ce7becbba54fda173c50f3e8c68d",
+          "version": "3.0.0-rc.2.4"
         }
       },
       {

@@ -18,6 +18,7 @@ final class ConversationController {
     typealias Resource = Conversation
     typealias Result = Conversation.PublicConversation
     
+    let maxDistance = 500.0
     var activeChatrooms = [Chatroom]()
     
     /// Returns all `Conversation`s associated to a parameterized `User`.
@@ -37,8 +38,6 @@ final class ConversationController {
         }
     }
 
-    let maxDistance = 500.0
-    
     /// Returns all `User`s which are within 500m distance of a tokenized `User`.
     func getNearbyUsers(_ req: Request) throws -> Future<[User.PublicUser]> {
         let requestor = try req.user()
@@ -139,6 +138,19 @@ final class ConversationController {
             
             return try conversation.getNewestMessage(on: req).map(to: Result.self) { newestMessage in
                 return try conversation.publicConversation(newestMessage: newestMessage)
+            }
+        }
+    }
+    
+    /// Updates a parameterized `Conversation`.
+    func update(_ req: Request) throws -> Future<HTTPStatus> {
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+            try req.user().checkParticipation(in: conversation, on: req)
+            
+            return try ConversationUpdateRequest.extract(from: req).flatMap(to: HTTPStatus.self) { updatedConversation in
+                conversation.title = updatedConversation.title
+                
+                return conversation.update(on: req).transform(to: .ok)
             }
         }
     }
