@@ -206,6 +206,5 @@ extension User {
             return participation.save(on: req).transform(to: .ok)
         }
     }
-    
 }
 
