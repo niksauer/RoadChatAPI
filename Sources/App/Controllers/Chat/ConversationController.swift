@@ -79,37 +79,36 @@ final class ConversationController {
     
     /// Saves a new `Conversation` to the database.
     func create(_ req: Request) throws -> Future<Result> {
-        return try ConversationRequest.extract(from: req).flatMap(to: Result.self) { conversationRequest in
+        func createNewConversation(_ request: ConversationRequest, on req: Request) throws -> Future<Conversation.PublicConversation> {
             let creator = try req.user()
-
-            var invalidParticipants = [Int]()
+            var invalidRecipients = [Int]()
             
-            return try conversationRequest.participants.map { participant -> EventLoopFuture<User?> in
-                guard try participant != creator.requireID() else {
+            return try request.recipients.map { recipient -> EventLoopFuture<User?> in
+                guard try recipient != creator.requireID() else {
                     return Future.map(on: req) { nil }
                 }
                 
-                return try User.query(on: req).filter(\User.id == participant).first().flatMap(to: User?.self) { receipient in
+                return try User.query(on: req).filter(\User.id == recipient).first().flatMap(to: User?.self) { receipient in
                     guard let receipient = receipient else {
-                        invalidParticipants.append(participant)
+                        invalidRecipients.append(recipient)
                         return Future.map(on: req) { nil }
                     }
                     
                     return Future.map(on: req) { receipient }
                 }
             }.flatMap(to: Result.self, on: req) { participants in
-                guard invalidParticipants.isEmpty else {
-                    throw ConversationFail.invalidParticipants(invalidParticipants)
+                guard invalidRecipients.isEmpty else {
+                    throw ConversationFail.invalidParticipants(invalidRecipients)
                 }
                 
                 guard participants.count >= 1 else {
                     throw ConversationFail.minimumParticipants
                 }
-                    
+                
                 var participants = participants.compactMap { return $0 }
                 participants.append(creator)
                 
-                return Conversation(creatorID: try creator.requireID(), title: conversationRequest.title).create(on: req).flatMap(to: Result.self) { conversation in
+                return Conversation(creatorID: try creator.requireID(), title: request.title).create(on: req).flatMap(to: Result.self) { conversation in
                     // add participants to conversation via pivot table
                     return participants.map { participant in
                         return conversation.participations.attach(participant, on: req).flatMap(to: Participation.self) { participation in
@@ -125,6 +124,22 @@ final class ConversationController {
                         return try conversation.publicConversation(on: req)
                     }
                 }
+            }
+        }
+        
+        return try ConversationRequest.extract(from: req).flatMap(to: Result.self) { conversationRequest in
+            if conversationRequest.recipients.count == 1 {
+                return try req.user().findConversation(recipientID: conversationRequest.recipients.first!, on: req).flatMap(to: Result.self) { existingConversation in
+                    guard let existingConversation = existingConversation else {
+                        return try createNewConversation(conversationRequest, on: req)
+                    }
+                    
+                    return try req.user().setStatus(.accepted, conversation: existingConversation, on: req).flatMap(to: Result.self) { result in
+                        return try existingConversation.publicConversation(on: req)
+                    }
+                }
+            } else {
+                return try createNewConversation(conversationRequest, on: req)
             }
         }
     }
@@ -201,15 +216,16 @@ final class ConversationController {
     /// Deletes a parameterized `Conversation` from the `Conversation`s associated to a `User`.
     func delete(_ req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
-            try req.user().checkParticipation(in: conversation, on: req)
+            let user = try req.user()
             
-            return conversation.participations.detach(try req.user(), on: req).flatMap(to: HTTPStatus.self) { _ in
-                return try conversation.participations.query(on: req).count().flatMap(to: HTTPStatus.self) { count in
-                    if count == 0 {
-                        // delete conversation if no more participations
+            return try user.setStatus(.deleted, conversation: conversation, on: req).flatMap(to: HTTPStatus.self) { result in
+                return try conversation.getParticipations(on: req).flatMap(to: HTTPStatus.self) { participations in
+                    let deletedParticipationsCount = participations.filter { $0.status == ApprovalType.deleted.rawValue }.count
+                    
+                    if deletedParticipationsCount == participations.count {
                         return conversation.delete(on: req).transform(to: .ok)
                     } else {
-                        return Future.map(on: req) { HTTPStatus.ok }
+                        return Future.map(on: req) { result }
                     }
                 }
             }
@@ -251,20 +267,15 @@ final class ConversationController {
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.accepted`.
     func acceptConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setStatus(.accepted, on: req)
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
+            return try req.user().setStatus(.accepted, conversation: conversation, on: req)
+        }
     }
     
     /// Sets the `ApprovalStatus` for a parameterized `Conversation` to `.denied`.
     func denyConversation(_ req: Request) throws -> Future<HTTPStatus> {
-        return try setStatus(.denied, on: req)
-    }
-    
-    private func setStatus(_ status: ApprovalType, on req: Request) throws -> Future<HTTPStatus> {
         return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { conversation in
-            return try req.user().getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
-                participation.status = status.rawValue
-                return participation.save(on: req).transform(to: .ok)
-            }
+            return try req.user().setStatus(.denied, conversation: conversation, on: req)
         }
     }
     

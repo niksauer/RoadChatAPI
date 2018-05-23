@@ -13,7 +13,7 @@ import RoadChatKit
 extension ConversationRequest: Validatable, Reflectable {
     public static func validations() throws -> Validations<ConversationRequest> {
         var validations = Validations(ConversationRequest.self)
-        try validations.add(\.participants, .count(1...))
+        try validations.add(\.recipients, .count(1...))
         return validations
     }
 }
@@ -28,7 +28,7 @@ extension ConversationRequest: Validatable, Reflectable {
 
 extension ConversationRequest: Payload {
     static var requiredParameters: [Payload.Parameter] = [
-        ("participants", [Int].self),
+        ("recipients", [Int].self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = [
