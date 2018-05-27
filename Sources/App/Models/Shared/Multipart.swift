@@ -9,8 +9,8 @@ import Foundation
 import Vapor
 import RoadChatKit
 
-struct Image: Content {
+struct Multipart: Content {
     let file: File
 }
 
-extension PublicImage: Content { }
+extension PublicFile: Content { }

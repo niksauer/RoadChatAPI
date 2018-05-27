@@ -54,8 +54,8 @@ final class CarController {
         }
     }
 
-    func getImage(_ req: Request) throws -> Future<PublicImage> {
-        return try req.parameters.next(Resource.self).map(to: PublicImage.self) { car in
+    func getImage(_ req: Request) throws -> Future<PublicFile> {
+        return try req.parameters.next(Resource.self).map(to: PublicFile.self) { car in
             let fileManager = FileManager()
             let filename = "car\(try car.requireID()).jpg"
             let url = self.uploadDirectory.appendingPathComponent(filename)
@@ -64,7 +64,7 @@ final class CarController {
                 throw Abort(.notFound)
             }
            
-            return PublicImage(filename: filename, data: data)
+            return PublicFile(filename: filename, data: data)
         }
     }
     
@@ -72,7 +72,7 @@ final class CarController {
         return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { car in
             try req.user().checkOwnership(for: car, on: req)
             
-            return try req.content.decode(Image.self).map(to: HTTPStatus.self) { image in
+            return try req.content.decode(Multipart.self).map(to: HTTPStatus.self) { image in
                 let acceptableTypes = [MediaType.jpeg]
                 
                 guard let mimeType = image.file.contentType, acceptableTypes.contains(mimeType) else {
