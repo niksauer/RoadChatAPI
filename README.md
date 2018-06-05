@@ -14,11 +14,10 @@
 </a>
 
 ### Dependencies
-
+- [GeoSwift](https://github.com/petrpavlik/GeoSwift)
 - [libressl](http://www.libressl.org)
 	- use brew to install on macOS: `brew install libressl`
 - [RoadChatKit](https://github.com/niksauer/RoadChatKit)
-- [GeoSwift](https://github.com/petrpavlik/GeoSwift)
 
 ### Swift Toolchain
 **Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally in Xcode.
