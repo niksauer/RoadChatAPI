@@ -17,6 +17,12 @@ final class UserController {
     typealias Resource = User
     typealias Result = User.PublicUser
     
+    private let uploadDirectory: URL
+    
+    init(uploadDirectory: URL) {
+        self.uploadDirectory = uploadDirectory
+    }
+    
     /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         return try RegisterRequest.extract(from: req).flatMap(to: Result.self) { registerRequest in
@@ -310,5 +316,38 @@ final class UserController {
         }
     }
 
+    func getImage(_ req: Request) throws -> Future<PublicFile> {
+        return try req.parameters.next(Resource.self).map(to: PublicFile.self) { car in
+            let fileManager = FileManager()
+            let filename = "user\(try car.requireID()).jpg"
+            let url = self.uploadDirectory.appendingPathComponent(filename)
+            
+            guard let data = fileManager.contents(atPath: url.path) else {
+                throw Abort(.notFound)
+            }
+            
+            return PublicFile(filename: filename, data: data)
+        }
+    }
+    
+    func uploadImage(_ req: Request) throws -> Future<HTTPStatus> {
+        return try req.parameters.next(Resource.self).flatMap(to: HTTPStatus.self) { user in
+            try req.user().checkOwnership(for: user, on: req)
+            
+            return try req.content.decode(Multipart.self).map(to: HTTPStatus.self) { image in
+                let acceptableTypes = [MediaType.jpeg]
+                
+                guard let mimeType = image.file.contentType, acceptableTypes.contains(mimeType) else {
+                    throw Abort(.badRequest)
+                }
+                
+                let url = self.uploadDirectory.appendingPathComponent("user\(try user.requireID()).jpg")
+                _ = try image.file.data.write(to: url)
+                
+                return .ok
+            }
+        }
+    }
+    
 }
 

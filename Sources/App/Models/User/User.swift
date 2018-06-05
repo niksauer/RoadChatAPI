@@ -179,5 +179,32 @@ extension User {
     func getLocation(on req: Request) throws -> Future<Location?> {
         return try Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
+    
+    func findConversation(recipientID: Int, on req: Request) throws -> Future<Conversation?> {
+        return try self.getConversations(on: req).flatMap(to: Conversation?.self) { conversations in
+            return try conversations.map { conversation in
+                return try conversation.publicConversation(on: req)
+            }.flatMap(to: Conversation?.self, on: req) { publicConversations in
+                let oneOnOneConversations = publicConversations.filter { $0.participants.count == 2 }
+                
+                for conversation in oneOnOneConversations {
+                    guard try conversation.participants.contains(where: { try $0.user.id == self.requireID() }), conversation.participants.contains(where: { $0.user.id == recipientID }) else {
+                        continue
+                    }
+                    
+                    return Conversation.query(on: req).filter(try \Conversation.id == conversation.id).first()
+                }
+                
+                return Future.map(on: req) { nil }
+            }
+        }
+    }
+    
+    func setStatus(_ status: ApprovalType, conversation: Conversation, on req: Request) throws -> Future<HTTPStatus> {
+        return try self.getParticipation(in: conversation, on: req).flatMap(to: HTTPStatus.self) { participation in
+            participation.status = status.rawValue
+            return participation.save(on: req).transform(to: .ok)
+        }
+    }
 }
 

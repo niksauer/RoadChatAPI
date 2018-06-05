@@ -55,6 +55,15 @@ extension Conversation: Parameter {
 }
 
 extension Conversation {
+    func publicConversation(on req: Request) throws -> Future<Conversation.PublicConversation> {
+        return try self.getNewestMessage(on: req).flatMap(to: Conversation.PublicConversation.self) { newestMessage in
+            return try self.getParticipants(on: req).map(to: Conversation.PublicConversation.self) { participants in
+                return try self.publicConversation(newestMessage: newestMessage, participants: participants)
+            }
+        }
+        
+    }
+    
     func getNewestMessage(on req: Request) throws -> Future<DirectMessage?> {
         return try messages.query(on: req).sort(\DirectMessage.time, .descending).first()
     }
@@ -65,6 +74,24 @@ extension Conversation {
     
     func getParticipations(on req: Request) throws -> Future<[Participation]> {
         return Participation.query(on: req).filter(try \Participation.conversationID == self.requireID()).all()
+    }
+    
+    func getParticipants(on req: Request) throws -> Future<[Participation.PublicParticipant]> {
+        return try self.getParticipations(on: req).flatMap(to: [Participation.PublicParticipant].self) { participations in
+            return try participations.map { participant -> EventLoopFuture<Participation.PublicParticipant?> in
+                return User.query(on: req).filter(try \User.id == participant.userID).first().flatMap(to: Participation.PublicParticipant?.self) { user in
+                    guard let user = user else {
+                        return Future.map(on: req) { nil }
+                    }
+                    
+                    return try user.publicUser(on: req).map(to: Participation.PublicParticipant?.self) { publicUser in
+                        return participant.publicParticipant(user: publicUser )
+                    }
+                }
+            }.map(to: [Participation.PublicParticipant].self, on: req) { participants in
+                return participants.compactMap { $0 }
+            }
+        }
     }
 }
 
