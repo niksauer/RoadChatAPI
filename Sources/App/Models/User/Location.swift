@@ -7,12 +7,16 @@
 
 import Foundation
 import Vapor
-import FluentSQLite
+import FluentMySQL
 import RoadChatKit
 
-extension Location: SQLiteModel, Migration {
+extension Location: MySQLModel, Migration {
     public static var idKey: WritableKeyPath<Location, Int?> {
         return \Location.id
+    }
+    
+    public static var entity: String {
+        return "Location"
     }
 }
 

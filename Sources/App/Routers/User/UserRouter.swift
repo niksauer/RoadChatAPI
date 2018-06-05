@@ -10,9 +10,16 @@ import Vapor
 import RoadChatKit
 
 class UserRouter: RouteCollection {
+    
+    private let uploadDirectory: URL
+    
+    init(uploadDirectory: URL) {
+        self.uploadDirectory = uploadDirectory
+    }
+    
     func boot(router: Router) throws {
-        let authMiddleware = User.tokenAuthMiddleware(database: .sqlite)
-        let userController = UserController()
+        let authMiddleware = User.tokenAuthMiddleware(database: .mysql)
+        let userController = UserController(uploadDirectory: uploadDirectory)
         let loginController = LoginController()
         let facebookController = FacebookController()
         let conversationController = ConversationController()
@@ -67,14 +74,18 @@ class UserRouter: RouteCollection {
             group.get(use: userController.getLocation)
             group.put(use: userController.createOrUpdateLocation)
         })
-        
+
         // /user/User.parameter/trafficMessages
-        user.get("trafficMessages", use: userController.getTrafficMessages)
+        authenticatedUser.get("trafficMessages", use: userController.getTrafficMessages)
         
         // /user/User.parameter/communityMessages
-        user.get("communityMessages", use: userController.getCommunityMessages)
+        authenticatedUser.get("communityMessages", use: userController.getCommunityMessages)
         
         // /user/User.parameter/conversations
         authenticatedUser.get("conversations", use: conversationController.index)
+        
+        // /user/User.parameter/image
+        user.get("image", use: userController.getImage)
+        authenticatedUser.put("image", use: userController.uploadImage)
     }
 }

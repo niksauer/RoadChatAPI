@@ -10,28 +10,27 @@ import Vapor
 import Validation
 import RoadChatKit
 
-extension LocationRequest: Validatable {
-    public static var validations: Validations = [
-        key(\LocationRequest.course): IsCount(0.0...360.0)
-    ]
+extension LocationRequest: Validatable, Reflectable {
+    public static func validations() throws -> Validations<LocationRequest> {
+        let validations = Validations(LocationRequest.self)
+        return validations
+    }
 }
 
-extension LocationRequest: OptionallyValidatable {
-    static var optionalValidations: OptionallyValidatable.Validations = [:]
-}
+//extension LocationRequest: OptionallyValidatable {
+//    static var optionalValidations: OptionallyValidatable.Validations = [:]
+//}
 
 extension LocationRequest: Payload {
-    typealias RequestType = LocationRequest
-    
     static var requiredParameters: [Payload.Parameter] = [
-        ("time", Date()),
-        ("latitude", 45.123),
-        ("longitude", 42.0),
-        ("altitude", 24.2),
-        ("horizontalAccuracy", 34.0),
-        ("verticalAccuracy", 34.0),
-        ("course", 0.0),
-        ("speed", 60.0),
+        ("time", Date.self),
+        ("latitude", Double.self),
+        ("longitude", Double.self),
+        ("altitude", Double.self),
+        ("horizontalAccuracy", Double.self),
+        ("verticalAccuracy", Double.self),
+        ("course", Double.self),
+        ("speed", Double.self),
     ]
     
     static var optionalParameters: [Payload.Parameter] = []
