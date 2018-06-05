@@ -4,23 +4,34 @@
     <img src="http://img.shields.io/badge/read_the-docs-92A8D1.svg" alt="Documentation">
 </a>
 <a href="license">
-    <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
+    <img src="http://img.shields.io/badge/license-AGPLv3-brightgreen.svg" alt="MIT License">
 </a>
 <a href="https://swift.org">
     <img src="http://img.shields.io/badge/swift-4.1-brightgreen.svg" alt="Swift 4.1">
 </a>
+<a href="https://app.getpostman.com/run-collection/21d22ca35d40ebb097f0">
+    <img src="http://img.shields.io/badge/Postman-import-orange.svg" alt="Postman">
+</a>
+
+### Dependencies
+- [GeoSwift](https://github.com/petrpavlik/GeoSwift)
+- [libressl](http://www.libressl.org)
+	- use brew to install on macOS: `brew install libressl`
+- [RoadChatKit](https://github.com/niksauer/RoadChatKit)
 
 ### Swift Toolchain
 **Warning:** Vapor 3 now depends on Swift 4.1. Please follow this [tutorial](https://gist.github.com/tanner0101/cdb77c7f58d53af2ba2da5d39415389a) to build and run the app locally in Xcode.
 
 Also, in order to support command line development you will have to set the Swift version to be used via [swiftenv](https://github.com/kylef/swiftenv): 
-1. `swiftenv version`
+1. `swiftenv versions`
 2. `swiftenv local <choose swift 4.1 snapshot here>`
 
 ### Working with Xcode
-Please use the Swift Package Manager to create an Xcode project file, since this repository purposefully ***excludes*** it to preserve a developer's individual IDE settings. Again, [Vapor toolbox](https://github.com/vapor/toolbox) will not be necessary or required for setup.
+Please use the Swift Package Manager to create an Xcode project file, since this repository purposefully ***excludes*** it to preserve a developer's individual IDE settings. Again, [Vapor Toolbox](https://github.com/vapor/toolbox) will not be necessary or required for setup.
 
 1. `swift package generate-xcodeproj`
+2. `Product > Scheme > Run`
+3. `Xcode > Toolchains > <choose swift 4.1 snapshot here>`
 
 ### Developing with Docker 
 The theory here is that you will build and run a Swift container, mounting your project directory, then keep it open during development using command-line Swift to build, test and run your project ([see tutorial](https://bygri.github.io/2018/01/25/vapor-3-with-docker.html)).

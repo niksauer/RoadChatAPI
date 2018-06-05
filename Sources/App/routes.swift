@@ -1,30 +1,28 @@
+//
+//  routes.swift
+//  App
+//
+//  Created by Niklas Sauer on 24.02.18.
+//
+
+import Foundation
 import Routing
 import Vapor
+import WebSocket
 
 /// Register your application's routes here.
 ///
 /// [Learn More →](https://docs.vapor.codes/3.0/getting-started/structure/#routesswift)
 public func routes(_ router: Router) throws {
-    // Basic "Hello, world!" example
-    router.get("hello") { req in
-        return "Hello, world!"
-    }
-
-    // Example of creating a Service and using it.
-    router.get("hash", String.parameter) { req -> String in
-        // Create a BCryptHasher using the Request's Container
-        let hasher = try req.make(BCryptHasher.self)
-
-        // Fetch the String parameter (as described in the route)
-        let string = try req.parameter(String.self)
-
-        // Return the hashed string!
-        return try hasher.make(string)
-    }
-
-    // Example of configuring a controller
-    let todoController = TodoController()
-    router.get("todos", use: todoController.index)
-    router.post("todos", use: todoController.create)
-    router.delete("todos", Todo.parameter, use: todoController.delete)
+    let router = router.grouped(JSendMiddleware())
+    
+    let rootDirectory = DirectoryConfig.detect().workDir
+    let userUploadDirectory = URL(fileURLWithPath: "\(rootDirectory)Public/users")
+    let carUploadDirectory = URL(fileURLWithPath: "\(rootDirectory)Public/cars")
+    
+    try router.grouped("user").register(collection: UserRouter(uploadDirectory: userUploadDirectory))
+    try router.grouped("car").register(collection: CarRouter(uploadDirectory: carUploadDirectory))
+    try router.grouped("traffic").register(collection: TrafficRouter())
+    try router.grouped("community").register(collection: CommunityRouter())
+    try router.grouped("chat").register(collection: ConversationRouter())
 }

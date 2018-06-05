@@ -1,19 +1,17 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.1
 import PackageDescription
 
 let package = Package(
     name: "RoadChatAPI",
     dependencies: [
-        // 💧 A server-side Swift web framework. 
-        .package(url: "https://github.com/vapor/vapor.git", .branch("beta")),
-
-        // 🖋 Swift ORM framework (queries, models, and relations) for building NoSQL and SQL database integrations.
-        .package(url: "https://github.com/vapor/fluent.git", .branch("beta")),
+        .package(url: "https://github.com/vapor/vapor", from: "3.0.0-rc"),
+        .package(url: "https://github.com/vapor/fluent-mysql", from: "3.0.0-rc.1"),
+        .package(url: "https://github.com/vapor/auth", from: "2.0.0-rc.1"),
+        .package(url: "https://github.com/petrpavlik/GeoSwift", .exact("1.0.4")),
+        .package(url: "https://github.com/niksauer/RoadChatKit", .branch("master")),
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentSQLite", "Vapor"]),
+        .target(name: "App", dependencies: ["Vapor", "FluentMySQL", "Authentication", "GeoSwift", "RoadChatKit"]),
         .target(name: "Run", dependencies: ["App"]),
-        .testTarget(name: "AppTests", dependencies: ["App"]),
     ]
 )
-
