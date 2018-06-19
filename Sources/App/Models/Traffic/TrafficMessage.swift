@@ -38,7 +38,7 @@ extension TrafficMessage: Parameter {
         }
         
         return container.newConnection(to: .mysql).flatMap(to: TrafficMessage.self) { database in
-            return try TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
+            return TrafficMessage.find(id, on: database).map(to: TrafficMessage.self) { existingTrafficMessage in
                 guard let trafficMessage = existingTrafficMessage else {
                     // traffic message not found
                     throw Abort(.notFound)
@@ -62,7 +62,7 @@ extension TrafficMessage {
     }
     
     func getLocation(on req: Request) throws -> Future<Location> {
-        return try Location.query(on: req).filter(\Location.id == self.locationID).first().map(to: Location.self) { location in
+        return Location.query(on: req).filter(\Location.id == self.locationID).first().map(to: Location.self) { location in
             guard let location = location else {
                 throw Abort(.internalServerError)
             }

@@ -88,7 +88,7 @@ final class ConversationController {
                     return Future.map(on: req) { nil }
                 }
                 
-                return try User.query(on: req).filter(\User.id == recipient).first().flatMap(to: User?.self) { receipient in
+                return User.query(on: req).filter(\User.id == recipient).first().flatMap(to: User?.self) { receipient in
                     guard let receipient = receipient else {
                         invalidRecipients.append(recipient)
                         return Future.map(on: req) { nil }

@@ -80,8 +80,8 @@ protocol Karmable: MySQLModel, Migration {
 
 extension Karmable {
     func getKarmaLevel(on req: Request) throws -> Future<Int> {
-        return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == 1).count().flatMap(to: Int.self) { upvotes in
-            return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(try \Donation.karma == -1).count().map(to: Int.self) { downvotes in
+        return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(\Donation.karma == 1).count().flatMap(to: Int.self) { upvotes in
+            return Donation.query(on: req).filter(try \Donation.resourceID == self.requireID()).filter(\Donation.karma == -1).count().map(to: Int.self) { downvotes in
                 return (upvotes-downvotes)
             }
         }

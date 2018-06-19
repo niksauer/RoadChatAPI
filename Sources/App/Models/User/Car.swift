@@ -34,7 +34,7 @@ extension Car: Parameter {
         }
         
         return container.newConnection(to: .mysql).flatMap(to: Car.self) { database in
-            return try Car.find(id, on: database).map(to: Car.self) { existingCar in
+            return Car.find(id, on: database).map(to: Car.self) { existingCar in
                 guard let car = existingCar else {
                     // user not found
                     throw Abort(.notFound)

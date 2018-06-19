@@ -42,7 +42,7 @@ extension Conversation: Parameter {
         }
         
         return container.newConnection(to: .mysql).flatMap(to: Conversation.self) { database in
-            return try Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
+            return Conversation.find(id, on: database).map(to: Conversation.self) { existingConversation in
                 guard let conversation = existingConversation else {
                     // conversation not found
                     throw Abort(.notFound)
@@ -78,8 +78,8 @@ extension Conversation {
     
     func getParticipants(on req: Request) throws -> Future<[Participation.PublicParticipant]> {
         return try self.getParticipations(on: req).flatMap(to: [Participation.PublicParticipant].self) { participations in
-            return try participations.map { participant -> EventLoopFuture<Participation.PublicParticipant?> in
-                return User.query(on: req).filter(try \User.id == participant.userID).first().flatMap(to: Participation.PublicParticipant?.self) { user in
+            return participations.map { participant -> EventLoopFuture<Participation.PublicParticipant?> in
+                return User.query(on: req).filter(\User.id == participant.userID).first().flatMap(to: Participation.PublicParticipant?.self) { user in
                     guard let user = user else {
                         return Future.map(on: req) { nil }
                     }

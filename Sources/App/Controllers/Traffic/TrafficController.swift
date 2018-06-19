@@ -40,7 +40,7 @@ final class TrafficController {
                 throw Abort(.internalServerError)
             }
             
-            return try TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
+            return TrafficMessage.query(on: req).filter(\TrafficMessage.type == trafficMessageRequest.type).filter(\TrafficMessage.time > compareDate).sort(\TrafficMessage.time, .ascending).all().flatMap(to: Result.self) { recentMessages in
                 return try recentMessages.map { message in
                     return try message.getLocation(on: req).flatMap(to: Result?.self) { location in
                         let geoLocation = try GeoCoordinate2D(latitude: location.latitude, longitude: location.longitude)

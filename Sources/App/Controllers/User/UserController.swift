@@ -26,13 +26,13 @@ final class UserController {
     /// Saves a new `User` to the database.
     func create(_ req: Request) throws -> Future<Result> {
         return try RegisterRequest.extract(from: req).flatMap(to: Result.self) { registerRequest in
-            return try User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
+            return User.query(on: req).filter(\User.email == registerRequest.email).first().flatMap(to: Result.self) { existingUser in
                 guard existingUser == nil else {
                     // email already registered
                     throw RegisterFail.emailTaken
                 }
                 
-                return try User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
+                return User.query(on: req).filter(\User.username == registerRequest.username).first().flatMap(to: Result.self) { existingUser in
                     guard existingUser == nil else {
                         // username taken
                         throw RegisterFail.usernameTaken

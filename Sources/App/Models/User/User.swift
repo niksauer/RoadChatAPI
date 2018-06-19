@@ -76,7 +76,7 @@ extension User: Parameter {
         }
         
         return container.newConnection(to: .mysql).flatMap(to: User.self) { database in
-            return try User.find(id, on: database).map(to: User.self) { existingUser in
+            return User.find(id, on: database).map(to: User.self) { existingUser in
                 guard let user = existingUser else {
                     // user not found
                     throw Abort(.notFound)
@@ -101,12 +101,12 @@ extension Request {
     
     func optionalUser() throws -> Future<User?> {
         if let token = self.http.headers.bearerAuthorization?.token {
-            return try BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
+            return BearerToken.query(on: self).filter(\BearerToken.token == token).first().flatMap(to: User?.self) { storedToken in
                 guard let storedToken = storedToken else {
                     return Future.map(on: self) { nil }
                 }
                 
-                return try storedToken.authUser.get(on: self).map(to: User?.self) { user in
+                return storedToken.authUser.get(on: self).map(to: User?.self) { user in
                     return user
                 }
             }
@@ -177,7 +177,7 @@ extension User {
     }
     
     func getLocation(on req: Request) throws -> Future<Location?> {
-        return try Location.query(on: req).filter(\Location.id == self.locationID).first()
+        return Location.query(on: req).filter(\Location.id == self.locationID).first()
     }
     
     func findConversation(recipientID: Int, on req: Request) throws -> Future<Conversation?> {
@@ -192,7 +192,7 @@ extension User {
                         continue
                     }
                     
-                    return Conversation.query(on: req).filter(try \Conversation.id == conversation.id).first()
+                    return Conversation.query(on: req).filter(\Conversation.id == conversation.id).first()
                 }
                 
                 return Future.map(on: req) { nil }

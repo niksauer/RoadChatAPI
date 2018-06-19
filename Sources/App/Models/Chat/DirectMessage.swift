@@ -21,11 +21,11 @@ extension DirectMessage: MySQLModel, Migration {
     
     public static func prepare(on connection: MySQLConnection) -> Future<Void> {
         return MySQLDatabase.create(self, on: connection) { builder in
-            try builder.field(for: \DirectMessage.id)
-            try builder.field(for: \DirectMessage.senderID)
-            try builder.field(for: \DirectMessage.conversationID)
-            try builder.field(for: \DirectMessage.time)
-            try builder.field(type: .text(), for: \DirectMessage.message)
+            builder.field(for: \DirectMessage.id)
+            builder.field(for: \DirectMessage.senderID)
+            builder.field(for: \DirectMessage.conversationID)
+            builder.field(for: \DirectMessage.time)
+            builder.field(for: \DirectMessage.message)
         }
     }
     
